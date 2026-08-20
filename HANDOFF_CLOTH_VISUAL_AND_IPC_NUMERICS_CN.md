@@ -1,0 +1,48 @@
+# 布料观感与 IPC 数值问题交接（RTX 5060 Laptop）
+
+## 当前可复现稳定版本
+
+运行：
+
+```bash
+RUN_LABEL=my_fabric_run ./run_g3v2_fabric_render_5060m.sh
+```
+
+已完成的参考产物是 `g3v2_cloth_t01_fabric_render_v2_8000`：980/980 帧、四路单视角、multiview、JSON 和关键帧均完整生成。物理参数为 shell radius 0.1 mm、dHat 2 mm、E 20 kPa、cloth/table/robot friction 1/1/2、substeps 2。录制时机器人灰色 visual 使用 IPC actual affine-body pose。
+
+注意：长运行不要依赖无人读取的交互 PTY。推荐将 stdout/stderr 重定向到日志，并用 `setsid` 后台运行，否则高频 Genesis FPS 日志可能填满缓冲区。
+
+## 已确认的观感原因
+
+- `contact_d_hat=2 mm` 主导桌面和叠层的可见空气间隔；渲染器并没有按 thickness 挤出表面。
+- 8000-face QEM 网格边长不均匀，最长边约 60 mm，只能形成宽大折脊，缺少细褶自由度。
+- 当前是各向同性 strain-limiting shell，不表达针织物经纬方向性和弯曲迟滞。
+- 高 cloth/self friction 能稳定抓取，但会锁住层间滑移和鼓包。
+- 纯色、全局平滑法线和原 ambient=0.45 会强化橡胶观感。当前代码已将 ambient 调为 0.26，并对 cloth 设置 roughness=1、normal_diff_clamp=42°。
+
+## 失败实验与上游阻塞
+
+以下实验均保持或尝试保持三折轨迹，但不能作为候选：
+
+1. `t=.1 mm, dHat=1 mm, E=100k, cloth/table friction=.4/.6`：五次抓取全部失败。
+2. `t=.1 mm, dHat=2 mm, E=40k, friction=.4/.6/5, substeps=2`：约 frame 482，CUDA CCD 报极小负 TOI 后断言退出。
+3. 同上 `substeps=4`：约 frame 326，`cudaErrorMemoryAllocation`；5060M 8 GB 不适合该配置。
+4. `E=30k, friction=.5/.7/4`：约 frame 325，line-search energy 变 NaN。
+5. `E=20k, friction=.7/.8/2.857`：约第一折后段，CCD 报 `TOI=-3.4e-12` 并断言退出。
+
+微负 TOI 属于浮点舍入量级，但 libuipc 当前 CUDA backend 在 `global_trajectory_filter.cu:95` 直接断言。若继续物理改进，优先在隔离分支复现并评估上游修复（容差/夹紧），不要在 demo 主分支反复扩大参数矩阵。
+
+## 稳定版本的验收结果
+
+- 完整运行且无 CUDA 错误。
+- 5 次抓取中 4 次 PASS；第一次右手 `follow_projection=0.7395`，略低于约 0.75 门槛，但方向余弦 0.99986，不是完全掉抓。
+- 第三折覆盖率 50.62% 通过；静止上片中位位移 31.84 mm，略高于 30 mm 门槛，因此严格 verdict 为 FAIL。
+- 最终高度 P50/P90/P99 为 26.2/68.2/103.1 mm。渲染改动改善了折痕可读性，但没有改变物理蓬松度。
+
+## 推荐后续顺序
+
+1. 先给第一次右手抓取增加少量鲁棒余量，并重复至少 3 个相同 seed/run，避免把边缘随机分支当成功。
+2. 在 libuipc 隔离复现中处理微负 TOI；修复前不要再做全流程低摩擦 sweep。
+3. 物理稳定后测试均匀 remesh，而不是当前 QEM 8k 网格；5060M 上先做 10k–14k，监控峰值显存。
+4. 最后增加织物 albedo/normal 纹理。纹理只改善材质读感，不能代替接触和网格修复。
+

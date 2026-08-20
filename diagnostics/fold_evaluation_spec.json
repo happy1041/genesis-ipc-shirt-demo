@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "coordinate_convention": {
+    "top": "shirt collar side",
+    "bottom": "shirt waist/hem side",
+    "left": "wearer's left sleeve side",
+    "right": "wearer's right sleeve side",
+    "front": "chest/belly panel",
+    "back": "back panel",
+    "vertical": "normal to the table; positive away from the table",
+    "warning": "Camera left/right and robot left/right must never replace shirt-centric directions."
+  },
+  "statuses": ["PASS", "FAIL", "INCOMPLETE", "REVIEW", "NOT_RUN"],
+  "failure_routing": [
+    {
+      "pattern": "input:*",
+      "objective": "恢复可复现输入，确认所有文件指向规范路径并重新采集 provenance",
+      "allowed_changes": ["输入路径、缺失文件与 provenance 记录"],
+      "recommended_actions": ["只修复路径或缺失输入", "不改变轨迹、物理参数或网格"]
+    },
+    {
+      "pattern": "reproducibility_manifest",
+      "objective": "补齐代码、资产、仓库和运行环境哈希",
+      "allowed_changes": ["provenance 采集；禁止改变仿真参数"],
+      "recommended_actions": ["运行 capture_provenance.py", "不要用当前结果创建 checkpoint"]
+    },
+    {
+      "pattern": "garment_semantic_analysis",
+      "objective": "补齐衣服局部区域、表面关键点和逐帧语义测量",
+      "allowed_changes": ["garment atlas 与离线语义诊断；禁止改变仿真参数"],
+      "recommended_actions": ["生成与网格哈希一致的 garment atlas", "运行 analyze_semantic_states.py"]
+    },
+    {
+      "pattern": "mandatory_visual_evidence",
+      "objective": "用完全相同的物理与轨迹参数重跑当前 Gate，仅补齐强制多视角关键帧",
+      "allowed_changes": ["关键帧、相机和 checkpoint 诊断采集；物理与轨迹必须保持不变"],
+      "recommended_actions": ["不得因证据缺失而顺手调轨迹或材料", "保存接触前、闭合、抬起、搬运、放置和释放后的四视角图"]
+    },
+    {
+      "pattern": "contact:*",
+      "objective": "让目标布层在闭合后稳定随 TCP 运动，并用近景确认没有夹空或只夹单层",
+      "allowed_changes": ["当前 Gate 的状态相关抓点、预抓姿态、闭合时序和夹爪接触几何"],
+      "recommended_actions": ["先调状态相关抓点、预抓姿态、闭合时序或夹爪接触几何", "抓取未通过前不调后续翻折与放置轨迹"]
+    },
+    {
+      "pattern": "metric:second_fold_motion_summary",
+      "objective": "降低第二折期间未折主体的水平位移，同时保持两臂均抓中",
+      "allowed_changes": ["第二折松弛量、进场净空和翻折弧线"],
+      "recommended_actions": ["逐段定位首次位移跃迁，只调第二折松弛量、净空高度或弧形路径", "保持材料、网格、抓点标签和其他两折不变"]
+    },
+    {
+      "pattern": "metric:fold_layering_summary",
+      "objective": "使第二折折片从上方覆盖第一折折片，而非并排或平齐侧撞",
+      "allowed_changes": ["第二折放置目标、下降高度、末端姿态和释放停留"],
+      "recommended_actions": ["只调第二折放置目标、下降高度和末端姿态", "使用 overhead 与 shirt-bottom 两视角共同复核"]
+    },
+    {
+      "pattern": "metric:third_fold_motion_summary",
+      "objective": "完成腰摆多层翻折，并在水平放置和释放后保持覆盖",
+      "allowed_changes": ["第三折状态相关多层抓点、松弛抬升、弧线、水平放置和释放"],
+      "recommended_actions": ["从已批准 G3 checkpoint 估计当前腰摆中点与局部层数", "只调第三折松弛抬升、翻折弧线、水平放置和停留释放"]
+    },
+    {
+      "pattern": "manual_visual_review",
+      "objective": "完成强制视觉复核；自动指标无硬失败也不能直接宣告成功",
+      "allowed_changes": ["只填写人工复核，不改变仿真参数"],
+      "recommended_actions": ["填写 manual_review.json 的每个布层、碰撞、放置和释放检查项", "用 --manual-review 重新生成报告"]
+    }
+  ],
+  "visual_views": ["overview", "overhead", "shirt_bottom", "right_grasp"],
+  "stages": [
+    {
+      "id": "first_fold",
+      "name_cn": "第一折",
+      "completion_frame": 340,
+      "contact_events": [
+        {"hand": "left", "close_frame": 54, "tolerance": 4},
+        {"hand": "right", "close_frame": 117, "tolerance": 4}
+      ],
+      "visual_frames": [45, 54, 90, 117, 150, 270, 300, 332, 340],
+      "manual_checks": [
+        "两只夹爪闭合时目标布层确实位于两指之间",
+        "正面和背面两层均被带起，未只抓住单层",
+        "搬运阶段没有把未折主体明显水平拖走",
+        "放置形成一条主折线，释放后折片未明显弹回"
+      ],
+      "allowed_changes": [
+        "第一折状态相关抓点与夹爪闭合时序",
+        "第一折进场净空、松弛抬升、翻折弧线和放置姿态",
+        "诊断采集与 checkpoint 元数据"
+      ]
+    },
+    {
+      "id": "second_fold",
+      "name_cn": "第二折",
+      "completion_frame": 619,
+      "contact_events": [
+        {"hand": "left", "close_frame": 393, "tolerance": 4},
+        {"hand": "right", "close_frame": 439, "tolerance": 4}
+      ],
+      "visual_frames": [385, 393, 430, 439, 455, 480, 530, 550, 570, 583, 600, 619],
+      "numeric_metrics": [
+        {"field": "second_fold_motion_summary", "fail_on_metric_fail": true},
+        {"field": "fold_layering_summary", "fail_on_metric_fail": false}
+      ],
+      "manual_checks": [
+        "机器人两臂高位进场时均未擦碰第一折折片",
+        "左右夹爪分别夹到预期边缘，未夹空或误夹第一折与底层",
+        "第二折搬运时短袖主体没有不希望的整体水平移动",
+        "第二折折片从上方落到第一折折片上，而不是平齐侧撞",
+        "释放后两侧折片与底层形成重叠的三层主体"
+      ],
+      "allowed_changes": [
+        "第二折状态相关抓点与夹爪闭合时序",
+        "第二折高位进场、松弛量、翻折弧线、放置目标与末端姿态",
+        "诊断采集与 checkpoint 元数据"
+      ]
+    },
+    {
+      "id": "third_fold",
+      "name_cn": "第三折",
+      "completion_frame": 979,
+      "contact_events": [
+        {"hand": "right", "close_frame": 690, "tolerance": 4}
+      ],
+      "visual_frames": [650, 680, 690, 720, 750, 780, 840, 900, 920, 941, 960, 979],
+      "numeric_metrics": [
+        {"field": "third_fold_motion_summary", "fail_on_metric_fail": true}
+      ],
+      "manual_checks": [
+        "第三折抓点位于当前短袖腰摆中部，而不是沿用失配的固定世界坐标",
+        "夹爪抓住折后多层主体，未只抓最上层或夹空",
+        "搬运轨迹先抬起再翻转，未把衣服沿桌面推成布团",
+        "末端放置姿态接近水平，折片由上方落下而非竖直插入",
+        "释放并撤离后折片保持覆盖在底层主体上"
+      ],
+      "allowed_changes": [
+        "第三折当前腰摆中点与多层抓点估计",
+        "第三折松弛抬升、翻折弧线、水平放置、停留与释放",
+        "诊断采集与 checkpoint 元数据"
+      ]
+    }
+  ],
+  "image_guardrail": {
+    "blue_min": 100,
+    "blue_over_red": 40,
+    "blue_over_green": 15,
+    "warning": "RGB mask metrics only flag large jumps/collapse; robot occlusion prevents them from proving grasp correctness."
+  },
+  "mesh_policy": {
+    "smoke_faces": 2500,
+    "debug_faces": 8000,
+    "final_faces_approx": 14000,
+    "warning": "Never accept physical or grasp conclusions from the smoke mesh."
+  }
+}
