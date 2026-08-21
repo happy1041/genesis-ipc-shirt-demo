@@ -22,10 +22,20 @@ if [[ "$FAST_PREVIEW" == "0" ]]; then
   runner_env=()
 fi
 
+grasp_args=(--contact-grasp-test)
+if [[ "${USE_SOFT_VIRTUAL_GRASP:-0}" == "1" ]]; then
+  grasp_args=(
+    --virtual-grasp
+    --grasp-mode soft
+    --prepin-first-grasp
+    --grasp-strength "${SOFT_VIRTUAL_GRASP_STRENGTH:-20}"
+  )
+fi
+
 env "${runner_env[@]}" "${runner[@]}" \
   --frames 240 \
   --drive-mode direct \
-  --contact-grasp-test \
+  "${grasp_args[@]}" \
   --initial-shirt-x 0.667 \
   --initial-shirt-y 0.015 \
   --contact-d-hat 0.005 \

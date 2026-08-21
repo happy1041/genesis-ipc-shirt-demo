@@ -1543,7 +1543,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--table-friction", type=float, default=0.3)
     parser.add_argument(
         "--fast-preview",
-        action="store_true",
+        action=argparse.BooleanOptionalAction,
+        default=False,
         help="Use a cheaper IPC nonlinear solve for iteration; keep disabled for final comparison",
     )
     parser.add_argument("--virtual-grasp", action="store_true")
@@ -1592,6 +1593,24 @@ def parse_args() -> argparse.Namespace:
             "first grasp. This keeps the exact finger collision meshes above the "
             "table when rigid-rigid IPC is enabled. The correction ramps over "
             "source frames 45--60, stays through frame 150, and fades by 210."
+        ),
+    )
+    parser.add_argument(
+        "--first-grasp-left-depth",
+        type=float,
+        default=0.0,
+        help=(
+            "Lower only the robot-left TCP during the first-grasp clearance "
+            "window. This compensates mesh-dependent cloth/finger capture."
+        ),
+    )
+    parser.add_argument(
+        "--first-grasp-left-world-y",
+        type=float,
+        default=0.0,
+        help=(
+            "Signed world-Y offset for only the robot-left TCP during the "
+            "first-grasp clearance window."
         ),
     )
     parser.add_argument(
@@ -2488,6 +2507,7 @@ def main() -> None:
 
     if (
         args.first_grasp_clearance_lift < 0.0
+        or args.first_grasp_left_depth < 0.0
         or args.first_grasp_right_depth < 0.0
         or args.first_fold_tcp_lift < 0.0
         or args.first_fold_transfer_lift < 0.0
@@ -2507,6 +2527,8 @@ def main() -> None:
         or not -180.0 <= args.third_fold_front_plane_roll_deg <= 180.0
     ):
         raise ValueError("trajectory lift corrections must be non-negative")
+    if abs(args.first_grasp_left_world_y) > 0.02:
+        raise ValueError("--first-grasp-left-world-y must stay within +/- 20 mm")
     if (
         args.second_fold_correction_release_start < 583
         or args.second_fold_correction_release_end
@@ -2527,6 +2549,8 @@ def main() -> None:
         )
     if (
         args.first_grasp_clearance_lift > 0.0
+        or args.first_grasp_left_depth > 0.0
+        or args.first_grasp_left_world_y != 0.0
         or args.first_grasp_right_depth > 0.0
         or args.first_fold_tcp_lift > 0.0
         or args.first_fold_transfer_lift > 0.0
@@ -3018,6 +3042,8 @@ def main() -> None:
             )
             per_hand_lift = (
                 first_grasp_clearance
+                - args.first_grasp_left_depth
+                * first_grasp_clearance_weight(int(source_frame))
                 + first_fold_lift
                 + args.second_fold_left_approach_lift
                 * second_fold_left_approach_weight(int(source_frame))
@@ -3121,6 +3147,15 @@ def main() -> None:
                 link_rot = quat_wxyz_to_matrix(link_quat)
                 tcp = link_pos + link_rot @ TCP_LOCAL
                 targets.append((tcp + np.array([0.0, 0.0, lift]), link_quat))
+
+            if args.first_grasp_left_world_y != 0.0:
+                left_tcp, left_quat = targets[0]
+                left_tcp = left_tcp.copy()
+                left_tcp[1] += (
+                    args.first_grasp_left_world_y
+                    * first_grasp_clearance_weight(int(source_frame))
+                )
+                targets[0] = (left_tcp, left_quat)
 
             if second_fold_relax > 0.0:
                 relax_offset = np.array([second_fold_relax, 0.0, 0.0])
@@ -3342,6 +3377,8 @@ def main() -> None:
         joint_q = corrected_joint_q
         print(
             f"first_grasp_clearance_lift={args.first_grasp_clearance_lift:.4f}m "
+            f"first_grasp_left_depth={args.first_grasp_left_depth:.4f}m "
+            f"first_grasp_left_world_y={args.first_grasp_left_world_y:.4f}m "
             f"first_grasp_right_depth={args.first_grasp_right_depth:.4f}m "
             f"first_fold_tcp_lift={args.first_fold_tcp_lift:.4f}m "
             f"first_fold_transfer_lift={args.first_fold_transfer_lift:.4f}m "
@@ -3739,6 +3776,8 @@ def main() -> None:
             "ipc_constraint_strength_rotation": args.ipc_constraint_strength_rotation,
             "ipc_rigid_rigid_contact": args.ipc_rigid_rigid_contact,
             "first_grasp_clearance_lift": args.first_grasp_clearance_lift,
+            "first_grasp_left_depth": args.first_grasp_left_depth,
+            "first_grasp_left_world_y": args.first_grasp_left_world_y,
             "first_grasp_right_depth": args.first_grasp_right_depth,
             "first_fold_tcp_lift": args.first_fold_tcp_lift,
             "first_fold_transfer_lift": args.first_fold_transfer_lift,
@@ -4552,6 +4591,8 @@ def main() -> None:
         "ipc_constraint_strength_rotation": args.ipc_constraint_strength_rotation,
         "ipc_rigid_rigid_contact": args.ipc_rigid_rigid_contact,
         "first_grasp_clearance_lift": args.first_grasp_clearance_lift,
+        "first_grasp_left_depth": args.first_grasp_left_depth,
+        "first_grasp_left_world_y": args.first_grasp_left_world_y,
         "first_grasp_right_depth": args.first_grasp_right_depth,
         "settle_frames": args.settle_frames,
         "settled_cloth_summary": settled_cloth_summary,

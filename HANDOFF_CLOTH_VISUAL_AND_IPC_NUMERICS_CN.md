@@ -46,3 +46,21 @@ RUN_LABEL=my_fabric_run ./run_g3v2_fabric_render_5060m.sh
 3. 物理稳定后测试均匀 remesh，而不是当前 QEM 8k 网格；5060M 上先做 10k–14k，监控峰值显存。
 4. 最后增加织物 albedo/normal 纹理。纹理只改善材质读感，不能代替接触和网格修复。
 
+## 2026-08-21：13,767 面稳定三折基线
+
+现有两套 RTX 5060 Laptop 可复现配置：
+
+```bash
+# 快速功能基线：dHat 2 mm
+./run_g3v2_13767_dhat2_soft_5060m.sh
+
+# 高质量基线：dHat 1.5 mm，必须使用完整求解器
+./run_g3v2_13767_dhat15_slow_5060m.sh
+```
+
+两者都使用 13,767 面原始模型、0.1 mm shell radius、2 substeps、6 点 soft virtual grasp、strength 20，并完整完成五次抓取和三折释放。
+
+- dHat 2 mm fast：980/980，无 CUDA 错误；第二折 layering PASS，第三折覆盖 62.8%，但静止上片中位移动 33.98 mm，严格 third motion FAIL。
+- dHat 1.5 mm slow：980/980，无 TOI/NaN/CUDA；第二折 layering PASS，第三折 motion PASS。最终高度 P50/P90/P99 为 23.6/55.2/71.1 mm，相比 2 mm 的 26.3/61.6/81.2 mm 更薄。
+- dHat 1.5 mm 若使用 fast solver，会在第二折约 frame 484 触发 `TOI=-1.8e-12` 断言。完整求解器（Newton 50、line search 8、linear tol 1e-3）能稳定跨过，并保持 frame480 左右抓取误差低于约 10 mm。
+- 软抓取避免了高分辨率模型首次左手纯摩擦抓取失败；代价是局部会出现较平滑的张力膜，但没有单点飞布或释放后继续拖拽。
