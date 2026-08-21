@@ -209,11 +209,16 @@ class IPCVirtualGrasp:
         points: int,
         final_right_points: int,
         first_candidates: tuple[np.ndarray, np.ndarray] | None,
+        first_capture_frames: int,
+        first_capture_fraction: float,
+        first_right_capture_world_z: float,
         mode: str,
     ):
         self.cloth = cloth
         self.openness = openness
         self.radius = radius
+        self.first_capture_frames = first_capture_frames
+        self.first_capture_fraction = first_capture_fraction
         self.mode = mode
         self.coupler = cloth.sim.coupler
         self.hands = [
@@ -225,6 +230,9 @@ class IPCVirtualGrasp:
                 "grasp_index": 0,
                 "ids": np.empty(0, dtype=np.int64),
                 "local": np.empty((0, 3), dtype=np.float64),
+                "capture_local": np.empty((0, 3), dtype=np.float64),
+                "attach_frame": None,
+                "capture_world_z": 0.0,
                 "targets": np.empty((0, 3), dtype=np.float64),
                 "attach_center": None,
                 "first_candidates": first_candidates[0] if first_candidates is not None else None,
@@ -237,6 +245,9 @@ class IPCVirtualGrasp:
                 "grasp_index": 0,
                 "ids": np.empty(0, dtype=np.int64),
                 "local": np.empty((0, 3), dtype=np.float64),
+                "capture_local": np.empty((0, 3), dtype=np.float64),
+                "attach_frame": None,
+                "capture_world_z": first_right_capture_world_z,
                 "targets": np.empty((0, 3), dtype=np.float64),
                 "attach_center": None,
                 "first_candidates": first_candidates[1] if first_candidates is not None else None,
@@ -263,6 +274,8 @@ class IPCVirtualGrasp:
             print(f"grasp_release frame={frame} hand={hand['name']} points={len(hand['ids'])}")
         hand["ids"] = np.empty(0, dtype=np.int64)
         hand["local"] = np.empty((0, 3), dtype=np.float64)
+        hand["capture_local"] = np.empty((0, 3), dtype=np.float64)
+        hand["attach_frame"] = None
         hand["targets"] = np.empty((0, 3), dtype=np.float64)
         hand["attach_center"] = None
 
@@ -298,6 +311,19 @@ class IPCVirtualGrasp:
         selected = cloth_pos[nearest]
         hand["ids"] = nearest.astype(np.int64)
         hand["local"] = (selected - pos) @ rot
+        hand["capture_local"] = hand["local"].copy()
+        if grasp_index == 0 and self.first_capture_frames > 0:
+            # Keep the patch shape but translate its centroid into the intended
+            # pinch point.  Ramping in update() avoids a one-frame magnetic snap.
+            hand["capture_local"] += (
+                self.first_capture_fraction
+                * (TCP_LOCAL - hand["capture_local"].mean(axis=0))
+            )
+            if hand["capture_world_z"] != 0.0:
+                hand["capture_local"] += (
+                    np.array([0.0, 0.0, hand["capture_world_z"]]) @ rot
+                )
+        hand["attach_frame"] = int(frame)
         hand["targets"] = selected.copy()
         hand["attach_center"] = selected.mean(axis=0)
         if self.mode == "hard":
@@ -330,7 +356,29 @@ class IPCVirtualGrasp:
         for hand in self.hands:
             if len(hand["ids"]):
                 pos, rot, _ = self._link_pose(hand)
-                targets = pos + hand["local"] @ rot.T
+                local = hand["local"]
+                if (
+                    self.first_capture_frames > 0
+                    and hand["attach_frame"] is not None
+                    and len(hand["capture_local"])
+                ):
+                    capture_progress = np.clip(
+                        (float(frame_label) - float(hand["attach_frame"]))
+                        / float(self.first_capture_frames),
+                        0.0,
+                        1.0,
+                    )
+                    capture_progress = float(capture_progress)
+                    capture_progress = (
+                        capture_progress
+                        * capture_progress
+                        * (3.0 - 2.0 * capture_progress)
+                    )
+                    local = (
+                        (1.0 - capture_progress) * hand["local"]
+                        + capture_progress * hand["capture_local"]
+                    )
+                targets = pos + local @ rot.T
                 hand["targets"] = targets
                 if self.mode == "hard":
                     self.coupler.set_fem_vertex_hard_bindings(self.cloth, hand["ids"], targets)
@@ -345,12 +393,15 @@ class IPCVirtualGrasp:
         for hand in held:
             actual = cloth_pos[hand["ids"]]
             error = np.linalg.norm(actual - hand["targets"], axis=1)
+            _, _, tcp = self._link_pose(hand)
+            centroid_tcp_distance = np.linalg.norm(actual.mean(axis=0) - tcp)
             target_travel = np.linalg.norm(hand["targets"].mean(axis=0) - hand["attach_center"])
             actual_travel = np.linalg.norm(actual.mean(axis=0) - hand["attach_center"])
             print(
                 f"grasp_track frame={source_frame} hand={hand['name']} "
                 f"target_travel={target_travel:.4f}m actual_travel={actual_travel:.4f}m "
-                f"mean_error={error.mean():.4f}m max_error={error.max():.4f}m"
+                f"mean_error={error.mean():.4f}m max_error={error.max():.4f}m "
+                f"centroid_tcp_distance={centroid_tcp_distance:.4f}m"
             )
 
     def summary(self) -> dict:
@@ -1558,6 +1609,28 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--grasp-points", type=int, default=6)
     parser.add_argument("--final-right-grasp-points", type=int, default=6)
     parser.add_argument("--grasp-strength", type=float, default=20.0)
+    parser.add_argument(
+        "--soft-grasp-first-capture-frames",
+        type=int,
+        default=0,
+        help=(
+            "For the first left/right soft grasp, smoothly translate the held "
+            "cloth patch centroid into TCP_LOCAL over this many source frames. "
+            "Zero preserves the attach-time offset."
+        ),
+    )
+    parser.add_argument(
+        "--soft-grasp-first-capture-fraction",
+        type=float,
+        default=1.0,
+        help="Fraction of the initial patch-centroid-to-TCP offset removed by first capture.",
+    )
+    parser.add_argument(
+        "--soft-grasp-first-right-capture-world-z",
+        type=float,
+        default=0.0,
+        help="Additional world-Z offset for the first robot-right capture target.",
+    )
     parser.add_argument("--exact-finger-collision", action="store_true")
     parser.add_argument("--prepin-first-grasp", action="store_true")
     parser.add_argument(
@@ -2203,6 +2276,14 @@ def main() -> None:
         raise ValueError("--substeps must be at least 1")
     if args.post_release_settle_frames < 0:
         raise ValueError("--post-release-settle-frames must be non-negative")
+    if args.soft_grasp_first_capture_frames < 0:
+        raise ValueError("--soft-grasp-first-capture-frames must be non-negative")
+    if not 0.0 <= args.soft_grasp_first_capture_fraction <= 1.0:
+        raise ValueError("--soft-grasp-first-capture-fraction must be in [0, 1]")
+    if abs(args.soft_grasp_first_right_capture_world_z) > 0.01:
+        raise ValueError(
+            "--soft-grasp-first-right-capture-world-z must stay within +/- 10 mm"
+        )
     if args.post_release_open_hold_frames < 0:
         raise ValueError("--post-release-open-hold-frames must be non-negative")
     if args.post_release_retreat_frames < 0:
@@ -3838,6 +3919,11 @@ def main() -> None:
             points=args.grasp_points,
             final_right_points=args.final_right_grasp_points,
             first_candidates=first_grasp_candidates,
+            first_capture_frames=args.soft_grasp_first_capture_frames,
+            first_capture_fraction=args.soft_grasp_first_capture_fraction,
+            first_right_capture_world_z=(
+                args.soft_grasp_first_right_capture_world_z
+            ),
             mode=args.grasp_mode,
         )
 
@@ -4642,6 +4728,11 @@ def main() -> None:
         "grasp_points": args.grasp_points,
         "final_right_grasp_points": args.final_right_grasp_points,
         "grasp_strength": args.grasp_strength,
+        "soft_grasp_first_capture_frames": args.soft_grasp_first_capture_frames,
+        "soft_grasp_first_capture_fraction": args.soft_grasp_first_capture_fraction,
+        "soft_grasp_first_right_capture_world_z": (
+            args.soft_grasp_first_right_capture_world_z
+        ),
         "exact_finger_collision": args.exact_finger_collision,
         "grasp_summary": virtual_grasp.summary() if virtual_grasp is not None else None,
         "contact_grasp_test": args.contact_grasp_test,

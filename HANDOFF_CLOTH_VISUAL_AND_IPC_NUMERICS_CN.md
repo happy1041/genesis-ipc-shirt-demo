@@ -64,3 +64,14 @@ RUN_LABEL=my_fabric_run ./run_g3v2_fabric_render_5060m.sh
 - dHat 1.5 mm slow：980/980，无 TOI/NaN/CUDA；第二折 layering PASS，第三折 motion PASS。最终高度 P50/P90/P99 为 23.6/55.2/71.1 mm，相比 2 mm 的 26.3/61.6/81.2 mm 更薄。
 - dHat 1.5 mm 若使用 fast solver，会在第二折约 frame 484 触发 `TOI=-1.8e-12` 断言。完整求解器（Newton 50、line search 8、linear tol 1e-3）能稳定跨过，并保持 frame480 左右抓取误差低于约 10 mm。
 - 软抓取避免了高分辨率模型首次左手纯摩擦抓取失败；代价是局部会出现较平滑的张力膜，但没有单点飞布或释放后继续拖拽。
+
+### 首次夹空修复与 dHat 1 mm 试验
+
+原 soft grasp 会永久保留 attach 瞬间的布片相对偏移；首次左右选点离 TCP 约 19--36 mm，因此布虽随动，画面仍像隔空抓取。正式 1.5 mm 脚本现增加：
+
+- `--soft-grasp-first-capture-frames 20`：在约 0.33 秒内将首次所夹布片质心平滑导入 TCP 夹取中心，同时保留布片形状。
+- `--first-grasp-right-depth 0.003`：首次闭合窗口右夹爪整体下降 3 mm，消除右侧残余 3--6 mm 可见空气缝。
+
+最终 `g3v2_13767f_dhat15_capture20_rightdepth3_slow_full` 完成980帧、五抓五放且无CUDA错误；视觉上左右布片均从指缝连续伸出，无明显穿模。耗时1684.10秒（28.07分钟、0.582 source FPS）。最终相对桌面高度P50/P90/P99/max为25.95/62.07/88.14/109.50 mm；这属于折后高度包络，不是材料厚度，材料shell radius仍为0.1 mm。
+
+dHat 1.0 mm 的slow/capture20/right-depth3试验：第一折220帧通过；扩展到第二折时在frame451、右手第二次attach后触发`cudaErrorMemoryAllocation`。这不是TOI/NaN或掉抓，而是RTX 5060 Laptop 8 GB上的接触/求解工作集溢出。因此1 mm暂不提供完整运行脚本，需先优化显存。

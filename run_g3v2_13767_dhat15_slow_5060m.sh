@@ -27,6 +27,8 @@ exec ./run_g3v2_majorfix_8000.sh \
   --cloth-E 20000 \
   --grasp-points 6 \
   --final-right-grasp-points 6 \
+  --soft-grasp-first-capture-frames 20 \
+  --first-grasp-right-depth 0.003 \
   --post-release-settle-frames 0 \
   --no-fast-preview \
   "$@"
