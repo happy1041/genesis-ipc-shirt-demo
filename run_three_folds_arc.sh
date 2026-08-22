@@ -39,6 +39,7 @@ CONTACT_CONSTITUTION="${CONTACT_CONSTITUTION:-ipc}"
 SETTLE_FRAMES="${SETTLE_FRAMES:-30}"
 SUBSTEPS="${SUBSTEPS:-1}"
 SHOW_VIEWER="${SHOW_VIEWER:-1}"
+RECORD_MULTI_VIEW="${RECORD_MULTI_VIEW:-1}"
 IPC_RIGID_RIGID_CONTACT="${IPC_RIGID_RIGID_CONTACT:-1}"
 VISUALIZE_IPC_PROXIES="${VISUALIZE_IPC_PROXIES:-0}"
 RENDER_IPC_ACTUAL_VISUALS="${RENDER_IPC_ACTUAL_VISUALS:-0}"
@@ -60,6 +61,11 @@ if [[ "$IPC_RIGID_RIGID_CONTACT" != "0" ]]; then
   ipc_debug_args+=(--ipc-rigid-rigid-contact)
 else
   ipc_debug_args+=(--no-ipc-rigid-rigid-contact)
+fi
+
+record_args=()
+if [[ "$RECORD_MULTI_VIEW" != "0" ]]; then
+  record_args+=(--record-multi-view)
 fi
 if [[ "$VISUALIZE_IPC_PROXIES" != "0" ]]; then
   ipc_debug_args+=(--visualize-ipc-proxies)
@@ -101,7 +107,7 @@ CONTACT_MESH_FACES="$ARC_MESH_FACES" \
   --substeps "$SUBSTEPS" \
   --seed 0 \
   --camera-view oblique \
-  --record-multi-view \
+  "${record_args[@]}" \
   --cloth-rho 800 \
   --table-friction "$TABLE_FRICTION" \
   --contact-d-hat "$CONTACT_D_HAT" \

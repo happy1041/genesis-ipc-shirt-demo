@@ -75,3 +75,21 @@ RUN_LABEL=my_fabric_run ./run_g3v2_fabric_render_5060m.sh
 最终 `g3v2_13767f_dhat15_capture20_rightdepth3_slow_full` 完成980帧、五抓五放且无CUDA错误；视觉上左右布片均从指缝连续伸出，无明显穿模。耗时1684.10秒（28.07分钟、0.582 source FPS）。最终相对桌面高度P50/P90/P99/max为25.95/62.07/88.14/109.50 mm；这属于折后高度包络，不是材料厚度，材料shell radius仍为0.1 mm。
 
 dHat 1.0 mm 的slow/capture20/right-depth3试验：第一折220帧通过；扩展到第二折时在frame451、右手第二次attach后触发`cudaErrorMemoryAllocation`。这不是TOI/NaN或掉抓，而是RTX 5060 Laptop 8 GB上的接触/求解工作集溢出。因此1 mm暂不提供完整运行脚本，需先优化显存。
+
+## 2026-08-22：RTX 5070 Ti、dHat 1 mm 与可靠离线录制
+
+RTX 5070 Ti 16 GB 能跨过原先 8 GB GPU 的 frame451 显存失败，但直接沿用腕部刚性旋转仍会在第二、第三折产生约15 cm的软约束长力臂。当前修复为：
+
+- 第二折两手仅传递 TCP 平移，保留 attach 时的世界坐标片内偏移；
+- 第三折右手仍传递旋转，但布片绕 `TCP_LOCAL` 而不是腕部/link origin 旋转；
+- 首次抓取继续使用 capture20 与右手下探3 mm，保持视觉上布片位于指缝内。
+
+最终 checkpoint 连续物理运行 `g3v2_13767f_dhat10_tcp_rotation_finalphysics` 完成 source frame 584--979：frame780/840/900 soft-grasp mean error分别3.8/4.3/4.8 mm，最终覆盖率67.06%，五次抓取全部发生并释放。静止上片累计中位位移30.65 mm，仅比严格30 mm门槛高0.65 mm，因此自动 verdict 仍为FAIL，但三折功能与视觉均已完成。
+
+实时四视角录制会在750--780段改变CUDA调度并放大软约束数值分支：同配置无录制frame780误差约3--4 mm，实时录制可升至43--58 mm并锁死。正式录制因此改成两阶段：第一遍`--no-record --dump-replay-states`保存每帧布料、robot q和IPC实际affine transform；第二遍`--replay-states`只渲染、不推进物理。推荐入口：
+
+```bash
+./run_g3v2_13767_dhat10_offline_record_5070ti.sh
+```
+
+本次最终四视角视频严格为980帧、60 FPS、16.333秒。后缀物理396帧耗时355.02秒（1.115 source FPS）；此前连续四视角实时跑完整段为25.36分钟/0.644 source FPS，而按最终视频实际采用的checkpoint前缀与后缀计，物理生成约19分钟。纯渲染396帧四视角耗时8.68秒（场景初始化另计）。最终相对桌面高度包络P50/P90/P95/P99/max为20.05/52.71/59.20/74.19/96.82 mm；在同时含上下折片的10 mm XY网格中，局部stack span的P50/P90约54.64/71.28 mm。材料输入仍是0.1 mm shell radius；这些折后高度/局部span不是材料厚度。

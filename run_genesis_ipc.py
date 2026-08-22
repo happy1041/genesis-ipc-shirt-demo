@@ -21,6 +21,7 @@ from genesis.engine.couplers.ipc_coupler.utils import (
     compute_link_to_link_transform,
     find_target_link_for_fixed_merge,
 )
+from genesis.utils.video_encoder import VideoEncoder
 
 
 SOURCE_JOINT_NAMES = (
@@ -212,6 +213,9 @@ class IPCVirtualGrasp:
         first_capture_frames: int,
         first_capture_fraction: float,
         first_right_capture_world_z: float,
+        second_translation_only: bool,
+        final_right_translation_only: bool,
+        final_right_rotate_about_tcp: bool,
         mode: str,
     ):
         self.cloth = cloth
@@ -219,6 +223,9 @@ class IPCVirtualGrasp:
         self.radius = radius
         self.first_capture_frames = first_capture_frames
         self.first_capture_fraction = first_capture_fraction
+        self.second_translation_only = second_translation_only
+        self.final_right_translation_only = final_right_translation_only
+        self.final_right_rotate_about_tcp = final_right_rotate_about_tcp
         self.mode = mode
         self.coupler = cloth.sim.coupler
         self.hands = [
@@ -233,6 +240,10 @@ class IPCVirtualGrasp:
                 "capture_local": np.empty((0, 3), dtype=np.float64),
                 "attach_frame": None,
                 "capture_world_z": 0.0,
+                "translation_only": False,
+                "world_offsets": np.empty((0, 3), dtype=np.float64),
+                "tcp_local_offsets": np.empty((0, 3), dtype=np.float64),
+                "active_grasp_index": None,
                 "targets": np.empty((0, 3), dtype=np.float64),
                 "attach_center": None,
                 "first_candidates": first_candidates[0] if first_candidates is not None else None,
@@ -248,6 +259,10 @@ class IPCVirtualGrasp:
                 "capture_local": np.empty((0, 3), dtype=np.float64),
                 "attach_frame": None,
                 "capture_world_z": first_right_capture_world_z,
+                "translation_only": False,
+                "world_offsets": np.empty((0, 3), dtype=np.float64),
+                "tcp_local_offsets": np.empty((0, 3), dtype=np.float64),
+                "active_grasp_index": None,
                 "targets": np.empty((0, 3), dtype=np.float64),
                 "attach_center": None,
                 "first_candidates": first_candidates[1] if first_candidates is not None else None,
@@ -276,8 +291,33 @@ class IPCVirtualGrasp:
         hand["local"] = np.empty((0, 3), dtype=np.float64)
         hand["capture_local"] = np.empty((0, 3), dtype=np.float64)
         hand["attach_frame"] = None
+        hand["translation_only"] = False
+        hand["world_offsets"] = np.empty((0, 3), dtype=np.float64)
+        hand["tcp_local_offsets"] = np.empty((0, 3), dtype=np.float64)
+        hand["active_grasp_index"] = None
         hand["targets"] = np.empty((0, 3), dtype=np.float64)
         hand["attach_center"] = None
+
+    def resume_after_prefix(self, source_frame: int) -> None:
+        """Synchronize event counters after loading a released-fold prefix."""
+        if source_frame < 583:
+            return
+        if self.mode == "soft":
+            self.coupler.clear_fem_vertex_constraints(
+                self.cloth, np.arange(self.cloth.n_vertices, dtype=np.int64)
+            )
+        for hand in self.hands:
+            hand["grasp_index"] = 2
+            hand["closed"] = True
+            hand["ids"] = np.empty(0, dtype=np.int64)
+            hand["local"] = np.empty((0, 3), dtype=np.float64)
+            hand["capture_local"] = np.empty((0, 3), dtype=np.float64)
+            hand["world_offsets"] = np.empty((0, 3), dtype=np.float64)
+            hand["tcp_local_offsets"] = np.empty((0, 3), dtype=np.float64)
+            hand["active_grasp_index"] = None
+            hand["targets"] = np.empty((0, 3), dtype=np.float64)
+            hand["attach_center"] = None
+        print(f"virtual_grasp_prefix_resumed source_frame={source_frame}")
 
     def _attach(self, hand, frame: int, cloth_pos: np.ndarray) -> None:
         pos, rot, tcp = self._link_pose(hand)
@@ -324,6 +364,16 @@ class IPCVirtualGrasp:
                     np.array([0.0, 0.0, hand["capture_world_z"]]) @ rot
                 )
         hand["attach_frame"] = int(frame)
+        hand["translation_only"] = (
+            self.second_translation_only and grasp_index == 1
+        ) or (
+            self.final_right_translation_only
+            and hand["name"] == "right"
+            and grasp_index == 2
+        )
+        hand["world_offsets"] = selected - tcp
+        hand["tcp_local_offsets"] = (selected - tcp) @ rot
+        hand["active_grasp_index"] = grasp_index
         hand["targets"] = selected.copy()
         hand["attach_center"] = selected.mean(axis=0)
         if self.mode == "hard":
@@ -355,7 +405,35 @@ class IPCVirtualGrasp:
         # IPC animator in the immediately following scene.step().
         for hand in self.hands:
             if len(hand["ids"]):
-                pos, rot, _ = self._link_pose(hand)
+                pos, rot, tcp = self._link_pose(hand)
+                if (
+                    self.final_right_rotate_about_tcp
+                    and hand["name"] == "right"
+                    and hand["active_grasp_index"] == 2
+                ):
+                    targets = tcp + hand["tcp_local_offsets"] @ rot.T
+                    hand["targets"] = targets
+                    if self.mode == "hard":
+                        self.coupler.set_fem_vertex_hard_bindings(
+                            self.cloth, hand["ids"], targets
+                        )
+                    else:
+                        self.coupler.set_fem_vertex_constraints(
+                            self.cloth, hand["ids"], targets
+                        )
+                    continue
+                if hand["translation_only"]:
+                    targets = tcp + hand["world_offsets"]
+                    hand["targets"] = targets
+                    if self.mode == "hard":
+                        self.coupler.set_fem_vertex_hard_bindings(
+                            self.cloth, hand["ids"], targets
+                        )
+                    else:
+                        self.coupler.set_fem_vertex_constraints(
+                            self.cloth, hand["ids"], targets
+                        )
+                    continue
                 local = hand["local"]
                 if (
                     self.first_capture_frames > 0
@@ -1524,6 +1602,24 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--camera-view", choices=("overhead", "oblique"), default="overhead")
     parser.add_argument("--no-record", action="store_true")
     parser.add_argument(
+        "--dump-replay-states",
+        type=Path,
+        default=None,
+        help=(
+            "Save one render-only cloth/robot/IPC state per executed source "
+            "frame. Use with --no-record so GPU rendering cannot perturb IPC."
+        ),
+    )
+    parser.add_argument(
+        "--replay-states",
+        type=Path,
+        default=None,
+        help=(
+            "Render a previously dumped state trajectory without advancing "
+            "physics. This decouples video generation from IPC convergence."
+        ),
+    )
+    parser.add_argument(
         "--trajectory-preflight-only",
         action="store_true",
         help=(
@@ -1630,6 +1726,34 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=0.0,
         help="Additional world-Z offset for the first robot-right capture target.",
+    )
+    parser.add_argument(
+        "--soft-grasp-second-translation-only",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "For each hand's second soft grasp, preserve the attach-time world "
+            "patch offset and follow only TCP translation instead of imposing "
+            "the wrist's full rigid rotation."
+        ),
+    )
+    parser.add_argument(
+        "--soft-grasp-final-right-translation-only",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "For the robot-right third/final soft grasp, follow only TCP "
+            "translation instead of imposing full wrist rotation."
+        ),
+    )
+    parser.add_argument(
+        "--soft-grasp-final-right-rotate-about-tcp",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "For the robot-right final grasp, rotate the held patch around "
+            "TCP_LOCAL instead of the wrist/link origin."
+        ),
     )
     parser.add_argument("--exact-finger-collision", action="store_true")
     parser.add_argument("--prepin-first-grasp", action="store_true")
@@ -2116,7 +2240,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--finger-kp", type=float, default=1000.0)
     parser.add_argument("--finger-kv", type=float, default=50.0)
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.dump_replay_states is not None and not args.no_record:
+        parser.error("--dump-replay-states requires --no-record")
+    if args.dump_replay_states is not None and args.replay_states is not None:
+        parser.error("--dump-replay-states and --replay-states are mutually exclusive")
+    return args
 
 
 def summarize_settled_cloth(
@@ -3924,6 +4053,13 @@ def main() -> None:
             first_right_capture_world_z=(
                 args.soft_grasp_first_right_capture_world_z
             ),
+            second_translation_only=args.soft_grasp_second_translation_only,
+            final_right_translation_only=(
+                args.soft_grasp_final_right_translation_only
+            ),
+            final_right_rotate_about_tcp=(
+                args.soft_grasp_final_right_rotate_about_tcp
+            ),
             mode=args.grasp_mode,
         )
 
@@ -4164,6 +4300,10 @@ def main() -> None:
         capture_diagnostic_state(
             int(loaded_checkpoint_meta["source_frame"]), previous_q
         )
+        if virtual_grasp is not None:
+            virtual_grasp.resume_after_prefix(
+                int(loaded_checkpoint_meta["source_frame"])
+            )
     else:
         for settle_frame in range(args.settle_frames):
             if args.drive_mode == "direct":
@@ -4199,6 +4339,166 @@ def main() -> None:
             f"max_height_mm={global_height['max'] * 1000.0:.2f} "
             f"snapshot={settled_cloth_snapshot_path}"
         )
+
+    if args.replay_states is not None:
+        replay_path = require_file(args.replay_states)
+        with np.load(replay_path) as replay:
+            replay_source_frames = np.asarray(replay["source_frames"], dtype=np.int64)
+            replay_cloth_pos = np.asarray(replay["cloth_pos"], dtype=np.float32)
+            replay_robot_q = np.asarray(replay["robot_q"], dtype=np.float64)
+            replay_ipc_transforms = np.asarray(
+                replay["ipc_link_transforms"], dtype=np.float64
+            )
+            replay_link_names = tuple(str(name) for name in replay["ipc_link_names"])
+        frame_total = len(replay_source_frames)
+        if not (
+            replay_cloth_pos.shape[0]
+            == replay_robot_q.shape[0]
+            == replay_ipc_transforms.shape[0]
+            == frame_total
+        ):
+            raise RuntimeError("Replay state arrays have inconsistent frame counts")
+        if replay_link_names != IPC_ROBOT_LINKS:
+            raise RuntimeError(
+                f"Replay IPC links mismatch: {replay_link_names} != {IPC_ROBOT_LINKS}"
+            )
+
+        replay_cameras = (
+            record_cameras
+            if args.record_multi_view
+            else {primary_record_view: camera}
+        )
+        replay_outputs = {}
+        replay_encoders = {}
+        for view_name in replay_cameras:
+            output_path = (
+                args.output
+                if view_name == primary_record_view
+                else args.output.with_name(
+                    f"{args.output.stem}_{view_name}{args.output.suffix}"
+                )
+            )
+            replay_outputs[view_name] = output_path
+            replay_encoders[view_name] = VideoEncoder(
+                str(output_path), args.record_fps, is_threaded=True
+            )
+
+        coupler = cloth.sim.coupler
+        replay_targets = [
+            find_target_link_for_fixed_merge(robot.get_link(name=name))
+            for name in IPC_ROBOT_LINKS
+        ]
+        render_started = time.perf_counter()
+        try:
+            for replay_index, source_frame in enumerate(replay_source_frames):
+                robot.set_qpos(replay_robot_q[replay_index], zero_velocity=True)
+                cloth.set_position(replay_cloth_pos[replay_index])
+                cloth.process_input()
+                for link_index, target_link in enumerate(replay_targets):
+                    coupler._abd_data_by_link[target_link][0].transform[:] = (
+                        replay_ipc_transforms[replay_index, link_index]
+                    )
+                scene._visualizer.update(force=True)
+
+                right_link = both_debug_links["right_link26"]
+                right_pos = as_numpy(right_link.get_pos(relative=False)).reshape(3)
+                right_quat = as_numpy(right_link.get_quat(relative=False)).reshape(4)
+                right_tcp = right_pos + quat_wxyz_to_matrix(right_quat) @ TCP_LOCAL
+                if "right_grasp" in replay_cameras:
+                    replay_cameras["right_grasp"].set_pose(
+                        pos=tuple(right_tcp + np.array((0.26, -0.32, 0.18))),
+                        lookat=tuple(right_tcp),
+                        up=(0.0, 0.0, 1.0),
+                    )
+                for view_name, replay_camera in replay_cameras.items():
+                    rgb = replay_camera.render(
+                        rgb=True,
+                        depth=False,
+                        segmentation=False,
+                        normal=False,
+                        force_render=True,
+                    )
+                    if isinstance(rgb, tuple):
+                        rgb = rgb[0]
+                    frame_array = as_numpy(rgb)
+                    if np.issubdtype(frame_array.dtype, np.floating):
+                        frame_array = np.clip(frame_array * 255.0, 0, 255).astype(
+                            np.uint8
+                        )
+                    else:
+                        frame_array = frame_array.astype(np.uint8)
+                    replay_encoders[view_name].write(frame_array[..., :3].copy())
+                if replay_index == 0 or (replay_index + 1) % 60 == 0:
+                    print(
+                        f"replay_render={replay_index + 1}/{frame_total} "
+                        f"source_frame={int(source_frame)}"
+                    )
+        finally:
+            for encoder in replay_encoders.values():
+                encoder.close()
+
+        replay_multiview = None
+        if args.record_multi_view:
+            ffmpeg = shutil.which("ffmpeg")
+            if ffmpeg is None:
+                try:
+                    import imageio_ffmpeg
+
+                    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+                except (ImportError, RuntimeError):
+                    ffmpeg = None
+            if ffmpeg is not None:
+                replay_multiview = args.output.with_name(
+                    f"{args.output.stem}_multiview{args.output.suffix}"
+                )
+                command = [ffmpeg, "-y"]
+                for view_name in (
+                    "overview",
+                    "overhead",
+                    "shirt_bottom",
+                    "right_grasp",
+                ):
+                    command.extend(("-i", str(replay_outputs[view_name])))
+                command.extend(
+                    (
+                        "-filter_complex",
+                        "[0:v][1:v][2:v][3:v]"
+                        "xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0:fill=black[out]",
+                        "-map",
+                        "[out]",
+                        "-c:v",
+                        "libx264",
+                        "-crf",
+                        "20",
+                        "-preset",
+                        "medium",
+                        "-pix_fmt",
+                        "yuv420p",
+                        str(replay_multiview),
+                    )
+                )
+                subprocess.run(command, check=True)
+                print(f"Replay multi-view video: {replay_multiview}")
+
+        replay_manifest = {
+            "replay_states": str(replay_path),
+            "source_frame_start": int(replay_source_frames[0]),
+            "source_frame_end": int(replay_source_frames[-1]),
+            "frames": frame_total,
+            "record_fps": args.record_fps,
+            "render_seconds": time.perf_counter() - render_started,
+            "videos": {name: str(path) for name, path in replay_outputs.items()},
+            "multiview": (
+                str(replay_multiview) if replay_multiview is not None else None
+            ),
+            "physics_advanced": False,
+        }
+        manifest_path = args.output.with_suffix(".replay.json")
+        manifest_path.write_text(
+            json.dumps(replay_manifest, indent=2), encoding="utf-8"
+        )
+        print(f"Replay manifest: {manifest_path}")
+        return
 
     recording_paths: dict[str, Path] = {}
     multiview_grid_path = None
@@ -4268,6 +4568,10 @@ def main() -> None:
         )
 
     step_times: list[float] = []
+    replay_dump_source_frames: list[int] = []
+    replay_dump_cloth_pos: list[np.ndarray] = []
+    replay_dump_robot_q: list[np.ndarray] = []
+    replay_dump_ipc_transforms: list[np.ndarray] = []
     checkpoint = None
     checkpoint_path = args.output.with_suffix(".third_fold_checkpoint.pkl")
     persistent_checkpoint_saved = False
@@ -4304,6 +4608,32 @@ def main() -> None:
             if substep + 1 == args.substeps:
                 capture_diagnostic_state(int(source_frames[frame]), commanded_q)
                 write_tcp_telemetry(frame, int(source_frames[frame]))
+                if args.dump_replay_states is not None:
+                    replay_dump_source_frames.append(int(source_frames[frame]))
+                    replay_dump_cloth_pos.append(
+                        as_numpy(cloth.get_state().pos)
+                        .astype(np.float32)
+                        .reshape((-1, 3))
+                        .copy()
+                    )
+                    replay_dump_robot_q.append(
+                        as_numpy(robot.get_qpos()).astype(np.float32).reshape(-1).copy()
+                    )
+                    replay_dump_ipc_transforms.append(
+                        np.stack(
+                            [
+                                np.asarray(
+                                    cloth.sim.coupler._abd_data_by_link[
+                                        find_target_link_for_fixed_merge(
+                                            robot.get_link(name=name)
+                                        )
+                                    ][0].transform,
+                                    dtype=np.float32,
+                                ).reshape(4, 4)
+                                for name in IPC_ROBOT_LINKS
+                            ]
+                        )
+                    )
                 if int(source_frames[frame]) == 0:
                     diagnostic_initial_cloth_pos = as_numpy(
                         cloth.get_state().pos
@@ -4382,6 +4712,21 @@ def main() -> None:
                 f"frame={frame + 1}/{frame_count} "
                 f"wall_fps={1.0 / max(np.mean(step_times[-60:]), 1e-9):.2f}"
             )
+
+    if args.dump_replay_states is not None:
+        dump_path = args.dump_replay_states.expanduser().resolve()
+        dump_path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            dump_path,
+            source_frames=np.asarray(replay_dump_source_frames, dtype=np.int32),
+            cloth_pos=np.stack(replay_dump_cloth_pos),
+            robot_q=np.stack(replay_dump_robot_q),
+            ipc_link_names=np.asarray(IPC_ROBOT_LINKS),
+            ipc_link_transforms=np.stack(replay_dump_ipc_transforms),
+        )
+        print(
+            f"Replay states: {dump_path} frames={len(replay_dump_source_frames)}"
+        )
 
     # Release first, then retreat along a single seeded IK branch before the
     # free-settle observation.  The public post-release path is intentionally
@@ -4732,6 +5077,15 @@ def main() -> None:
         "soft_grasp_first_capture_fraction": args.soft_grasp_first_capture_fraction,
         "soft_grasp_first_right_capture_world_z": (
             args.soft_grasp_first_right_capture_world_z
+        ),
+        "soft_grasp_second_translation_only": (
+            args.soft_grasp_second_translation_only
+        ),
+        "soft_grasp_final_right_translation_only": (
+            args.soft_grasp_final_right_translation_only
+        ),
+        "soft_grasp_final_right_rotate_about_tcp": (
+            args.soft_grasp_final_right_rotate_about_tcp
         ),
         "exact_finger_collision": args.exact_finger_collision,
         "grasp_summary": virtual_grasp.summary() if virtual_grasp is not None else None,
