@@ -2,6 +2,12 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$PROJECT_ROOT/.env"
+  set +a
+fi
 CONFIG="${DEMO_CONFIG:-$PROJECT_ROOT/configs/dhat_1p5_pure_friction.args}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$PROJECT_ROOT/outputs/episode_000000}"
 RUN_LABEL="${RUN_LABEL:-g3v2_13767f_dhat15_purefriction_staged_slow}"

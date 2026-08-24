@@ -20,15 +20,15 @@ git -C /path/to/genesis-world apply \
 ## 环境变量
 
 ```bash
-SIM1_ROOT=/path/to/SIM1
-EPISODE_ROOT=/path/to/episode_000000
-GENESIS_ENV=/path/to/genesis-ipc-env
-SIM1_PYTHON=/path/to/sim1-python
-GENESIS_ROOT=/path/to/genesis-world
+cp .env.example .env
+# 编辑.env后：
+./scripts/check_setup.sh
 ```
 
 也可以直接设置 `GENESIS_PYTHON`、`TRAJECTORY`、`SHIRT_OBJ`、`ROBOT_URDF`。
 `GENESIS_GPU`可选；未设置时由Genesis选择设备，不再写死本机GPU UUID。
+`scripts/run_demo.sh`、`scripts/check_setup.sh`会自动读取仓库根目录的`.env`。
+资产包目录和协作者操作见[资产交接](ASSETS_CN.md)。
 
 ## 资产准备
 

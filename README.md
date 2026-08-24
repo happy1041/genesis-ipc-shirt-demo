@@ -20,14 +20,14 @@ main robustness issue. See [current status](docs/STATUS_CN.md).
 ## Quick start
 
 This repository depends on external SIM1 assets and a patched Genesis checkout.
-Read [setup and architecture](docs/DEVELOPMENT_CN.md) first.
+The repository alone is not enough to run the demo. Obtain the asset bundle from
+the project owner, then read [asset handoff](docs/ASSETS_CN.md) and
+[setup and architecture](docs/DEVELOPMENT_CN.md).
 
 ```bash
-export SIM1_ROOT=/path/to/SIM1
-export EPISODE_ROOT=/path/to/episode_000000
-export GENESIS_ENV=/path/to/genesis-ipc-env
-export SIM1_PYTHON=/path/to/sim1-python
-
+cp .env.example .env
+# Edit .env with the local asset and Python environment paths.
+./scripts/check_setup.sh
 ./scripts/run_demo.sh
 ```
 
@@ -64,10 +64,13 @@ outputs/        generated results; ignored by Git
 - No project license has been selected yet; this repository is currently shared
   for research review, not as a redistribution grant.
 - The latest result is a single full run, not a multi-seed robustness claim.
+- Ubuntu/Linux with NVIDIA CUDA is the validated platform. Windows users should
+  use WSL2; native Windows is not currently supported.
 
 ## Documentation
 
 - [Current results and open questions](docs/STATUS_CN.md)
+- [Asset bundle and collaborator handoff](docs/ASSETS_CN.md)
 - [Setup, architecture and external dependencies](docs/DEVELOPMENT_CN.md)
 - [Evaluation protocol](docs/EVALUATION_CN.md)
 - [Short project history](docs/HISTORY_CN.md)
