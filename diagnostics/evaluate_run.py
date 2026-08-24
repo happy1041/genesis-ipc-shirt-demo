@@ -19,7 +19,9 @@ from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_SPEC = SCRIPT_DIR / "fold_evaluation_spec.json"
-CURRENT_SIM1_ROOT = Path(os.environ.get("SIM1_ROOT", "/home/happy1041/Workspace/SIM1"))
+CURRENT_SIM1_ROOT = (
+    Path(os.environ["SIM1_ROOT"]) if os.environ.get("SIM1_ROOT") else None
+)
 STATUS_PRIORITY = {
     "FAIL": 4,
     "INCOMPLETE": 3,
@@ -71,7 +73,11 @@ def resolve_recorded_file(path: Path | None) -> tuple[Path | None, Path | None]:
         return None, None
     recorded = path.expanduser()
     parts = recorded.parts
-    if "SIM1" in parts and CURRENT_SIM1_ROOT.exists():
+    if (
+        "SIM1" in parts
+        and CURRENT_SIM1_ROOT is not None
+        and CURRENT_SIM1_ROOT.exists()
+    ):
         marker = max(index for index, part in enumerate(parts) if part == "SIM1")
         candidate = CURRENT_SIM1_ROOT.joinpath(*parts[marker + 1 :])
         if candidate.is_file():

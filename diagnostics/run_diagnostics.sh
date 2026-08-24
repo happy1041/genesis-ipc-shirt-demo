@@ -3,7 +3,10 @@ set -euo pipefail
 
 DIAGNOSTICS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$DIAGNOSTICS_ROOT/.." && pwd)"
-PYTHON_BIN="${GENESIS_PYTHON:-/home/happy1041/work/genesis-ipc-env/bin/python}"
+: "${GENESIS_PYTHON:?Set GENESIS_PYTHON to the patched Genesis environment Python}"
+: "${GENESIS_ROOT:?Set GENESIS_ROOT to the patched Genesis checkout}"
+PYTHON_BIN="$GENESIS_PYTHON"
+OUTPUT_ROOT="${OUTPUT_ROOT:-$PROJECT_ROOT/outputs/episode_000000}"
 
 if [[ $# -lt 1 ]]; then
   echo "usage: $0 RUN_JSON [MANUAL_REVIEW_JSON]" >&2
@@ -22,4 +25,4 @@ if ! "$PYTHON_BIN" "$DIAGNOSTICS_ROOT/analyze_semantic_states.py" "$run_json"; t
 fi
 "$PYTHON_BIN" "$DIAGNOSTICS_ROOT/evaluate_run.py" "$run_json" "${manual_args[@]}"
 "$PYTHON_BIN" "$DIAGNOSTICS_ROOT/index_runs.py" \
-  "$PROJECT_ROOT/outputs/episode_000000"
+  "$OUTPUT_ROOT"

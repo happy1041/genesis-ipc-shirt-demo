@@ -17,8 +17,12 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_GENESIS_ROOT = Path("/home/happy1041/work/genesis-world")
-CURRENT_SIM1_ROOT = Path(os.environ.get("SIM1_ROOT", "/home/happy1041/Workspace/SIM1"))
+DEFAULT_GENESIS_ROOT = (
+    Path(os.environ["GENESIS_ROOT"]) if os.environ.get("GENESIS_ROOT") else None
+)
+CURRENT_SIM1_ROOT = (
+    Path(os.environ["SIM1_ROOT"]) if os.environ.get("SIM1_ROOT") else None
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -26,7 +30,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("run_json", type=Path)
     parser.add_argument("--genesis-root", type=Path, default=DEFAULT_GENESIS_ROOT)
     parser.add_argument("--output", type=Path)
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.genesis_root is None:
+        parser.error("set GENESIS_ROOT or pass --genesis-root")
+    return args
 
 
 def sha256(path: Path) -> str:
@@ -53,7 +60,11 @@ def relocate_sim1_path(path: Path | None) -> tuple[Path | None, str | None]:
         return path, None
     expanded = path.expanduser()
     parts = expanded.parts
-    if "SIM1" in parts and CURRENT_SIM1_ROOT.exists():
+    if (
+        "SIM1" in parts
+        and CURRENT_SIM1_ROOT is not None
+        and CURRENT_SIM1_ROOT.exists()
+    ):
         marker = max(index for index, part in enumerate(parts) if part == "SIM1")
         candidate = CURRENT_SIM1_ROOT.joinpath(*parts[marker + 1 :])
         # Prefer the user-designated canonical root even while the archived
@@ -166,7 +177,7 @@ def main() -> None:
         "trajectory": Path(metrics["trajectory"]) if metrics.get("trajectory") else None,
         "shirt_obj": Path(metrics["shirt_obj"]) if metrics.get("shirt_obj") else None,
         "urdf": urdf,
-        "runner": PROJECT_ROOT / "run_genesis_ipc.py",
+        "runner": PROJECT_ROOT / "src/run_genesis_ipc.py",
         "genesis_ipc_coupler": args.genesis_root
         / "genesis/engine/couplers/ipc_coupler/coupler.py",
     }
