@@ -23,11 +23,11 @@ index 4dae059..537279d 100644
 +    )
      from uipc.geometry import GeometrySlot, SimplicialComplex, SimplicialComplexSlot
      from uipc.gui import SceneGUI
- 
+
 @@ -89,6 +98,23 @@ def _animate_rigid_link(coupler_ref, link, env_idx, info):
      uipc.view(aim_transform_attr)[:] = coupler._abd_transforms_by_link[link][env_idx]
- 
- 
+
+
 +def _animate_fem_vertex_constraints(coupler_ref, entity, env_idx, info):
 +    """Update dynamic libuipc soft-position targets for one FEM geometry."""
 +    coupler = coupler_ref()
@@ -59,7 +59,7 @@ index 4dae059..537279d 100644
 @@ -151,6 +178,20 @@ class IPCCoupler(RBC):
          self._ipc_abd_contacts: dict["RigidEntity", ContactElement] = {}
          self._ipc_ground_contacts: dict["RigidEntity", ContactElement] = {}
- 
+
 +        # ==== Dynamic FEM Vertex Constraints ====
 +        self._fem_constraint_strength_rate = 100.0
 +        self._fem_constraint_candidates: dict["FEMEntity", np.ndarray] = {}
@@ -80,7 +80,7 @@ index 4dae059..537279d 100644
 @@ -178,6 +219,112 @@ class IPCCoupler(RBC):
      # Section 1: Configuration API
      # ============================================================
- 
+
 +    def set_fem_vertex_constraint_strength_rate(self, strength_rate: float) -> None:
 +        """Set libuipc FEM soft-position strength before the simulator is built."""
 +        if self._ipc_engine is not None:
@@ -193,7 +193,7 @@ index 4dae059..537279d 100644
 @@ -312,6 +459,18 @@ class IPCCoupler(RBC):
                      mesh = uipc.geometry.tetmesh(tensor_to_array(entity.init_positions), entity.elems)
                  uipc.geometry.label_surface(mesh)
- 
+
 +                # Register a disabled soft-position constraint on every FEM vertex.
 +                # Runtime callers may toggle individual vertices without rebuilding IPC.
 +                if self._ipc_spc is None:
@@ -211,7 +211,7 @@ index 4dae059..537279d 100644
                  if self.sim.n_envs > 0:
 @@ -362,7 +521,28 @@ class IPCCoupler(RBC):
                  meta_attrs.create("env_idx", str(env_idx))
- 
+
                  # ---- Create IPC object and geometry slot ----
 +                if entity not in self._fem_vertex_offsets:
 +                    self._fem_vertex_offsets[entity] = [-1] * self.sim._B
@@ -235,7 +235,7 @@ index 4dae059..537279d 100644
 +                self._ipc_animator.insert(
 +                    fem_obj, partial(_animate_fem_vertex_constraints, weakref.ref(self), entity, env_idx)
 +                )
- 
+
      def _add_rigid_geoms_to_ipc(self) -> None:
          """Add rigid geoms to the IPC scene as ABD objects, merging geoms by link."""
 @@ -660,30 +840,37 @@ class IPCCoupler(RBC):
@@ -260,7 +260,7 @@ index 4dae059..537279d 100644
              resistance = entity.material.contact_resistance or self.options.contact_resistance
 -            contact_infos.append((elem, friction, resistance, True))
 +            contact_infos.append((entity, elem, friction, resistance, True))
- 
+
          # Register entity-entity pairs (upper triangle including self-pairs)
 -        for i, (elem_i, friction_i, resistance_i, is_abd_i) in enumerate(contact_infos):
 -            for elem_j, friction_j, resistance_j, is_abd_j in contact_infos[i:]:
@@ -274,7 +274,7 @@ index 4dae059..537279d 100644
 +                    self.options.enable_rigid_rigid_contact and entity_i is not entity_j
 +                )
                  self._ipc_contact_tabular.insert(elem_i, elem_j, friction_ij, resistance_ij, enabled)
- 
+
          # Register per-plane ground contact pairs
          for entity, ground_elem in self._ipc_ground_contacts.items():
              plane_friction = entity.material.coup_friction
@@ -286,7 +286,7 @@ index 4dae059..537279d 100644
                  enabled = not is_abd or self.options.enable_rigid_ground_contact
 @@ -691,7 +878,7 @@ class IPCCoupler(RBC):
              self._ipc_contact_tabular.insert(self._ipc_no_collision_contact, ground_elem, 0.0, 0.0, False)
- 
+
          # Register no_collision pairs (always disabled)
 -        for elem, *_ in contact_infos:
 +        for _, elem, *_ in contact_infos:
@@ -296,7 +296,7 @@ index 4dae059..537279d 100644
 @@ -710,7 +897,23 @@ class IPCCoupler(RBC):
          assert gs.logger is not None
          assert self._ipc_world is not None
- 
+
 -        # No ABD bodies, feature not needed
 +        if self.fem_solver.is_active:
 +            self._fem_state_feature = cast(
@@ -321,7 +321,7 @@ index 4dae059..537279d 100644
 @@ -807,6 +1010,10 @@ class IPCCoupler(RBC):
          # Step 2: Pre-advance processing (per entity type)
          self._pre_advance_external_articulation()
- 
+
 +        # Apply scripted FEM attachments before the solve so IPC can resolve
 +        # table/self contacts from the imposed vertex motion in the same step.
 +        self._apply_fem_hard_bindings()
@@ -332,7 +332,7 @@ index 4dae059..537279d 100644
 @@ -825,6 +1032,38 @@ class IPCCoupler(RBC):
              ps.frame_tick()
              self._ipc_gui.update()
- 
+
 +    def _apply_fem_hard_bindings(self) -> None:
 +        """Overwrite hard-bound FEM vertex position and velocity in IPC state."""
 +        if self._fem_state_feature is None or self._fem_state_geom is None:
@@ -375,7 +375,7 @@ index f5bd077..9ded11d 100644
 @@ -1081,6 +1081,10 @@ class Scene(RBC):
          them opaquely; use this to drive a scene from an external controller without coupling the scene to it."""
          self._pre_step_callbacks.append(callback)
- 
+
 +    def register_post_visual_state_callback(self, callback):
 +        """Register a render-only callback after visual FK and before drawing."""
 +        self._visualizer.register_post_visual_state_callback(callback)
@@ -393,7 +393,7 @@ index ea82c2e..0ba1fe4 100644
      contact_constitution : str, optional
 -        Contact constitution model. Options: 'ipc', 'isometric'. Defaults to None (use libuipc default: 'ipc').
 +        Contact pipeline. Options: 'ipc' and 'al-ipc'. Defaults to None (use libuipc default: 'ipc').
- 
+
      Collision Detection Options
      ---------------------------
 @@ -316,7 +316,7 @@ class IPCCouplerOptions(BaseCouplerOptions):
@@ -402,7 +402,7 @@ index ea82c2e..0ba1fe4 100644
      contact_eps_velocity: PositiveFloat | None = None
 -    contact_constitution: Literal["ipc", "isometric"] | None = None
 +    contact_constitution: Literal["ipc", "al-ipc"] | None = None
- 
+
      # Collision detection options
      collision_detection_method: Literal["linear_bvh", "spatial_hash"] | None = None
 diff --git a/genesis/vis/visualizer.py b/genesis/vis/visualizer.py
@@ -415,17 +415,17 @@ index 0775504..33c9cc3 100644
          self._batch_renderer = None
 +        self._post_visual_state_callbacks = []
          self.viewer_lock = DummyViewerLock()
- 
+
          # Rasterizer context is shared by viewer and rasterizer
 @@ -255,8 +256,15 @@ class Visualizer(RBC):
          if self._scene.pbd_solver.is_active:
              self._scene.pbd_solver.update_render_fields()
- 
+
 +        for callback in tuple(self._post_visual_state_callbacks):
 +            callback()
 +
          self._t = self._scene._t
- 
+
 +    def register_post_visual_state_callback(self, callback):
 +        """Run a render-only callback after solver visual transforms are built."""
 +        self._post_visual_state_callbacks.append(callback)
