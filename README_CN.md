@@ -1,5 +1,10 @@
 # SIM1 短袖轨迹的 Genesis IPC 迁移
 
+> **2026-08-24 当前主线：** 13,767面、dHat=1.5 mm、slow solver、全程纯摩擦。
+> 使用 `./run_g3v2_13767_dhat15_pure_friction.sh` 复现；最新结论、限制和向上游
+> 咨询的问题见 [仓库交接文档](REPOSITORY_HANDOFF_CN.md)。本文后续“当前状态”
+> 包含历史调试记录，不能替代最新交接结论。
+
 > 当前入口：[文件与配置导航](FILE_SYSTEM_GUIDE_CN.md) ·
 > [项目总审计与路线图](PROJECT_AUDIT_AND_ROADMAP_CN.md) ·
 > [自动诊断说明](diagnostics/README_CN.md) ·

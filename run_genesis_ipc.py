@@ -1755,6 +1755,15 @@ def parse_args() -> argparse.Namespace:
             "TCP_LOCAL instead of the wrist/link origin."
         ),
     )
+    parser.add_argument(
+        "--first-left-staged-close",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Close left finger 17 over source frames 45--75, then finger 18 "
+            "over 75--105, creating a physical sweep-and-pinch pregrasp."
+        ),
+    )
     parser.add_argument("--exact-finger-collision", action="store_true")
     parser.add_argument("--prepin-first-grasp", action="store_true")
     parser.add_argument(
@@ -2470,7 +2479,6 @@ def main() -> None:
     frame_count = len(source_frames)
     if openness.shape != (frame_count, 2):
         raise ValueError(f"Expected openness shape ({frame_count}, 2), got {openness.shape}")
-
     physics_dt = args.trajectory_stride / (args.action_fps * args.substeps)
     effective_record_fps = max(1, round(args.record_fps / args.trajectory_stride))
     kinematic_grasp_demo = args.virtual_grasp and args.grasp_mode == "hard"
@@ -2607,6 +2615,23 @@ def main() -> None:
         for names in FINGER_JOINT_NAMES
     )
     all_finger_dof_indices = np.concatenate(finger_dof_indices)
+    if args.first_left_staged_close:
+        staged_source = source_frames.astype(np.float64)
+        first_progress = np.clip((staged_source - 45.0) / 30.0, 0.0, 1.0)
+        second_progress = np.clip((staged_source - 75.0) / 30.0, 0.0, 1.0)
+        first_progress = first_progress * first_progress * (3.0 - 2.0 * first_progress)
+        second_progress = second_progress * second_progress * (3.0 - 2.0 * second_progress)
+        staged_mask = source_frames <= 105
+        joint_q[staged_mask, finger_dof_indices[0][0]] = (
+            FINGER_URDF_UPPER * (1.0 - first_progress[staged_mask])
+        )
+        joint_q[staged_mask, finger_dof_indices[0][1]] = (
+            FINGER_URDF_UPPER * (1.0 - second_progress[staged_mask])
+        )
+        openness[staged_mask, 0] = np.mean(
+            joint_q[np.ix_(np.flatnonzero(staged_mask), finger_dof_indices[0])],
+            axis=1,
+        ) / FINGER_URDF_UPPER
     print(f"SIM1 source joint order: {SOURCE_JOINT_NAMES}")
     print(f"Genesis joint order: {genesis_joint_names}")
     print(f"Genesis <- source columns: {genesis_from_source.tolist()}")
@@ -4304,7 +4329,7 @@ def main() -> None:
             virtual_grasp.resume_after_prefix(
                 int(loaded_checkpoint_meta["source_frame"])
             )
-    else:
+    elif args.replay_states is None:
         for settle_frame in range(args.settle_frames):
             if args.drive_mode == "direct":
                 robot.set_qpos(joint_q[0], zero_velocity=True)

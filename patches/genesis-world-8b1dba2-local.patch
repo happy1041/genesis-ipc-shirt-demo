@@ -1,0 +1,436 @@
+diff --git a/genesis/engine/couplers/ipc_coupler/coupler.py b/genesis/engine/couplers/ipc_coupler/coupler.py
+index 4dae059..537279d 100644
+--- a/genesis/engine/couplers/ipc_coupler/coupler.py
++++ b/genesis/engine/couplers/ipc_coupler/coupler.py
+@@ -41,11 +41,20 @@ if TYPE_CHECKING or UIPC_AVAILABLE:
+         ElasticModuli,
+         ElasticModuli2D,
+         ExternalArticulationConstraint,
++        SoftPositionConstraint,
+         SoftTransformConstraint,
+         StableNeoHookean,
+         StrainLimitingBaraffWitkinShell,
+     )
+-    from uipc.core import Engine, World, Scene, AffineBodyStateAccessorFeature, ContactElement, SubsceneElement
++    from uipc.core import (
++        Engine,
++        World,
++        Scene,
++        AffineBodyStateAccessorFeature,
++        FiniteElementStateAccessorFeature,
++        ContactElement,
++        SubsceneElement,
++    )
+     from uipc.geometry import GeometrySlot, SimplicialComplex, SimplicialComplexSlot
+     from uipc.gui import SceneGUI
+ 
+@@ -89,6 +98,23 @@ def _animate_rigid_link(coupler_ref, link, env_idx, info):
+     uipc.view(aim_transform_attr)[:] = coupler._abd_transforms_by_link[link][env_idx]
+ 
+ 
++def _animate_fem_vertex_constraints(coupler_ref, entity, env_idx, info):
++    """Update dynamic libuipc soft-position targets for one FEM geometry."""
++    coupler = coupler_ref()
++    if coupler is None:
++        gs.raise_exception("IPCCoupler was garbage collected while animator callback is still active.")
++
++    geom_slots = info.geo_slots()
++    if not geom_slots:
++        return
++    geom = geom_slots[0].geometry()
++    is_constrained_attr = geom.vertices().find(uipc.builtin.is_constrained)
++    aim_position_attr = geom.vertices().find(uipc.builtin.aim_position)
++    assert is_constrained_attr and aim_position_attr
++    uipc.view(is_constrained_attr)[:] = coupler._fem_constraint_active[entity][env_idx]
++    uipc.view(aim_position_attr)[:] = coupler._fem_constraint_targets[entity][env_idx, ..., None]
++
++
+ class IPCCoupler(RBC):
+     """
+     Coupler class for handling Incremental Potential Contact (IPC) simulation coupling.
+@@ -140,6 +166,7 @@ class IPCCoupler(RBC):
+         self._ipc_abd: AffineBodyConstitution | None = None
+         self._ipc_stk: StableNeoHookean | None = None
+         self._ipc_stc: SoftTransformConstraint | None = None
++        self._ipc_spc: SoftPositionConstraint | None = None
+         self._ipc_nks: StrainLimitingBaraffWitkinShell | None = None
+         self._ipc_dsb: DiscreteShellBending | None = None
+         self._ipc_eac: ExternalArticulationConstraint | None = None
+@@ -151,6 +178,20 @@ class IPCCoupler(RBC):
+         self._ipc_abd_contacts: dict["RigidEntity", ContactElement] = {}
+         self._ipc_ground_contacts: dict["RigidEntity", ContactElement] = {}
+ 
++        # ==== Dynamic FEM Vertex Constraints ====
++        self._fem_constraint_strength_rate = 100.0
++        self._fem_constraint_candidates: dict["FEMEntity", np.ndarray] = {}
++        self._fem_constraint_active: dict["FEMEntity", np.ndarray] = {}
++        self._fem_constraint_targets: dict["FEMEntity", np.ndarray] = {}
++        self._fem_hard_active: dict["FEMEntity", np.ndarray] = {}
++        self._fem_hard_targets: dict["FEMEntity", np.ndarray] = {}
++        self._fem_hard_previous_targets: dict["FEMEntity", np.ndarray] = {}
++        self._fem_hard_previous_valid: dict["FEMEntity", np.ndarray] = {}
++        self._fem_vertex_offsets: dict["FEMEntity", list[int]] = {}
++        self._fem_vertex_count = 0
++        self._fem_state_feature: FiniteElementStateAccessorFeature | None = None
++        self._fem_state_geom: SimplicialComplex | None = None
++
+         # ==== Entity Coupling Configuration ====
+         self._coup_type_by_entity: dict["RigidEntity", COUPLING_TYPE] = {}
+         self._coup_links: dict["RigidEntity", set["RigidLink"]] = {}  # Used for "two_way_soft_constraint"
+@@ -178,6 +219,112 @@ class IPCCoupler(RBC):
+     # Section 1: Configuration API
+     # ============================================================
+ 
++    def set_fem_vertex_constraint_strength_rate(self, strength_rate: float) -> None:
++        """Set libuipc FEM soft-position strength before the simulator is built."""
++        if self._ipc_engine is not None:
++            gs.raise_exception("FEM vertex constraint strength must be set before scene.build().")
++        if strength_rate <= 0:
++            gs.raise_exception("FEM vertex constraint strength must be positive.")
++        self._fem_constraint_strength_rate = float(strength_rate)
++
++    def register_fem_vertex_constraint_candidates(self, entity: "FEMEntity", verts_idx_local) -> None:
++        """Pre-register vertices that may be animated, before IPC world initialization."""
++        if self._ipc_engine is not None:
++            gs.raise_exception("FEM vertex candidates must be registered before scene.build().")
++        indices = np.unique(np.asarray(verts_idx_local, dtype=np.int64).reshape(-1))
++        if len(indices) and (indices.min() < 0 or indices.max() >= entity.n_vertices):
++            gs.raise_exception(f"Vertex index outside [0, {entity.n_vertices - 1}].")
++        self._fem_constraint_candidates[entity] = indices
++
++    def set_fem_vertex_constraints(
++        self,
++        entity: "FEMEntity",
++        verts_idx_local,
++        target_positions,
++        env_idx: int = 0,
++        *,
++        clear_existing: bool = False,
++    ) -> None:
++        """Enable or update libuipc soft-position constraints on FEM vertices.
++
++        The constraint constitution is registered during ``build()``; this method
++        only updates animator-owned host buffers and is therefore safe to call
++        between simulation steps.
++        """
++        if entity not in self._fem_constraint_active:
++            gs.raise_exception("FEM entity is not registered with this IPC coupler.")
++        if not 0 <= env_idx < self.sim._B:
++            gs.raise_exception(f"env_idx must be within [0, {self.sim._B - 1}], got {env_idx}.")
++
++        indices = np.asarray(verts_idx_local, dtype=np.int64).reshape(-1)
++        targets = np.asarray(target_positions, dtype=np.float64)
++        if targets.shape != (len(indices), 3):
++            gs.raise_exception(f"target_positions must have shape ({len(indices)}, 3), got {targets.shape}.")
++        if len(indices) and (indices.min() < 0 or indices.max() >= entity.n_vertices):
++            gs.raise_exception(f"Vertex index outside [0, {entity.n_vertices - 1}].")
++
++        active = self._fem_constraint_active[entity][env_idx]
++        if clear_existing:
++            active.fill(0)
++        active[indices] = 1
++        self._fem_constraint_targets[entity][env_idx, indices] = targets
++
++    def clear_fem_vertex_constraints(
++        self, entity: "FEMEntity", verts_idx_local=None, env_idx: int = 0
++    ) -> None:
++        """Disable some or all dynamic libuipc FEM vertex constraints."""
++        if entity not in self._fem_constraint_active:
++            gs.raise_exception("FEM entity is not registered with this IPC coupler.")
++        active = self._fem_constraint_active[entity][env_idx]
++        if verts_idx_local is None:
++            active.fill(0)
++        else:
++            indices = np.asarray(verts_idx_local, dtype=np.int64).reshape(-1)
++            active[indices] = 0
++
++    def get_fem_vertex_constraint_mask(self, entity: "FEMEntity", env_idx: int = 0) -> np.ndarray:
++        """Return a copy of the currently enabled dynamic vertex mask."""
++        if entity not in self._fem_constraint_active:
++            gs.raise_exception("FEM entity is not registered with this IPC coupler.")
++        return self._fem_constraint_active[entity][env_idx].astype(bool, copy=True)
++
++    def set_fem_vertex_hard_bindings(
++        self, entity: "FEMEntity", verts_idx_local, target_positions, env_idx: int = 0
++    ) -> None:
++        """Hard-bind selected IPC FEM vertices to world-space target positions.
++
++        Unlike :class:`SoftPositionConstraint`, this overwrites the IPC state after
++        every solve.  It is intended for scripted grasps where a perfectly rigid
++        attachment is preferable to modelling finger/cloth contact.
++        """
++        if entity not in self._fem_hard_active:
++            gs.raise_exception("FEM entity is not registered with this IPC coupler.")
++        indices = np.asarray(verts_idx_local, dtype=np.int64).reshape(-1)
++        targets = np.asarray(target_positions, dtype=np.float64)
++        if targets.shape != (len(indices), 3):
++            gs.raise_exception(f"target_positions must have shape ({len(indices)}, 3), got {targets.shape}.")
++        if len(indices) and (indices.min() < 0 or indices.max() >= entity.n_vertices):
++            gs.raise_exception(f"Vertex index outside [0, {entity.n_vertices - 1}].")
++        active = self._fem_hard_active[entity][env_idx]
++        active[indices] = 1
++        self._fem_hard_targets[entity][env_idx, indices] = targets
++
++    def clear_fem_vertex_hard_bindings(
++        self, entity: "FEMEntity", verts_idx_local=None, env_idx: int = 0
++    ) -> None:
++        """Release selected (or all) state-level FEM hard bindings."""
++        if entity not in self._fem_hard_active:
++            gs.raise_exception("FEM entity is not registered with this IPC coupler.")
++        active = self._fem_hard_active[entity][env_idx]
++        previous_valid = self._fem_hard_previous_valid[entity][env_idx]
++        if verts_idx_local is None:
++            active.fill(0)
++            previous_valid.fill(0)
++        else:
++            indices = np.asarray(verts_idx_local, dtype=np.int64).reshape(-1)
++            active[indices] = 0
++            previous_valid[indices] = 0
++
+     def build(self) -> None:
+         """Build IPC system"""
+         # IPC coupler builds a single IPC scene shared across all envs, so it requires
+@@ -312,6 +459,18 @@ class IPCCoupler(RBC):
+                     mesh = uipc.geometry.tetmesh(tensor_to_array(entity.init_positions), entity.elems)
+                 uipc.geometry.label_surface(mesh)
+ 
++                # Register a disabled soft-position constraint on every FEM vertex.
++                # Runtime callers may toggle individual vertices without rebuilding IPC.
++                if self._ipc_spc is None:
++                    self._ipc_spc = SoftPositionConstraint()
++                    self._ipc_constitution_tabular.insert(self._ipc_spc)
++                self._ipc_spc.apply_to(mesh, strength_rate=self._fem_constraint_strength_rate)
++                candidates = self._fem_constraint_candidates.get(entity, np.empty(0, dtype=np.int64))
++                if len(candidates):
++                    # libuipc builds the constraint DOF set during world initialization.
++                    # Candidate vertices must therefore be active in the source geometry.
++                    uipc.view(mesh.vertices().find(uipc.builtin.is_constrained))[candidates] = 1
++
+                 # ---- Apply constitutions ----
+                 # Add to contact subscene (only for multi-environment)
+                 if self.sim.n_envs > 0:
+@@ -362,7 +521,28 @@ class IPCCoupler(RBC):
+                 meta_attrs.create("env_idx", str(env_idx))
+ 
+                 # ---- Create IPC object and geometry slot ----
++                if entity not in self._fem_vertex_offsets:
++                    self._fem_vertex_offsets[entity] = [-1] * self.sim._B
++                self._fem_vertex_offsets[entity][env_idx] = self._fem_vertex_count
++                self._fem_vertex_count += entity.n_vertices
+                 fem_obj.geometries().create(mesh)
++                if entity not in self._fem_constraint_active:
++                    n_vertices = len(entity.init_positions)
++                    init_positions = tensor_to_array(entity.init_positions).astype(np.float64, copy=True)
++                    self._fem_constraint_active[entity] = np.zeros((self.sim._B, n_vertices), dtype=np.int32)
++                    # Candidate flags on the source mesh only register constraint
++                    # DOFs during world initialization. Runtime starts released;
++                    # the first animator callback clears those source flags.
++                    self._fem_constraint_targets[entity] = np.repeat(
++                        init_positions[None], self.sim._B, axis=0
++                    )
++                    self._fem_hard_active[entity] = np.zeros((self.sim._B, n_vertices), dtype=np.int32)
++                    self._fem_hard_targets[entity] = np.repeat(init_positions[None], self.sim._B, axis=0)
++                    self._fem_hard_previous_targets[entity] = np.repeat(init_positions[None], self.sim._B, axis=0)
++                    self._fem_hard_previous_valid[entity] = np.zeros((self.sim._B, n_vertices), dtype=np.int32)
++                self._ipc_animator.insert(
++                    fem_obj, partial(_animate_fem_vertex_constraints, weakref.ref(self), entity, env_idx)
++                )
+ 
+     def _add_rigid_geoms_to_ipc(self) -> None:
+         """Add rigid geoms to the IPC scene as ABD objects, merging geoms by link."""
+@@ -660,30 +840,37 @@ class IPCCoupler(RBC):
+         ``contact_resistance``, ``options.contact_resistance`` is used as the per-entity fallback.
+         Ground pairs combine entity parameters with the plane entity's material friction.
+         """
+-        # Collect (ContactElement, friction_mu, resistance, is_abd) for all entity contact elements
+-        contact_infos: list[tuple[ContactElement, float, float, bool]] = []
++        # Keep the owning entity alongside every contact element.  A single
++        # articulated robot uses one ABD contact element for all of its coupled
++        # links; enabling that element's self-pair would therefore make adjacent
++        # fingers/palm links collide with one another.  We want inter-entity
++        # rigid contact (robot <-> table), not same-entity articulated self-contact.
++        contact_infos: list[tuple[object, ContactElement, float, float, bool]] = []
+         for entity, elem in (*self._ipc_cloth_contacts.items(), *self._ipc_fem_contacts.items()):
+             friction = entity.material.friction_mu
+             resistance = entity.material.contact_resistance or self.options.contact_resistance
+-            contact_infos.append((elem, friction, resistance, False))
++            contact_infos.append((entity, elem, friction, resistance, False))
+         for entity, elem in self._ipc_abd_contacts.items():
+             friction = entity.material.coup_friction
+             resistance = entity.material.contact_resistance or self.options.contact_resistance
+-            contact_infos.append((elem, friction, resistance, True))
++            contact_infos.append((entity, elem, friction, resistance, True))
+ 
+         # Register entity-entity pairs (upper triangle including self-pairs)
+-        for i, (elem_i, friction_i, resistance_i, is_abd_i) in enumerate(contact_infos):
+-            for elem_j, friction_j, resistance_j, is_abd_j in contact_infos[i:]:
++        for i, (entity_i, elem_i, friction_i, resistance_i, is_abd_i) in enumerate(contact_infos):
++            for entity_j, elem_j, friction_j, resistance_j, is_abd_j in contact_infos[i:]:
+                 friction_ij = geometric_mean(friction_i, friction_j)
+                 resistance_ij = harmonic_mean(resistance_i, resistance_j)
+-                enabled = not (is_abd_i and is_abd_j) or self.options.enable_rigid_rigid_contact
++                both_abd = is_abd_i and is_abd_j
++                enabled = not both_abd or (
++                    self.options.enable_rigid_rigid_contact and entity_i is not entity_j
++                )
+                 self._ipc_contact_tabular.insert(elem_i, elem_j, friction_ij, resistance_ij, enabled)
+ 
+         # Register per-plane ground contact pairs
+         for entity, ground_elem in self._ipc_ground_contacts.items():
+             plane_friction = entity.material.coup_friction
+             plane_resistance = entity.material.contact_resistance or self.options.contact_resistance
+-            for elem, friction, resistance, is_abd in contact_infos:
++            for _, elem, friction, resistance, is_abd in contact_infos:
+                 friction_ground = geometric_mean(friction, plane_friction)
+                 resistance_ground = harmonic_mean(resistance, plane_resistance)
+                 enabled = not is_abd or self.options.enable_rigid_ground_contact
+@@ -691,7 +878,7 @@ class IPCCoupler(RBC):
+             self._ipc_contact_tabular.insert(self._ipc_no_collision_contact, ground_elem, 0.0, 0.0, False)
+ 
+         # Register no_collision pairs (always disabled)
+-        for elem, *_ in contact_infos:
++        for _, elem, *_ in contact_infos:
+             self._ipc_contact_tabular.insert(self._ipc_no_collision_contact, elem, 0.0, 0.0, False)
+         self._ipc_contact_tabular.insert(
+             self._ipc_no_collision_contact, self._ipc_no_collision_contact, 0.0, 0.0, False
+@@ -710,7 +897,23 @@ class IPCCoupler(RBC):
+         assert gs.logger is not None
+         assert self._ipc_world is not None
+ 
+-        # No ABD bodies, feature not needed
++        if self.fem_solver.is_active:
++            self._fem_state_feature = cast(
++                FiniteElementStateAccessorFeature,
++                self._ipc_world.features().find(FiniteElementStateAccessorFeature),
++            )
++            if self._fem_state_feature is None:
++                gs.raise_exception("IPC finite-element state accessor is unavailable.")
++            if self._fem_state_feature.vertex_count() != self._fem_vertex_count:
++                gs.raise_exception(
++                    f"FEM vertex count mismatch: feature has {self._fem_state_feature.vertex_count()}, "
++                    f"expected {self._fem_vertex_count}."
++                )
++            self._fem_state_geom = self._fem_state_feature.create_geometry()
++            self._fem_state_geom.vertices().create(uipc.builtin.position, np.zeros(3, dtype=np.float64))
++            self._fem_state_geom.vertices().create(uipc.builtin.velocity, np.zeros(3, dtype=np.float64))
++
++        # No ABD bodies, ABD feature not needed
+         abd_links = list(self._abd_slots_by_link.keys())
+         n_abd_links = len(abd_links)
+         if not abd_links:
+@@ -807,6 +1010,10 @@ class IPCCoupler(RBC):
+         # Step 2: Pre-advance processing (per entity type)
+         self._pre_advance_external_articulation()
+ 
++        # Apply scripted FEM attachments before the solve so IPC can resolve
++        # table/self contacts from the imposed vertex motion in the same step.
++        self._apply_fem_hard_bindings()
++
+         # Step 3: IPC advance + retrieve (common)
+         self._ipc_world.advance()
+         self._ipc_world.retrieve()
+@@ -825,6 +1032,38 @@ class IPCCoupler(RBC):
+             ps.frame_tick()
+             self._ipc_gui.update()
+ 
++    def _apply_fem_hard_bindings(self) -> None:
++        """Overwrite hard-bound FEM vertex position and velocity in IPC state."""
++        if self._fem_state_feature is None or self._fem_state_geom is None:
++            return
++        if not any(np.any(active) for active in self._fem_hard_active.values()):
++            return
++
++        self._fem_state_feature.copy_to(self._fem_state_geom)
++        position_attr = self._fem_state_geom.vertices().find(uipc.builtin.position)
++        velocity_attr = self._fem_state_geom.vertices().find(uipc.builtin.velocity)
++        if position_attr is None or velocity_attr is None:
++            gs.raise_exception("IPC FEM state geometry has no position/velocity attribute.")
++        positions = position_attr.view().reshape(-1, 3)
++        velocities = velocity_attr.view().reshape(-1, 3)
++
++        for entity, active_by_env in self._fem_hard_active.items():
++            for env_idx, active in enumerate(active_by_env):
++                local_indices = np.flatnonzero(active)
++                if not len(local_indices):
++                    continue
++                global_indices = self._fem_vertex_offsets[entity][env_idx] + local_indices
++                targets = self._fem_hard_targets[entity][env_idx, local_indices]
++                valid = self._fem_hard_previous_valid[entity][env_idx, local_indices].astype(bool)
++                previous = self._fem_hard_previous_targets[entity][env_idx, local_indices]
++                velocities[global_indices] = 0.0
++                velocities[global_indices[valid]] = (targets[valid] - previous[valid]) / self.sim.dt
++                positions[global_indices] = targets
++                self._fem_hard_previous_targets[entity][env_idx, local_indices] = targets
++                self._fem_hard_previous_valid[entity][env_idx, local_indices] = 1
++
++        self._fem_state_feature.copy_from(self._fem_state_geom)
++
+     def couple_grad(self, f):
+         """Gradient computation for coupling"""
+         # IPC doesn't support gradients yet
+diff --git a/genesis/engine/scene.py b/genesis/engine/scene.py
+index f5bd077..9ded11d 100644
+--- a/genesis/engine/scene.py
++++ b/genesis/engine/scene.py
+@@ -1081,6 +1081,10 @@ class Scene(RBC):
+         them opaquely; use this to drive a scene from an external controller without coupling the scene to it."""
+         self._pre_step_callbacks.append(callback)
+ 
++    def register_post_visual_state_callback(self, callback):
++        """Register a render-only callback after visual FK and before drawing."""
++        self._visualizer.register_post_visual_state_callback(callback)
++
+     @gs.assert_built
+     def step(self, update_visualizer=True, refresh_visualizer=True):
+         """
+diff --git a/genesis/options/solvers.py b/genesis/options/solvers.py
+index ea82c2e..0ba1fe4 100644
+--- a/genesis/options/solvers.py
++++ b/genesis/options/solvers.py
+@@ -242,7 +242,7 @@ class IPCCouplerOptions(BaseCouplerOptions):
+     contact_eps_velocity : float, optional
+         Epsilon velocity for contact. Defaults to None (use libuipc default: 0.01).
+     contact_constitution : str, optional
+-        Contact constitution model. Options: 'ipc', 'isometric'. Defaults to None (use libuipc default: 'ipc').
++        Contact pipeline. Options: 'ipc' and 'al-ipc'. Defaults to None (use libuipc default: 'ipc').
+ 
+     Collision Detection Options
+     ---------------------------
+@@ -316,7 +316,7 @@ class IPCCouplerOptions(BaseCouplerOptions):
+     contact_friction_enable: StrictBool | None = None
+     contact_resistance: PositiveFloat = 1e9
+     contact_eps_velocity: PositiveFloat | None = None
+-    contact_constitution: Literal["ipc", "isometric"] | None = None
++    contact_constitution: Literal["ipc", "al-ipc"] | None = None
+ 
+     # Collision detection options
+     collision_detection_method: Literal["linear_bvh", "spatial_hash"] | None = None
+diff --git a/genesis/vis/visualizer.py b/genesis/vis/visualizer.py
+index 0775504..33c9cc3 100644
+--- a/genesis/vis/visualizer.py
++++ b/genesis/vis/visualizer.py
+@@ -38,6 +38,7 @@ class Visualizer(RBC):
+         self._rasterizer = None
+         self._raytracer = None
+         self._batch_renderer = None
++        self._post_visual_state_callbacks = []
+         self.viewer_lock = DummyViewerLock()
+ 
+         # Rasterizer context is shared by viewer and rasterizer
+@@ -255,8 +256,15 @@ class Visualizer(RBC):
+         if self._scene.pbd_solver.is_active:
+             self._scene.pbd_solver.update_render_fields()
+ 
++        for callback in tuple(self._post_visual_state_callbacks):
++            callback()
++
+         self._t = self._scene._t
+ 
++    def register_post_visual_state_callback(self, callback):
++        """Run a render-only callback after solver visual transforms are built."""
++        self._post_visual_state_callbacks.append(callback)
++
+     def colorize_seg_idxc_arr(self, seg_idxc_arr):
+         if self._batch_renderer is not None:
+             return self._batch_renderer.colorize_seg_idxc_arr(seg_idxc_arr)
+
