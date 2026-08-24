@@ -60,6 +60,9 @@ outputs/        generated results; ignored by Git
 - Clone is not self-contained: SIM1 trajectory, shirt, and Acone visual meshes
   are external and their redistribution permission is not assumed.
 - Apply `patches/genesis-world-8b1dba2-local.patch` to Genesis commit `8b1dba2`.
+  This is a cumulative development snapshot, not yet a minimal patch; it still
+  contains disabled soft-virtual-grasp experiment support. See
+  [patch notes](patches/README_CN.md).
 - `dHat=1.0 mm` is not stable in the current high-resolution pure-friction run.
 - No project license has been selected yet; this repository is currently shared
   for research review, not as a redistribution grant.
@@ -71,6 +74,7 @@ outputs/        generated results; ignored by Git
 
 - [Current results and open questions](docs/STATUS_CN.md)
 - [Asset bundle and collaborator handoff](docs/ASSETS_CN.md)
+- [Genesis local patch scope and history](patches/README_CN.md)
 - [Setup, architecture and external dependencies](docs/DEVELOPMENT_CN.md)
 - [Evaluation protocol](docs/EVALUATION_CN.md)
 - [Short project history](docs/HISTORY_CN.md)

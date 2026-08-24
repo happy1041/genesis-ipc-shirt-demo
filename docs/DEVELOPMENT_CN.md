@@ -13,9 +13,15 @@
 
 ```bash
 git -C /path/to/genesis-world checkout 8b1dba2
+git -C /path/to/genesis-world apply --check \
+  /path/to/this-repo/patches/genesis-world-8b1dba2-local.patch
 git -C /path/to/genesis-world apply \
   /path/to/this-repo/patches/genesis-world-8b1dba2-local.patch
 ```
+
+该补丁是2026-08-16至08-18调试期间的累计工作区差异，并非已经最小化的单功能
+修复。当前纯摩擦主线关闭了virtual grasp，但补丁仍包含早期soft virtual grasp
+实验代码。完整范围、限制和后续拆分计划见[补丁说明](../patches/README_CN.md)。
 
 ## 环境变量
 
