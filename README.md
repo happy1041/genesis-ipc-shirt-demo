@@ -1,78 +1,32 @@
-# Genesis IPC Shirt-Folding Demo
+# Genesis＋libuIPC 叠衣 demo：组内代码包
 
-Dual-arm replay of a three-fold short-shirt task using Genesis FEM cloth and
-libuIPC contact. The current public baseline uses **physical gripper contact and
-friction only**; virtual cloth attachments are disabled.
+本仓库整理了 Scene527 双臂叠衣实验中调用 Genesis/libuIPC、设置布料与接触参数、播放机器人轨迹所需的主要代码。它是**代码审阅包**；布料网格、双 X5 机器人模型、SIM1 原始资产及物理 checkpoint 需要另行获取。Isaac 只读取保存的状态做离线渲染，不负责本包的布料物理。
 
-## Current baseline
+## 从哪里看
 
-- 13,767-face shirt mesh exported from SIM1
-- shell radius `0.1 mm`, `dHat=1.5 mm`
-- 2 substeps, full/slow IPC solver
-- `E=20 kPa`, bending `10`, density `800 kg/m³`
-- cloth/table/robot friction `1 / 1 / 2`
-- physics is saved first; video is rendered offline from replay states
+- `src/run_genesis_ipc.py`：Genesis 场景、libuIPC 接触、机器人轨迹执行、checkpoint/replay 与诊断。
+- `tools/contact_dump.py`：可选的原始 IPC 接触记录辅助模块；主程序的该项诊断只在指定 `--contact-dump-frames` 时调用。
+- `scripts/`：运行和环境检查入口；`configs/dhat_1p5_pure_friction.args` 是历史参数基线，当前 55k 成片的参数摘要见 [`docs/CURRENT_55K_DEMO_CN.md`](docs/CURRENT_55K_DEMO_CN.md)。
+- `patches/genesis-world-8b1dba2-current.patch`：官方 `8b1dba2` 基线到当前运行源码的完整补丁，涉及 7 个文件；应用后逐文件字节匹配已验证。
+- `data/scene527_55k_73s_joint_commands.npz`：当前约 1:13 分段版的累计机器人命令，见 [`data/README.md`](data/README.md)。
 
-Latest verified run: 980/980 frames, 18.5 minutes on an RTX 5070 Ti. All three
-folds complete, but the final right grasp slides about 90 mm and remains the
-main robustness issue. See [current status](docs/STATUS_CN.md).
+这里的“代码”主要是 `src/` 与 `tools/assets/` 下的 Python 文件，以及 `scripts/` 下负责启动、准备资产和检查环境的 Shell 脚本。`configs/*.args` 是参数文本；`requirements/` 是依赖版本记录；`patches/*.patch` 是对外部 Genesis 源码的修改，不是独立程序。`data/*.npz` 是逐帧机器人命令数据，不是代码，也不包含衣服的运动状态。
 
-## Quick start
+## 如何启动基础入口
 
-This repository depends on external SIM1 assets and a patched Genesis checkout.
-The repository alone is not enough to run the demo. Obtain the asset bundle from
-the project owner, then read [asset handoff](docs/ASSETS_CN.md) and
-[setup and architecture](docs/DEVELOPMENT_CN.md).
+在 Linux/NVIDIA GPU 环境中使用与 `pyuipc==0.0.25` 兼容的 Genesis；补丁的基线与安装说明在 [`docs/DEVELOPMENT_CN.md`](docs/DEVELOPMENT_CN.md)。
 
 ```bash
 cp .env.example .env
-# Edit .env with the local asset and Python environment paths.
+# 编辑 .env 中的 SIM1、Genesis、Python、轨迹及外部资产路径
 ./scripts/check_setup.sh
-./scripts/run_demo.sh
-```
-
-Run only physics or only render an existing state trajectory:
-
-```bash
 ./scripts/run_demo.sh --physics-only
-./scripts/run_demo.sh --render-only
 ```
 
-The validated CLI preset is stored in
-[`configs/dhat_1p5_pure_friction.args`](configs/dhat_1p5_pure_friction.args).
-Append CLI arguments to override it for an experiment.
+上述默认入口保留了旧 13k 参数与资产约定。要研究随附的 55k 命令轨迹，需将 `TRAJECTORY` 指向 `data/scene527_55k_73s_joint_commands.npz`，并提供匹配的 **55,068 面衣服**与**双 X5 URDF/碰撞网格**；具体数值覆盖见 [`docs/CURRENT_55K_DEMO_CN.md`](docs/CURRENT_55K_DEMO_CN.md)。不要将不同拓扑的抓点编号或 checkpoint 混用。
 
-## Repository layout
+新补丁包含 IPC 状态访问、视觉同步、布料自摩擦、指定接触对摩擦，以及前向仿真的 GPU 状态历史管理修改。已从官方 `8b1dba2` 提交的原始文件应用补丁，确认全部 7 个结果文件与当前运行源码逐字节相同；`check_setup.sh` 同步检查这些文件的哈希。补丁验证不包含新 GPU 仿真。七段成片通过 checkpoint 接续，单独的机器人命令不会重建已折好的衣服；复现仍需外部资产和对应阶段状态。
 
-```text
-src/            core simulator
-scripts/        public run and asset-preparation entry points
-configs/        versioned CLI presets
-diagnostics/    run evaluation and provenance tools
-tools/assets/   asset conversion and collision-proxy generation
-docs/           status, development and evaluation documentation
-patches/        required Genesis patch
-outputs/        generated results; ignored by Git
-```
+## 提交范围
 
-## Important limitations
-
-- Clone is not self-contained: SIM1 trajectory, shirt, and Acone visual meshes
-  are external and their redistribution permission is not assumed.
-- Apply `patches/genesis-world-8b1dba2-local.patch` to Genesis commit `8b1dba2`.
-  It is a cumulative development snapshot and still contains disabled
-  soft-virtual-grasp experiment support; the current baseline uses friction only.
-- `dHat=1.0 mm` is not stable in the current high-resolution pure-friction run.
-- No project license has been selected yet; this repository is currently shared
-  for research review, not as a redistribution grant.
-- The latest result is a single full run, not a multi-seed robustness claim.
-- Ubuntu/Linux with NVIDIA CUDA is the validated platform. Windows users should
-  use WSL2; native Windows is not currently supported.
-
-## Documentation
-
-- [Current results and open questions](docs/STATUS_CN.md)
-- [Asset bundle and collaborator handoff](docs/ASSETS_CN.md)
-- [Setup, architecture and external dependencies](docs/DEVELOPMENT_CN.md)
-- [Evaluation protocol](docs/EVALUATION_CN.md)
-- [Short project history](docs/HISTORY_CN.md)
+[`docs/SOURCE_FILES.txt`](docs/SOURCE_FILES.txt)记录选入的源文件；[来源与验收范围](docs/PROVENANCE_CN.md)记录版本和哈希。本次代码包不含`trajectory_workbench`，随附NPZ供主程序播放。`outputs/`、视频、checkpoint、虚拟环境和资产包均未纳入。原仓库的`diagnostics/`与历史结果说明保留，当前55k条件以`docs/CURRENT_55K_DEMO_CN.md`为准。研究共享声明见[`NOTICE.md`](NOTICE.md)。

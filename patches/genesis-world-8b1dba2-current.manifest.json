@@ -1,0 +1,31 @@
+{
+  "schema": "genesis-source-patch-v1",
+  "created_date": "2026-10-05",
+  "upstream_url": "https://github.com/Genesis-Embodied-AI/Genesis.git",
+  "base_commit": "8b1dba2fc99d0eff9ab7cc4b4bbc87685688fa44",
+  "patch": "genesis-world-8b1dba2-current.patch",
+  "patch_sha256": "355102f4710081590a080fd0f94bbc64cab4b1adf7324439df70a5a8d77793ae",
+  "generation": "git diff --binary from official commit index to current local Genesis source tree",
+  "tracked_changed_files": 7,
+  "insertions": 298,
+  "deletions": 25,
+  "result_sha256": {
+    "genesis/engine/couplers/ipc_coupler/coupler.py": "c403be43580383ccd018df1386984ea5ebb2683511431711747856407012065b",
+    "genesis/engine/entities/fem_entity.py": "3f130b06605f3f2d611733ac0f228349ee56b37139ad4653e0195833adaec64a",
+    "genesis/engine/materials/FEM/cloth.py": "091ff861144cb6ba509f9620bae7a549d726274dbc66c1d073217dd9380541ee",
+    "genesis/engine/scene.py": "493f948fe9283be97fc13ec70622c5be53d47cf4e221c43482229ecb306dc759",
+    "genesis/engine/solvers/fem_solver.py": "6419127645bd414201bd0c9eae12955fe2148ddf6cce0778f335f848a8fb4915",
+    "genesis/options/solvers.py": "b78a3bc31e6ab770d3e02dffb1b8e105f02aca4b2fef05a716775d618d35402e",
+    "genesis/vis/visualizer.py": "2ace526f3ccb499557a77f381b17aff18cbf842e977eddc207e38c8180028a54"
+  },
+  "verification": {
+    "official_base_fetched": true,
+    "apply_check": true,
+    "actual_apply": true,
+    "all_result_files_byte_equal_to_current_source": true,
+    "reverse_apply_check": true,
+    "python_compile": true,
+    "new_gpu_simulation": false
+  },
+  "application_note": "Apply once to clean base commit; do not stack over the old cumulative patch."
+}

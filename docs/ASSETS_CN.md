@@ -6,6 +6,9 @@
 再分发许可尚未确认，因此不要直接提交到Git历史；运行视频、checkpoint和
 `outputs/`也不应提交。
 
+资产包不包含Python、CUDA或Genesis运行环境；环境迁移见
+[开发与复现](DEVELOPMENT_CN.md)。
+
 ## 发给协作者的资产包
 
 建议在仓库外制作一个 `shirt-demo-assets` 目录：

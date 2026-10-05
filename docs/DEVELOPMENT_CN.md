@@ -14,14 +14,34 @@
 ```bash
 git -C /path/to/genesis-world checkout 8b1dba2
 git -C /path/to/genesis-world apply --check \
-  /path/to/this-repo/patches/genesis-world-8b1dba2-local.patch
+  /path/to/this-repo/patches/genesis-world-8b1dba2-current.patch
 git -C /path/to/genesis-world apply \
-  /path/to/this-repo/patches/genesis-world-8b1dba2-local.patch
+  /path/to/this-repo/patches/genesis-world-8b1dba2-current.patch
 ```
 
-该补丁是2026-08-16至08-18调试期间的累计工作区差异，并非最小补丁。当前主线
-使用纯摩擦并关闭virtual grasp，但补丁仍保留早期soft virtual grasp实验代码；
-后续拆分前必须重新执行短程GPU测试和完整三折回归。
+该补丁于2026-10-05直接比较官方完整提交
+`8b1dba2fc99d0eff9ab7cc4b4bbc87685688fa44`与本机当前Genesis源码生成，覆盖7个修改文件。
+包括IPC FEM状态访问、视觉同步、布料自摩擦与指定接触对摩擦，以及无梯度前向仿真
+避免积累GPU历史状态的改动；仍保留默认禁用的早期virtual grasp支持。
+这是相对官方基线的累计补丁，不能叠加在已经打过旧补丁的源码上。
+已验证`git apply --check`、实际应用后的7个文件逐字节一致、反向检查和Python编译。
+证据见`patches/genesis-world-8b1dba2-current.manifest.json`。本次未执行新GPU仿真。
+
+## 依赖快照与GPU兼容
+
+成功环境的Python包版本记录在
+`requirements/verified-linux-py312-rtx50-cu130-20260827.txt`。该文件是Linux、
+Python 3.12、RTX 50/CUDA 13环境快照，不是所有GPU通用的requirements；详见
+[依赖说明](../requirements/README_CN.md)。不同GPU应选择兼容的Torch/CUDA wheel，
+并重新进行GPU验证，不能只以`pip install`成功作为迁移完成。
+
+推荐迁移验收顺序：
+
+1. `./scripts/check_setup.sh`；
+2. 20帧无录制GPU smoke；
+3. 完整980帧`--physics-only`，检查无OOM、NaN或TOI；
+4. `--render-only`生成四视角；
+5. 按抓取事件、关键帧和指标容差比较，不要求跨GPU的NPZ逐字节一致。
 
 ## 环境变量
 

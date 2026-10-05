@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -181,6 +182,23 @@ def table_parallel_quat(quat) -> np.ndarray:
     return matrix_to_quat_wxyz(leveled_rot)
 
 
+def table_edge_insert_quat(quat) -> np.ndarray:
+    """Point the TCP down while keeping the jaw closing axis horizontal."""
+    raw_rot = quat_wxyz_to_matrix(quat)
+    closing_y = raw_rot[:, 1].copy()
+    closing_y[2] = 0.0
+    norm = np.linalg.norm(closing_y)
+    if norm < 1.0e-8:
+        closing_y = np.array([0.0, 1.0, 0.0])
+    else:
+        closing_y /= norm
+    length_x = np.array([0.0, 0.0, -1.0])
+    local_z = np.cross(length_x, closing_y)
+    local_z /= np.linalg.norm(local_z)
+    inserted_rot = np.column_stack((length_x, closing_y, local_z))
+    return matrix_to_quat_wxyz(inserted_rot)
+
+
 def rotate_quat_about_world_x(quat, angle_rad: float) -> np.ndarray:
     """Rotate a TCP pose only inside the robot-front (world Y-Z) plane."""
     c = float(np.cos(angle_rad))
@@ -195,6 +213,23 @@ def rotate_quat_about_world_x(quat, angle_rad: float) -> np.ndarray:
     )
     return matrix_to_quat_wxyz(
         world_x_rotation @ quat_wxyz_to_matrix(quat)
+    )
+
+
+def rotate_quat_about_world_y(quat, angle_rad: float) -> np.ndarray:
+    """Rotate a TCP pose about the shirt-length/world-Y fold axis."""
+    c = float(np.cos(angle_rad))
+    s = float(np.sin(angle_rad))
+    world_y_rotation = np.array(
+        [
+            [c, 0.0, s],
+            [0.0, 1.0, 0.0],
+            [-s, 0.0, c],
+        ],
+        dtype=np.float64,
+    )
+    return matrix_to_quat_wxyz(
+        world_y_rotation @ quat_wxyz_to_matrix(quat)
     )
 
 
@@ -652,12 +687,23 @@ class ContactGraspDiagnostics:
                     not hand["events"]
                     and hand["expected_ids"] is not None
                     and len(hand["expected_ids"])
+                    and np.all(hand["expected_ids"] >= 0)
+                    and np.all(hand["expected_ids"] < len(cloth_pos))
                 ):
                     expected = cloth_pos[hand["expected_ids"]]
                     expected_center = expected.mean(axis=0)
                     expected_text = (
                         f" expected_center={expected_center.tolist()}"
                         f" expected_tcp_distance={float(np.linalg.norm(expected_center - tcp)):.4f}m"
+                    )
+                elif (
+                    not hand["events"]
+                    and hand["expected_ids"] is not None
+                    and len(hand["expected_ids"])
+                ):
+                    expected_text = (
+                        " expected_ids_skipped_for_topology="
+                        f"{len(cloth_pos)}_vertices"
                     )
                 print(
                     f"contact_probe frame={source_frame} hand={hand['name']} points={len(ids)} "
@@ -847,6 +893,16 @@ class IPCProxyVisualizer:
                 edges = edges[np.linspace(0, len(edges) - 1, 400, dtype=np.int64)]
             self.local_edges.append(edges)
             self.current_transforms.append(initial_transform)
+        if self.output_dir is not None:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+            proxy_arrays = {
+                "names": np.asarray([link.name for link in self.links], dtype=str),
+                "geometry_source": np.asarray("Genesis collision geoms; IPC fixed-link merge; link-local coordinates"),
+            }
+            for index, mesh in enumerate(self.local_meshes):
+                proxy_arrays[f"verts_{index}"] = np.asarray(mesh.vertices, dtype=np.float64)
+                proxy_arrays[f"faces_{index}"] = np.asarray(mesh.faces, dtype=np.int64)
+            np.savez_compressed(self.output_dir / "ipc_proxy_meshes.npz", **proxy_arrays)
         print(
             "ipc_proxy_visualization initialized "
             f"links={[link.name for link in self.links]} color=orange"
@@ -1172,7 +1228,7 @@ class KeyframeVisualDiagnostics:
         FIRST_FOLD_FRAMES + SECOND_FOLD_FRAMES + THIRD_FOLD_FRAMES
     )
 
-    def __init__(self, scene, output_dir: Path | None):
+    def __init__(self, scene, output_dir: Path | None, *, debug: bool = False):
         self.output_dir = None if output_dir is None else output_dir.expanduser().resolve()
         self.camera = None
         self.images: dict[int, dict[str, Path]] = {}
@@ -1184,6 +1240,7 @@ class KeyframeVisualDiagnostics:
                 lookat=(0.68, 0.0, 0.82),
                 fov=42,
                 GUI=False,
+                debug=debug,
             )
 
     @staticmethod
@@ -1550,9 +1607,20 @@ def summarize_third_fold_motion(debug_dir: Path | None) -> dict | None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
+    parser.add_argument('--no-shadows', action='store_true', help='Disable Genesis viewer and replay rasterizer shadows; physics unchanged')
     parser.add_argument("--sim1-root", type=Path, required=True)
     parser.add_argument("--trajectory", type=Path, required=True)
     parser.add_argument("--shirt-obj", type=Path, required=True)
+    parser.add_argument("--expected-cloth-vertices", type=int, default=None,
+                        help="Optional topology guard checked before scene build/IPC stepping")
+    parser.add_argument("--expected-cloth-faces", type=int, default=None,
+                        help="Optional triangle-count guard for refined cloth assets")
+    parser.add_argument('--replay-closeup-hand',choices=('left','right'),default='right',
+                        help='Saved-replay closeup camera only; does not change physics')
+    parser.add_argument('--replay-overview-left-grasp',action='store_true',
+                        help='Replay only: replace overview panel with zoomed left grasp from +Y side; keep right closeup')
+    parser.add_argument('--replay-six-view',action='store_true',
+                        help='Replay only: overview/overhead/low/left/right/base in a3x2 video')
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--frames", type=int, default=0, help="0 means the full trajectory")
     parser.add_argument(
@@ -1573,6 +1641,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--settle-frames", type=int, default=120)
     parser.add_argument("--initial-shirt-x", type=float, default=0.660)
+    parser.add_argument(
+        "--workspace-world-x-shift",
+        type=float,
+        default=0.0,
+        help=(
+            "Translate both the initial shirt and every left/right TCP target "
+            "by the same world-X distance before continuous IK."
+        ),
+    )
     parser.add_argument("--initial-shirt-y", type=float, default=0.0)
     parser.add_argument("--initial-shirt-z", type=float, default=0.93)
     parser.add_argument("--contact-d-hat", type=float, default=0.0002)
@@ -1686,8 +1763,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cloth-thickness", type=float, default=0.0002)
     parser.add_argument("--cloth-bending", type=float, default=10.0)
     parser.add_argument("--cloth-friction", type=float, default=0.5)
+    parser.add_argument(
+        "--cloth-self-friction",
+        type=float,
+        default=None,
+        help=(
+            "Optional friction coefficient for the cloth-self contact pair only. "
+            "When omitted, cloth-friction is used for cloth self, table and robot contacts."
+        ),
+    )
     parser.add_argument("--robot-friction", type=float, default=1.2)
     parser.add_argument("--table-friction", type=float, default=0.3)
+    parser.add_argument('--cloth-table-pair-friction',type=float,default=None,help='Override only the cloth/table entity contact pair, bypassing geometric mean')
     parser.add_argument(
         "--fast-preview",
         action=argparse.BooleanOptionalAction,
@@ -1788,6 +1875,15 @@ def parse_args() -> argparse.Namespace:
             "Additional right-hand close advance in metres. This is useful because "
             "the recorded right first-grasp target remains slightly more open than "
             "the left target; the final command is still clamped to the URDF limit."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-right-overclose-extra",
+        type=float,
+        default=0.0,
+        help=(
+            "Additional right-hand overclose applied only during source frames "
+            "400--585, so a frame-339 checkpoint remains reusable."
         ),
     )
     parser.add_argument(
@@ -1921,6 +2017,125 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--second-fold-left-grasp-world-x",
+        type=float,
+        default=0.0,
+        help="World-X offset for the upper/robot-left second-fold corner grasp.",
+    )
+    parser.add_argument(
+        "--second-fold-left-grasp-world-y",
+        type=float,
+        default=0.0,
+        help="World-Y offset for the upper/robot-left second-fold corner grasp.",
+    )
+    parser.add_argument(
+        "--second-fold-right-grasp-world-x",
+        type=float,
+        default=0.0,
+        help="World-X offset for the lower/robot-right second-fold corner grasp.",
+    )
+    parser.add_argument(
+        "--second-fold-right-grasp-world-y",
+        type=float,
+        default=0.0,
+        help="World-Y offset for the lower/robot-right second-fold corner grasp.",
+    )
+    parser.add_argument(
+        "--second-fold-travel-scale",
+        type=float,
+        default=1.0,
+        help=(
+            "Scale the second-fold XY displacement from the shifted corner-grasp "
+            "pose to the existing corrected endpoint. One preserves the old path."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-causal-ik",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Use one forward-only Cartesian IK pass for the material-plan "
+            "second fold, seeded explicitly from source frame 339."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-terminal-center-inset",
+        type=float,
+        default=0.0,
+        help=(
+            "Additional world-X inset toward the centerline, introduced "
+            "causally over frames 506--583 after the grasp/peel phases."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-terminal-center-inset-start",
+        type=int,
+        default=505,
+        help=(
+            "Source frame at which the terminal center inset begins its "
+            "smooth ramp."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-peel-lift",
+        type=float,
+        default=0.0,
+        help=(
+            "Lift the two corner grasps vertically over frames 439--465 before "
+            "the page-turn portion of the second fold."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-flip-deg",
+        type=float,
+        default=0.0,
+        help=(
+            "Signed wrist rotation about world Y during frames 465--570. Negative "
+            "angles turn the current high-X panel upward before placing it inward."
+        ),
+    )
+    parser.add_argument(
+        "--debug-second-fold-material-markers",
+        action="store_true",
+        help=(
+            "Render Genesis-native markers for the two second-fold material "
+            "corners and their seam-safe inward grasp patches at frames 0/332."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-material-plan",
+        type=Path,
+        help=(
+            "JSON plan produced from a first-fold checkpoint. It supplies the "
+            "two material-patch world positions and normals used as direct TCP "
+            "targets instead of offsets from the public trajectory."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-left-staged-close",
+        action="store_true",
+        help=(
+            "After reaching the marked shoulder edge, close the robot-left "
+            "inner jaw over frames 393--408 and the opposing jaw over "
+            "408--423 so the edge is swept "
+            "into the physical finger gap before the page turn."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-right-staged-close",
+        action="store_true",
+        help=(
+            "At the marked lower-right corner, keep both jaws open through "
+            "frame 439, close the inner jaw over 439--454, then sweep the "
+            "outer jaw inward over 454--469 before lifting."
+        ),
+    )
+    parser.add_argument(
+        "--second-fold-left-plan-orientation-source-frame",
+        type=int,
+        help="Override the robot-left wrist orientation source frame in a material plan.",
+    )
+    parser.add_argument(
         "--second-fold-roll-path",
         choices=("staged", "smooth_arc"),
         default="staged",
@@ -2043,6 +2258,22 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--third-fold-grasp-extra-world-x",
+        type=float,
+        default=0.0,
+        help=(
+            "Additional world-X correction used only around the third-fold "
+            "grasp. It ramps in over frames 650--680, stays through 750, and "
+            "fades by 820 so grasp-point tuning does not move the final place pose."
+        ),
+    )
+    parser.add_argument(
+        "--third-fold-grasp-extra-world-y",
+        type=float,
+        default=0.0,
+        help="World-Y companion to --third-fold-grasp-extra-world-x.",
+    )
+    parser.add_argument(
         "--third-fold-placement-depth",
         type=float,
         default=0.0,
@@ -2071,6 +2302,17 @@ def parse_args() -> argparse.Namespace:
             "Reparameterize the public robot-right wrist quaternion path from "
             "source frames 690--780 to constant angular speed. The original "
             "orientation path and both endpoint poses remain unchanged."
+        ),
+    )
+    parser.add_argument(
+        "--third-fold-causal-ik",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "When resuming after the second fold, bridge the real checkpoint "
+            "pose to the third-fold approach over source frames 620--650 and "
+            "solve later third-fold arm poses from the preceding accepted IK "
+            "solution. This prevents checkpoint teleports and IK branch jumps."
         ),
     )
     parser.add_argument(
@@ -2128,6 +2370,21 @@ def parse_args() -> argparse.Namespace:
             "the gripper opens through frame 945, then retreat vertically through "
             "frame 979. This avoids dragging the released fold across the table."
         ),
+    )
+    parser.add_argument(
+        "--third-fold-release-source-frame",
+        type=int,
+        default=920,
+        help=(
+            "Source frame captured as the fixed third-fold release pose. The "
+            "gripper opens over the next 25 frames, then retreats vertically."
+        ),
+    )
+    parser.add_argument(
+        "--third-fold-release-retreat-height",
+        type=float,
+        default=0.04,
+        help="Vertical retreat height after the third-fold release hold.",
     )
     parser.add_argument(
         "--post-release-settle-frames",
@@ -2190,6 +2447,8 @@ def parse_args() -> argparse.Namespace:
             "around the second-fold grasp, transport and release."
         ),
     )
+    parser.add_argument('--contact-dump-frames', type=int, nargs='*', default=[],
+                        help='Optional real IPC contact exporter snapshots at source frames; never used during replay render.')
     parser.add_argument(
         "--keyframe-diagnostics-dir",
         type=Path,
@@ -2229,6 +2488,26 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--save-checkpoint-source-frames",
+        type=int,
+        nargs="+",
+        default=None,
+        help=(
+            "Save portable Genesis+IPC checkpoints at these source frames without "
+            "restoring or interrupting the trajectory. Requires --checkpoint-output-dir."
+        ),
+    )
+    parser.add_argument(
+        "--checkpoint-output-dir",
+        type=Path,
+        default=None,
+        help=(
+            "Directory for --save-checkpoint-source-frames; each save is named "
+            "source_NNNNNN.pkl with .ipc_state.npz and .meta.json sidecars. "
+            "Existing checkpoint files are never overwritten."
+        ),
+    )
+    parser.add_argument(
         "--save-third-fold-checkpoint",
         type=Path,
         default=None,
@@ -2247,9 +2526,53 @@ def parse_args() -> argparse.Namespace:
             "parameters may change; mesh, physics and first-two-fold parameters may not."
         ),
     )
+    parser.add_argument(
+        "--allow-material-change-on-checkpoint",
+        action="store_true",
+        help=(
+            "Allow only cloth_E, cloth_bending and cloth_self_friction to differ "
+            "from the loaded checkpoint signature. All topology, trajectory, "
+            "robot/control, contact-distance and other physics fields remain strict. "
+            "Use for segment-local material sensitivity screens, not stitched full runs."
+        ),
+    )
+    parser.add_argument(
+        "--allow-checkpoint-path-relocation",
+        action="store_true",
+        help=(
+            "Allow only the resolved shirt_obj and trajectory path strings to "
+            "differ from a loaded checkpoint. Their recorded file sizes, cloth "
+            "topology and every physics/control field remain strict. Intended "
+            "for checkpoints migrated between hosts without modifying the source metadata."
+        ),
+    )
+    parser.add_argument(
+        "--resolved-joint-trajectory",
+        type=Path,
+        default=None,
+        help=(
+            "Override final commanded robot_q at explicitly listed source frames. "
+            "The NPZ must contain source_frames (K,) and robot_q (K, 19), in "
+            "Genesis actuated-joint order. Intended for PATH+IK-validated "
+            "explicit joint-command suffix runs."
+        ),
+    )
+    parser.add_argument(
+        "--action-plan-trajectory", action="store_true",
+        help="Execute native joint_q/openness exactly, without legacy fold corrections. Checkpoints require identical action-plan prefixes.",
+    )
     parser.add_argument("--finger-kp", type=float, default=1000.0)
     parser.add_argument("--finger-kv", type=float, default=50.0)
     args = parser.parse_args()
+    if args.action_plan_trajectory:
+        if args.trajectory_preflight_only:
+            parser.error("--trajectory-preflight-only is unavailable with --action-plan-trajectory; validate joint commands separately")
+        if args.resolved_joint_trajectory or args.trajectory_stride != 1:
+            parser.error("--action-plan-trajectory requires stride 1 and no resolved override")
+        if args.virtual_grasp or args.drive_mode != "direct":
+            parser.error("--action-plan-trajectory requires direct control and real contact (no virtual grasp)")
+        if any((args.post_release_settle_frames, args.post_release_open_hold_frames, args.post_release_retreat_frames)):
+            parser.error("Action-plan holds/retreats must be explicit timeline actions")
     if args.dump_replay_states is not None and not args.no_record:
         parser.error("--dump-replay-states requires --no-record")
     if args.dump_replay_states is not None and args.replay_states is not None:
@@ -2334,6 +2657,67 @@ def checkpoint_sidecars(path: Path) -> tuple[Path, Path, Path]:
     )
 
 
+def checkpoint_save_requests(args) -> dict[int, Path]:
+    """Validate all persistent-save targets before constructing a physics scene."""
+    frames = args.save_checkpoint_source_frames
+    output_dir = args.checkpoint_output_dir
+    if (frames is None) != (output_dir is None):
+        raise ValueError(
+            "--save-checkpoint-source-frames and --checkpoint-output-dir must be used together"
+        )
+    requests: dict[int, Path] = {}
+    if frames is not None:
+        for source_frame in frames:
+            if source_frame in requests:
+                raise ValueError(f"Duplicate checkpoint source frame: {source_frame}")
+            requests[source_frame] = output_dir / f"source_{source_frame:06d}.pkl"
+    if args.save_third_fold_checkpoint is not None:
+        legacy_frame = (
+            args.save_checkpoint_source_frame
+            if args.save_checkpoint_source_frame is not None
+            else args.third_fold_checkpoint_source_frame
+        )
+        if legacy_frame in requests:
+            raise ValueError(f"Duplicate checkpoint source frame: {legacy_frame}")
+        requests[legacy_frame] = args.save_third_fold_checkpoint
+    targets: set[Path] = set()
+    if args.verify_third_fold_checkpoint:
+        targets.add(
+            args.output.expanduser().resolve().with_suffix(".third_fold_checkpoint.pkl")
+        )
+    for source_frame, path in requests.items():
+        if source_frame < 0:
+            raise ValueError(f"Checkpoint source frame must be non-negative: {source_frame}")
+        raw_scene_path = path.expanduser().with_suffix(".pkl")
+        for raw_target in (
+            raw_scene_path,
+            raw_scene_path.with_suffix(".ipc_state.npz"),
+            raw_scene_path.with_suffix(".meta.json"),
+        ):
+            if raw_target.is_symlink():
+                raise FileExistsError(f"Refusing to overwrite checkpoint symlink: {raw_target}")
+        paths = checkpoint_sidecars(path)
+        for target in paths:
+            if target in targets:
+                raise ValueError(f"Conflicting checkpoint output path: {target}")
+            if target.exists() or target.is_symlink():
+                raise FileExistsError(f"Refusing to overwrite checkpoint file: {target}")
+            if any(parent.exists() and not parent.is_dir() for parent in target.parents):
+                raise ValueError(f"Checkpoint output parent is not a directory: {target}")
+            targets.add(target)
+        requests[source_frame] = paths[0]
+    return requests
+
+
+def validate_checkpoint_save_frames(requests, source_frames, start_frame: int) -> None:
+    available = {int(frame) for frame in source_frames[start_frame:]}
+    missing = sorted(set(requests) - available)
+    if missing:
+        raise ValueError(
+            f"Requested checkpoint source frames are not in the remaining trajectory: {missing}"
+        )
+
+
 def snapshot_ipc_state(coupler) -> dict[str, np.ndarray]:
     """Copy the public libuipc FEM and ABD state-accessor buffers."""
     arrays: dict[str, np.ndarray] = {}
@@ -2398,6 +2782,25 @@ def restore_ipc_state(coupler, arrays: dict[str, np.ndarray]) -> None:
 
 def main() -> None:
     args = parse_args()
+    persistent_checkpoint_requests = checkpoint_save_requests(args)
+    second_fold_material_plan = None
+    if args.second_fold_material_plan is not None:
+        plan_path = args.second_fold_material_plan.expanduser().resolve()
+        second_fold_material_plan = json.loads(plan_path.read_text(encoding="utf-8"))
+        hands = second_fold_material_plan.get("hands")
+        if not isinstance(hands, list) or len(hands) != 2:
+            raise ValueError("--second-fold-material-plan must contain two hands")
+        for hand in hands:
+            grasp = np.asarray(hand.get("grasp_world_m"), dtype=np.float64)
+            normal = np.asarray(hand.get("normal_world"), dtype=np.float64)
+            if grasp.shape != (3,) or normal.shape != (3,):
+                raise ValueError("material plan grasp/normal must be length-3 vectors")
+            norm = float(np.linalg.norm(normal))
+            if norm <= 1.0e-9:
+                raise ValueError("material plan normal must be nonzero")
+            hand["grasp_world_m"] = grasp
+            hand["normal_world"] = normal / norm
+        print(f"second_fold_material_plan={plan_path}")
     if args.contact_grasp_test:
         # Visual verification is a mandatory artifact for grasp development.
         # Logs can quantify co-motion, but cannot prove that the intended layer
@@ -2434,6 +2837,10 @@ def main() -> None:
         raise ValueError("--ipc-constraint-strength-translation must be positive")
     if args.ipc_constraint_strength_rotation <= 0.0:
         raise ValueError("--ipc-constraint-strength-rotation must be positive")
+    if args.cloth_self_friction is not None and (
+        not np.isfinite(args.cloth_self_friction) or args.cloth_self_friction < 0.0
+    ):
+        raise ValueError("--cloth-self-friction must be finite and non-negative")
     if args.verify_third_fold_checkpoint and not args.no_record:
         raise ValueError("--verify-third-fold-checkpoint currently requires --no-record")
     if args.load_third_fold_checkpoint is not None and args.verify_third_fold_checkpoint:
@@ -2468,7 +2875,8 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
     with np.load(trajectory_path) as data:
-        joint_q = np.asarray(data["joint_q"], dtype=np.float64)
+        full_joint_q = np.asarray(data["joint_q"], dtype=np.float64)
+        joint_q = full_joint_q
         openness = np.asarray(data["openness"], dtype=np.float64)
     if joint_q.ndim != 2 or joint_q.shape[1] != 19:
         raise ValueError(f"Expected trajectory shape (T, 19), got {joint_q.shape}")
@@ -2479,6 +2887,11 @@ def main() -> None:
     frame_count = len(source_frames)
     if openness.shape != (frame_count, 2):
         raise ValueError(f"Expected openness shape ({frame_count}, 2), got {openness.shape}")
+    if args.action_plan_trajectory and (
+        not frame_count or not np.all(np.isfinite(joint_q))
+        or not np.all(np.isfinite(openness)) or np.any((openness < 0) | (openness > 1))
+    ):
+        raise ValueError("Action-plan trajectory must be nonempty, finite, with openness in [0,1]")
     physics_dt = args.trajectory_stride / (args.action_fps * args.substeps)
     effective_record_fps = max(1, round(args.record_fps / args.trajectory_stride))
     kinematic_grasp_demo = args.virtual_grasp and args.grasp_mode == "hard"
@@ -2538,7 +2951,7 @@ def main() -> None:
         # A strong ambient term flattens centimeter-scale cloth folds and makes
         # the uniformly colored surface read like molded rubber.  Keep enough
         # fill light for the dark fabric while restoring directional shading.
-        vis_options=gs.options.VisOptions(ambient_light=(0.26, 0.26, 0.26)),
+        vis_options=gs.options.VisOptions(ambient_light=(0.26, 0.26, 0.26), shadow=not args.no_shadows),
         show_viewer=args.viewer,
     )
 
@@ -2606,6 +3019,7 @@ def main() -> None:
         [source_index_by_name[name] for name in genesis_joint_names], dtype=np.int64
     )
     joint_q = joint_q[:, genesis_from_source]
+    full_joint_q = full_joint_q[:, genesis_from_source]
     genesis_index_by_name = {name: index for index, name in enumerate(genesis_joint_names)}
     arm_dof_indices = np.array(
         [genesis_index_by_name[name] for name in ARM_JOINT_NAMES], dtype=np.int64
@@ -2615,7 +3029,7 @@ def main() -> None:
         for names in FINGER_JOINT_NAMES
     )
     all_finger_dof_indices = np.concatenate(finger_dof_indices)
-    if args.first_left_staged_close:
+    if args.first_left_staged_close and not args.action_plan_trajectory:
         staged_source = source_frames.astype(np.float64)
         first_progress = np.clip((staged_source - 45.0) / 30.0, 0.0, 1.0)
         second_progress = np.clip((staged_source - 75.0) / 30.0, 0.0, 1.0)
@@ -2632,6 +3046,40 @@ def main() -> None:
             joint_q[np.ix_(np.flatnonzero(staged_mask), finger_dof_indices[0])],
             axis=1,
         ) / FINGER_URDF_UPPER
+    if args.second_fold_left_staged_close and not args.action_plan_trajectory:
+        staged_source = source_frames.astype(np.float64)
+        first_progress = np.clip((staged_source - 439.0) / 15.0, 0.0, 1.0)
+        second_progress = np.clip((staged_source - 454.0) / 15.0, 0.0, 1.0)
+        first_progress = first_progress * first_progress * (3.0 - 2.0 * first_progress)
+        second_progress = second_progress * second_progress * (3.0 - 2.0 * second_progress)
+        staged_mask = (source_frames >= 340) & (source_frames <= 480)
+        joint_q[staged_mask, finger_dof_indices[0][0]] = (
+            FINGER_URDF_UPPER * (1.0 - first_progress[staged_mask])
+        )
+        joint_q[staged_mask, finger_dof_indices[0][1]] = (
+            FINGER_URDF_UPPER * (1.0 - second_progress[staged_mask])
+        )
+        openness[staged_mask, 0] = np.mean(
+            joint_q[np.ix_(np.flatnonzero(staged_mask), finger_dof_indices[0])],
+            axis=1,
+        ) / FINGER_URDF_UPPER
+    if args.second_fold_right_staged_close and not args.action_plan_trajectory:
+        staged_source = source_frames.astype(np.float64)
+        inner_progress = np.clip((staged_source - 439.0) / 15.0, 0.0, 1.0)
+        outer_progress = np.clip((staged_source - 454.0) / 15.0, 0.0, 1.0)
+        inner_progress = inner_progress * inner_progress * (3.0 - 2.0 * inner_progress)
+        outer_progress = outer_progress * outer_progress * (3.0 - 2.0 * outer_progress)
+        staged_mask = (source_frames >= 400) & (source_frames <= 480)
+        joint_q[staged_mask, finger_dof_indices[1][0]] = (
+            FINGER_URDF_UPPER * (1.0 - inner_progress[staged_mask])
+        )
+        joint_q[staged_mask, finger_dof_indices[1][1]] = (
+            FINGER_URDF_UPPER * (1.0 - outer_progress[staged_mask])
+        )
+        openness[staged_mask, 1] = np.mean(
+            joint_q[np.ix_(np.flatnonzero(staged_mask), finger_dof_indices[1])],
+            axis=1,
+        ) / FINGER_URDF_UPPER
     print(f"SIM1 source joint order: {SOURCE_JOINT_NAMES}")
     print(f"Genesis joint order: {genesis_joint_names}")
     print(f"Genesis <- source columns: {genesis_from_source.tolist()}")
@@ -2641,7 +3089,11 @@ def main() -> None:
             morph=gs.morphs.Mesh(
                 file=str(shirt_obj),
                 scale=0.001,
-                pos=(args.initial_shirt_x, args.initial_shirt_y, args.initial_shirt_z),
+                pos=(
+                    args.initial_shirt_x + args.workspace_world_x_shift,
+                    args.initial_shirt_y,
+                    args.initial_shirt_z,
+                ),
                 euler=(-90.0, 0.0, 0.0),
             ),
             material=gs.materials.FEM.Cloth(
@@ -2651,6 +3103,7 @@ def main() -> None:
                 thickness=args.cloth_thickness,
                 bending_stiffness=args.cloth_bending,
                 friction_mu=args.cloth_friction,
+                self_friction_mu=args.cloth_self_friction,
                 contact_resistance=1.0e7,
             ),
             surface=gs.surfaces.Plastic(
@@ -2662,6 +3115,16 @@ def main() -> None:
                 normal_diff_clamp=42.0,
             ),
         )
+    if cloth is not None:
+        for label, expected, actual in (
+            ("vertices", args.expected_cloth_vertices, cloth.n_vertices),
+            ("faces", args.expected_cloth_faces, cloth.n_elements),
+        ):
+            if expected is not None and actual != expected:
+                raise ValueError(
+                    f"Cloth topology guard: expected {expected} {label}, loaded {actual}; "
+                    "refusing to build/step IPC with a different mesh"
+                )
     canonical_camera_specs = {
         "overview": ((1.50, -1.35, 1.55), (0.68, 0.0, 0.82), (0.0, 0.0, 1.0)),
         "overhead": ((1.48, 0.0, 2.45), (0.68, 0.0, 0.80), (0.0, 1.0, 0.0)),
@@ -2670,6 +3133,13 @@ def main() -> None:
         "right_grasp": ((1.20, -0.32, 1.10), (0.94, 0.0, 0.92), (0.0, 0.0, 1.0)),
     }
     record_cameras = {}
+    if args.replay_six_view:
+        if args.replay_states is None or not args.record_multi_view or args.replay_overview_left_grasp:
+            raise ValueError('Six-view requires saved replay multiview; do not combine with overview replacement')
+        canonical_camera_specs.update({
+            'left_grasp': ((1.20,.22,1.10),(.94,0.,.92),(0.,0.,1.)),
+            'base_side': ((-.25,0.,1.45),(.65,0.,.83),(0.,0.,1.)),
+        })
     if args.record_multi_view and not args.trajectory_preflight_only:
         for view_name, (pos, lookat, up) in canonical_camera_specs.items():
             record_cameras[view_name] = scene.add_camera(
@@ -2694,6 +3164,7 @@ def main() -> None:
     keyframe_visuals = KeyframeVisualDiagnostics(
         scene,
         None if args.trajectory_preflight_only else args.keyframe_diagnostics_dir,
+        debug=args.debug_second_fold_material_markers,
     )
 
     # ``_init_qpos`` is part of the imported joint-frame definition, not merely
@@ -2718,6 +3189,12 @@ def main() -> None:
             )
 
     build_start = time.perf_counter()
+    if args.cloth_table_pair_friction is not None:
+        if not np.isfinite(args.cloth_table_pair_friction) or args.cloth_table_pair_friction < 0:
+            raise ValueError('cloth/table pair friction must be finite and nonnegative')
+        if cloth is not None and table is not None:
+            cloth._ipc_pair_friction_overrides = {table: float(args.cloth_table_pair_friction)}
+            print(f'cloth_table_pair_friction_override={args.cloth_table_pair_friction}',flush=True)
     scene.build()
     ipc_proxy_visuals = None
     ipc_actual_visuals = None
@@ -2750,6 +3227,9 @@ def main() -> None:
         or args.second_fold_right_approach_lift < 0.0
         or args.second_fold_transport_lift < 0.0
         or args.second_fold_roll_arc_height < 0.0
+        or not 0.0 < args.second_fold_travel_scale <= 1.0
+        or args.second_fold_peel_lift < 0.0
+        or not -180.0 <= args.second_fold_flip_deg <= 180.0
         or args.second_fold_placement_relax < 0.0
         or args.second_fold_placement_lift < 0.0
         or args.third_fold_right_grasp_lift < 0.0
@@ -2764,6 +3244,18 @@ def main() -> None:
         raise ValueError("trajectory lift corrections must be non-negative")
     if abs(args.first_grasp_left_world_y) > 0.02:
         raise ValueError("--first-grasp-left-world-y must stay within +/- 20 mm")
+    second_grasp_offsets = (
+        args.second_fold_left_grasp_world_x,
+        args.second_fold_left_grasp_world_y,
+        args.second_fold_right_grasp_world_x,
+        args.second_fold_right_grasp_world_y,
+    )
+    if max(map(abs, second_grasp_offsets)) > 0.20:
+        raise ValueError("second-fold corner-grasp offsets must stay within +/- 200 mm")
+    if not 469 <= args.second_fold_terminal_center_inset_start < 583:
+        raise ValueError(
+            "--second-fold-terminal-center-inset-start must be in [469, 582]"
+        )
     if (
         args.second_fold_correction_release_start < 583
         or args.second_fold_correction_release_end
@@ -2782,8 +3274,9 @@ def main() -> None:
             "third-fold table leveling and front-plane roll are alternative "
             "orientation strategies; enable only one"
         )
-    if (
-        args.first_grasp_clearance_lift > 0.0
+    if not args.action_plan_trajectory and (
+        args.workspace_world_x_shift != 0.0
+        or args.first_grasp_clearance_lift > 0.0
         or args.first_grasp_left_depth > 0.0
         or args.first_grasp_left_world_y != 0.0
         or args.first_grasp_right_depth > 0.0
@@ -2793,6 +3286,11 @@ def main() -> None:
         or args.second_fold_right_approach_lift > 0.0
         or args.second_fold_transport_lift > 0.0
         or args.second_fold_roll_arc_height > 0.0
+        or second_fold_material_plan is not None
+        or any(abs(value) > 0.0 for value in second_grasp_offsets)
+        or args.second_fold_travel_scale != 1.0
+        or args.second_fold_peel_lift > 0.0
+        or args.second_fold_flip_deg != 0.0
         or args.second_fold_placement_relax > 0.0
         or args.second_fold_placement_lift > 0.0
         or args.third_fold_right_grasp_lift > 0.0
@@ -2800,6 +3298,8 @@ def main() -> None:
         or args.third_fold_right_grasp_lateral > 0.0
         or args.third_fold_right_grasp_world_x != 0.0
         or args.third_fold_right_grasp_world_y != 0.0
+        or args.third_fold_grasp_extra_world_x != 0.0
+        or args.third_fold_grasp_extra_world_y != 0.0
         or args.third_fold_post_close_lift > 0.0
         or args.third_fold_smooth_rotation
         or args.third_fold_outward_pull_cancel > 0.0
@@ -2826,6 +3326,14 @@ def main() -> None:
         def smoothstep(value: float) -> float:
             value = float(np.clip(value, 0.0, 1.0))
             return value * value * (3.0 - 2.0 * value)
+
+        def workspace_shift_weight(source_frame: int, hand_index: int) -> float:
+            start, end = ((20, 75) if hand_index == 0 else (75, 117))
+            if source_frame < start:
+                return 0.0
+            if source_frame < end:
+                return smoothstep((source_frame - start) / float(end - start))
+            return 1.0
 
         def first_fold_lift_weight(source_frame: int) -> float:
             if source_frame < 240 or source_frame > 350:
@@ -2922,6 +3430,27 @@ def main() -> None:
             if source_frame <= 455:
                 return 0.425
             return 0.425 * (1.0 - smoothstep((source_frame - 455) / 20.0))
+
+        def second_fold_corner_grasp_weight(source_frame: int, hand_index: int) -> float:
+            """Move each hand from the boundary seam to the marked torso corner."""
+            start, full = ((340, 375) if hand_index == 0 else (400, 430))
+            if source_frame < start or source_frame >= 439:
+                return 0.0
+            if source_frame < full:
+                return smoothstep((source_frame - start) / float(full - start))
+            return 1.0
+
+        def second_fold_endpoint_hold_weight(source_frame: int) -> float:
+            """Keep the shortened/flipped endpoint continuous through release."""
+            release_start = args.second_fold_correction_release_start
+            release_end = args.second_fold_correction_release_end
+            if source_frame < 570 or source_frame > release_end:
+                return 0.0
+            if source_frame <= release_start:
+                return 1.0
+            return 1.0 - smoothstep(
+                (source_frame - release_start) / (release_end - release_start)
+            )
 
         def second_fold_left_transport_weight(source_frame: int) -> float:
             # The left hand closes first at frame 393. The public TCP stays near
@@ -3047,6 +3576,15 @@ def main() -> None:
                 return 1.0
             return 1.0 - smoothstep((source_frame - 941) / 19.0)
 
+        def third_fold_grasp_extra_xy_weight(source_frame: int) -> float:
+            if source_frame < 650 or source_frame > 820:
+                return 0.0
+            if source_frame < 680:
+                return smoothstep((source_frame - 650) / 30.0)
+            if source_frame <= 750:
+                return 1.0
+            return 1.0 - smoothstep((source_frame - 750) / 70.0)
+
         def third_fold_placement_depth_weight(source_frame: int) -> float:
             if source_frame < 890 or source_frame > 970:
                 return 0.0
@@ -3130,12 +3668,16 @@ def main() -> None:
 
         def raw_tcp_at_source(source_frame: int, hand_index: int) -> np.ndarray:
             matches = np.flatnonzero(source_frames == source_frame)
-            if len(matches) != 1:
+            if len(matches) == 1:
+                raw_q = joint_q[int(matches[0])]
+            elif 0 <= source_frame < len(full_joint_q):
+                raw_q = full_joint_q[source_frame]
+            else:
                 raise RuntimeError(
                     "Second-fold Cartesian correction requires exactly one trajectory sample "
                     f"for source frame {source_frame}, got {len(matches)}"
                 )
-            robot.set_qpos(joint_q[int(matches[0])], zero_velocity=True)
+            robot.set_qpos(raw_q, zero_velocity=True)
             link = lift_links[hand_index]
             link_pos = as_numpy(link.get_pos()).reshape(3)
             link_quat = as_numpy(link.get_quat()).reshape(4)
@@ -3143,13 +3685,93 @@ def main() -> None:
 
         def raw_quat_at_source(source_frame: int, hand_index: int) -> np.ndarray:
             matches = np.flatnonzero(source_frames == source_frame)
-            if len(matches) != 1:
+            if len(matches) == 1:
+                raw_q = joint_q[int(matches[0])]
+            elif 0 <= source_frame < len(full_joint_q):
+                raw_q = full_joint_q[source_frame]
+            else:
                 raise RuntimeError(
                     "Third-fold rotation smoothing requires exactly one trajectory "
                     f"sample for source frame {source_frame}, got {len(matches)}"
                 )
-            robot.set_qpos(joint_q[int(matches[0])], zero_velocity=True)
+            robot.set_qpos(raw_q, zero_velocity=True)
             return as_numpy(lift_links[hand_index].get_quat()).reshape(4).copy()
+
+        second_fold_plan_close_quats = None
+        if second_fold_material_plan is not None:
+            def solve_and_hold_arm_keyframe(
+                hand_index: int, close_source: int, hold_end_source: int
+            ) -> None:
+                matches = np.flatnonzero(source_frames == close_source)
+                if len(matches) != 1:
+                    return
+                close_sample = int(matches[0])
+                arm_indices = np.asarray(
+                    lift_arm_indices[hand_index], dtype=np.int64
+                )
+                target_tcp, target_quat = second_fold_target_cache[
+                    close_source
+                ][hand_index]
+                solved, _ = robot.inverse_kinematics(
+                    link=lift_links[hand_index],
+                    pos=target_tcp,
+                    quat=target_quat,
+                    local_point=TCP_LOCAL,
+                    init_qpos=source_joint_q[close_sample].copy(),
+                    dofs_idx_local=arm_indices,
+                    max_samples=1,
+                    max_solver_iters=50,
+                    pos_tol=1.0e-4,
+                    rot_tol=1.0e-4,
+                    return_error=True,
+                )
+                solved = as_numpy(solved).reshape(-1)
+                close_arm_q = solved[arm_indices].copy()
+                hold_samples = np.flatnonzero(
+                    (source_frames >= close_source)
+                    & (source_frames <= hold_end_source)
+                )
+                corrected_joint_q[
+                    hold_samples[:, None], arm_indices[None, :]
+                ] = close_arm_q[None, :]
+
+            plan_quats = []
+            for hand_index, default_close in enumerate((393, 439)):
+                hand_plan = second_fold_material_plan["hands"][hand_index]
+                source = int(
+                    args.second_fold_left_plan_orientation_source_frame
+                    if hand_index == 0
+                    and args.second_fold_left_plan_orientation_source_frame
+                    is not None
+                    else hand_plan.get("orientation_source_frame", default_close)
+                )
+                blend = float(hand_plan.get("orientation_blend", 1.0))
+                planned_quat = slerp_quat_wxyz(
+                    raw_quat_at_source(default_close, hand_index),
+                    raw_quat_at_source(source, hand_index),
+                    blend,
+                )
+                orientation_pose = str(
+                    hand_plan.get("orientation_pose", "raw")
+                )
+                if orientation_pose == "table_parallel":
+                    # Insert the open jaws parallel to the table at a hem or
+                    # shoulder edge. Rotating about the TCP keeps the selected
+                    # material point fixed while lifting the palm collision
+                    # body away from the tabletop.
+                    planned_quat = table_parallel_quat(planned_quat)
+                elif orientation_pose == "vertical_insert":
+                    # The Acone TCP lies +X from the palm. Point +X down so
+                    # the fingertips reach the cloth edge while the palm stays
+                    # above the table; keep local-Y (jaw closing) horizontal.
+                    planned_quat = table_edge_insert_quat(planned_quat)
+                elif orientation_pose != "raw":
+                    raise ValueError(
+                        "Unsupported second-fold orientation pose "
+                        f"{orientation_pose!r}"
+                    )
+                plan_quats.append(planned_quat)
+            second_fold_plan_close_quats = tuple(plan_quats)
 
         second_fold_close_tcp = None
         if (
@@ -3161,8 +3783,47 @@ def main() -> None:
                 raw_tcp_at_source(439, 1),
             )
 
+        second_fold_grasp_offsets = (
+            np.array(
+                [
+                    args.second_fold_left_grasp_world_x,
+                    args.second_fold_left_grasp_world_y,
+                    0.0,
+                ],
+                dtype=np.float64,
+            ),
+            np.array(
+                [
+                    args.second_fold_right_grasp_world_x,
+                    args.second_fold_right_grasp_world_y,
+                    0.0,
+                ],
+                dtype=np.float64,
+            ),
+        )
+        if second_fold_material_plan is not None:
+            second_fold_grasp_offsets = (
+                np.zeros(3, dtype=np.float64),
+                np.zeros(3, dtype=np.float64),
+            )
+        second_fold_custom_motion = (
+            second_fold_material_plan is not None
+            or
+            any(np.linalg.norm(offset) > 0.0 for offset in second_fold_grasp_offsets)
+            or args.second_fold_travel_scale != 1.0
+            or args.second_fold_peel_lift > 0.0
+            or args.second_fold_flip_deg != 0.0
+        )
         second_fold_roll_endpoints = None
-        if args.second_fold_roll_arc_height > 0.0 and int(np.max(source_frames)) >= 570:
+        second_fold_endpoint_residuals = None
+        second_fold_flip_quats = None
+        if args.second_fold_roll_arc_height > 0.0 and (
+            int(np.max(source_frames)) >= 570
+            or (
+                second_fold_material_plan is not None
+                and len(full_joint_q) > 570
+            )
+        ):
             roll_start = [raw_tcp_at_source(439, hand) for hand in range(2)]
             roll_end = [raw_tcp_at_source(570, hand) for hand in range(2)]
             for hand in range(2):
@@ -3192,25 +3853,98 @@ def main() -> None:
                         else second_fold_right_transport_weight(570)
                     )
                 )
-                roll_start[hand] = roll_start[hand] + np.array([0.0, 0.0, start_lift])
-                roll_end[hand] = roll_end[hand] + np.array(
+                roll_start[hand] = (
+                    roll_start[hand]
+                    + np.array(
+                        [args.workspace_world_x_shift, 0.0, start_lift]
+                    )
+                    + second_fold_grasp_offsets[hand]
+                )
+                if second_fold_material_plan is not None:
+                    planned_hand = second_fold_material_plan["hands"][hand]
+                    roll_start[hand] = (
+                        planned_hand["grasp_world_m"]
+                        + float(planned_hand.get("tcp_normal_offset_m", 0.006))
+                        * planned_hand["normal_world"]
+                    )
+                corrected_raw_end = roll_end[hand] + np.array(
                     [
-                        args.second_fold_placement_relax
+                        args.workspace_world_x_shift
+                        + args.second_fold_placement_relax
                         * second_fold_placement_relax_weight(570)
                         - args.second_fold_stack_overlap * second_fold_stack_weight(570),
                         0.0,
                         end_lift
                         + args.second_fold_placement_lift
+                            * second_fold_placement_lift_weight(570),
+                    ]
+                )
+                shortened_end = corrected_raw_end.copy()
+                shortened_end[:2] = roll_start[hand][:2] + (
+                    args.second_fold_travel_scale
+                    * (corrected_raw_end[:2] - roll_start[hand][:2])
+                )
+                roll_end[hand] = shortened_end
+            second_fold_roll_endpoints = (tuple(roll_start), tuple(roll_end))
+            if second_fold_material_plan is not None:
+                print(
+                    "second_fold_roll_endpoints "
+                    f"start={[np.asarray(v).round(9).tolist() for v in roll_start]} "
+                    f"end={[np.asarray(v).round(9).tolist() for v in roll_end]}"
+                )
+            corrected_raw_endpoints = []
+            for hand in range(2):
+                corrected_raw_end = raw_tcp_at_source(570, hand) + np.array(
+                    [
+                        args.workspace_world_x_shift
+                        + args.second_fold_placement_relax
+                        * second_fold_placement_relax_weight(570)
+                        - args.second_fold_stack_overlap
+                        * second_fold_stack_weight(570),
+                        0.0,
+                        args.second_fold_transport_lift
+                        * (
+                            second_fold_left_transport_weight(570)
+                            if hand == 0
+                            else second_fold_right_transport_weight(570)
+                        )
+                        + args.second_fold_placement_lift
                         * second_fold_placement_lift_weight(570),
                     ]
                 )
-            second_fold_roll_endpoints = (tuple(roll_start), tuple(roll_end))
+                corrected_raw_endpoints.append(corrected_raw_end)
+            second_fold_endpoint_residuals = tuple(
+                roll_end[hand] - corrected_raw_endpoints[hand]
+                for hand in range(2)
+            )
+            flip_angle = np.deg2rad(args.second_fold_flip_deg)
+            second_fold_flip_quats = tuple(
+                (
+                    (
+                        second_fold_plan_close_quats[hand]
+                        if second_fold_material_plan is not None
+                        else raw_quat_at_source(439, hand)
+                    ),
+                    rotate_quat_about_world_y(
+                        (
+                            second_fold_plan_close_quats[hand]
+                            if second_fold_material_plan is not None
+                            else raw_quat_at_source(439, hand)
+                        ),
+                        flip_angle,
+                    ),
+                )
+                for hand in range(2)
+            )
 
         third_fold_rotation_quats = None
         if args.third_fold_smooth_rotation:
-            if int(np.max(source_frames)) < 780:
+            # Prefix probes still retain the full input trajectory. Read the
+            # future orientation references via raw_quat_at_source's fallback;
+            # do not require executing the third fold just to save frame 339.
+            if len(full_joint_q) <= 780:
                 raise RuntimeError(
-                    "Third-fold rotation smoothing requires source frame 780"
+                    "Third-fold rotation smoothing requires input source frame 780"
                 )
             raw_rotation_quats = np.asarray(
                 [raw_quat_at_source(frame, 1) for frame in range(690, 781)],
@@ -3260,6 +3994,7 @@ def main() -> None:
 
         source_joint_q = joint_q.copy()
         corrected_joint_q = joint_q.copy()
+        second_fold_target_cache = {}
         corrected_frames = 0
         max_ik_error = 0.0
         max_ik_error_source_frame = -1
@@ -3312,6 +4047,13 @@ def main() -> None:
                     0.0,
                 ]
             ) * third_fold_right_lateral_weight(int(source_frame))
+            third_fold_grasp_extra_xy = np.array(
+                [
+                    args.third_fold_grasp_extra_world_x,
+                    args.third_fold_grasp_extra_world_y,
+                    0.0,
+                ]
+            ) * third_fold_grasp_extra_xy_weight(int(source_frame))
             third_fold_placement_xy = np.array(
                 [0.0, args.third_fold_shirt_top_offset, 0.0]
             ) * third_fold_shirt_top_weight(int(source_frame))
@@ -3338,14 +4080,31 @@ def main() -> None:
                 second_fold_left_planar_hold_weight(int(source_frame)),
                 second_fold_right_planar_hold_weight(int(source_frame)),
             )
+            second_fold_corner_grasp = (
+                second_fold_corner_grasp_weight(int(source_frame), 0),
+                second_fold_corner_grasp_weight(int(source_frame), 1),
+            )
+            second_fold_endpoint_hold = second_fold_endpoint_hold_weight(
+                int(source_frame)
+            )
             second_fold_roll_active = (
                 second_fold_roll_endpoints is not None
-                and 439 <= int(source_frame) <= 570
+                and 439 <= int(source_frame) <= (
+                    583 if second_fold_material_plan is not None else 570
+                )
+            )
+            workspace_shifts = (
+                args.workspace_world_x_shift
+                * workspace_shift_weight(int(source_frame), 0),
+                args.workspace_world_x_shift
+                * workspace_shift_weight(int(source_frame), 1),
             )
             if (
-                max(per_hand_lift) <= 0.0
+                max(map(abs, workspace_shifts)) == 0.0
+                and max(per_hand_lift) <= 0.0
                 and right_lateral <= 0.0
                 and not np.any(third_fold_world_xy)
+                and not np.any(third_fold_grasp_extra_xy)
                 and not np.any(third_fold_placement_xy)
                 and not np.any(third_fold_pull_cancel_xy)
                 and args.third_fold_placement_level
@@ -3361,7 +4120,13 @@ def main() -> None:
                 and first_fold_stack <= 0.0
                 and second_fold_stack <= 0.0
                 and max(second_fold_planar_hold) <= 0.0
+                and max(second_fold_corner_grasp) <= 0.0
+                and second_fold_endpoint_hold <= 0.0
                 and not second_fold_roll_active
+                and not (
+                    second_fold_material_plan is not None
+                    and 340 <= int(source_frame) <= 619
+                )
                 # Frames 920--979 deliberately hold the corrected third-fold
                 # release pose and then retreat vertically.  At frame 960 the
                 # ordinary third-fold correction weights have all faded to
@@ -3376,12 +4141,20 @@ def main() -> None:
                 continue
             robot.set_qpos(joint_q[frame], zero_velocity=True)
             targets = []
-            for link, lift in zip(lift_links, per_hand_lift):
+            for hand_index, (link, lift) in enumerate(zip(lift_links, per_hand_lift)):
                 link_pos = as_numpy(link.get_pos()).reshape(3)
                 link_quat = as_numpy(link.get_quat()).reshape(4)
                 link_rot = quat_wxyz_to_matrix(link_quat)
                 tcp = link_pos + link_rot @ TCP_LOCAL
-                targets.append((tcp + np.array([0.0, 0.0, lift]), link_quat))
+                targets.append(
+                    (
+                        tcp
+                        + np.array(
+                            [workspace_shifts[hand_index], 0.0, lift]
+                        ),
+                        link_quat,
+                    )
+                )
 
             if args.first_grasp_left_world_y != 0.0:
                 left_tcp, left_quat = targets[0]
@@ -3391,6 +4164,86 @@ def main() -> None:
                     * first_grasp_clearance_weight(int(source_frame))
                 )
                 targets[0] = (left_tcp, left_quat)
+
+            if second_fold_material_plan is not None:
+                planned_targets = list(targets)
+                # Both arms may start repositioning as soon as the first fold
+                # has released. The old right-hand window (400 -> 420) forced
+                # a ~16 mm Cartesian target jump per source frame and produced
+                # the visible wrist snap before the lower-corner grasp.
+                left_close = 439 if args.second_fold_left_staged_close else 393
+                approach_windows = (
+                    (340, 400 if left_close == 439 else 370, left_close),
+                    (340, 400, 439),
+                )
+                for hand_index, (start, pregrasp_end, close) in enumerate(
+                    approach_windows
+                ):
+                    source_frame_int = int(source_frame)
+                    if not start <= source_frame_int <= 439:
+                        continue
+                    planned_hand = second_fold_material_plan["hands"][hand_index]
+                    grasp_tcp = (
+                        planned_hand["grasp_world_m"]
+                        + float(planned_hand.get("tcp_normal_offset_m", 0.006))
+                        * planned_hand["normal_world"]
+                    )
+                    pregrasp_tcp = (
+                        planned_hand["grasp_world_m"]
+                        + 0.050 * planned_hand["normal_world"]
+                        + np.asarray(
+                            planned_hand.get(
+                                "pregrasp_world_offset_m", [0.0, 0.0, 0.0]
+                            ),
+                            dtype=np.float64,
+                        )
+                    )
+                    raw_tcp, raw_quat = planned_targets[hand_index]
+                    if source_frame_int <= pregrasp_end:
+                        progress = smoothstep(
+                            (source_frame_int - start)
+                            / float(pregrasp_end - start)
+                        )
+                        direct_tcp = (
+                            (1.0 - progress) * raw_tcp
+                            + progress * pregrasp_tcp
+                        )
+                        direct_quat = slerp_quat_wxyz(
+                            raw_quat,
+                            second_fold_plan_close_quats[hand_index],
+                            progress,
+                        )
+                    elif source_frame_int <= close:
+                        progress = smoothstep(
+                            (source_frame_int - pregrasp_end)
+                            / float(close - pregrasp_end)
+                        )
+                        direct_tcp = (
+                            (1.0 - progress) * pregrasp_tcp
+                            + progress * grasp_tcp
+                        )
+                        direct_quat = second_fold_plan_close_quats[hand_index]
+                    else:
+                        direct_tcp = grasp_tcp
+                        direct_quat = second_fold_plan_close_quats[hand_index]
+                    planned_targets[hand_index] = (direct_tcp, direct_quat)
+                targets = planned_targets
+
+            if (
+                second_fold_material_plan is None
+                and max(second_fold_corner_grasp) > 0.0
+            ):
+                shifted_targets = []
+                for hand_index, ((tcp, quat), weight) in enumerate(
+                    zip(targets, second_fold_corner_grasp)
+                ):
+                    shifted_targets.append(
+                        (
+                            tcp + weight * second_fold_grasp_offsets[hand_index],
+                            quat,
+                        )
+                    )
+                targets = shifted_targets
 
             if second_fold_relax > 0.0:
                 relax_offset = np.array([second_fold_relax, 0.0, 0.0])
@@ -3412,6 +4265,27 @@ def main() -> None:
                 stack_offset = np.array([stack_offset_x, 0.0, 0.0])
                 targets = [(tcp + stack_offset, quat) for tcp, quat in targets]
 
+            if (
+                second_fold_endpoint_hold > 0.0
+                and second_fold_endpoint_residuals is not None
+                and second_fold_flip_quats is not None
+            ):
+                held_endpoint_targets = []
+                for hand_index, (tcp, raw_quat) in enumerate(targets):
+                    held_tcp = (
+                        tcp
+                        + second_fold_endpoint_hold
+                        * second_fold_endpoint_residuals[hand_index]
+                    )
+                    _, flipped_quat = second_fold_flip_quats[hand_index]
+                    held_quat = slerp_quat_wxyz(
+                        raw_quat,
+                        flipped_quat,
+                        second_fold_endpoint_hold,
+                    )
+                    held_endpoint_targets.append((held_tcp, held_quat))
+                targets = held_endpoint_targets
+
             if second_fold_close_tcp is not None:
                 held_targets = []
                 for hand_index, ((target_tcp, quat), hold_weight) in enumerate(
@@ -3432,20 +4306,156 @@ def main() -> None:
                     start_tcp = roll_start[hand_index]
                     end_tcp = roll_end[hand_index]
                     if args.second_fold_roll_path == "smooth_arc":
-                        # Move in-plane and upward together. The legacy staged
-                        # path first pulled the grasped edge straight up while
-                        # its crease remained on the table, then translated an
-                        # already taut panel and dragged the garment body.
-                        progress = smoothstep(
-                            (int(source_frame) - 439) / float(570 - 439)
+                        corner_flip_active = (
+                            args.second_fold_peel_lift > 0.0
+                            or args.second_fold_flip_deg != 0.0
+                            or args.second_fold_travel_scale != 1.0
+                            or np.linalg.norm(second_fold_grasp_offsets[hand_index])
+                            > 0.0
                         )
-                        staged_tcp = (
-                            (1.0 - progress) * start_tcp + progress * end_tcp
-                        )
-                        staged_tcp[2] += (
-                            args.second_fold_roll_arc_height
-                            * np.sin(np.pi * progress)
-                        )
+                        if corner_flip_active:
+                            # First peel the selected torso corner vertically,
+                            # then turn it like a page about the world-Y/garment
+                            # length axis.  This prevents the old high-arc
+                            # translation from rolling the panel into a U-shaped
+                            # double strip.
+                            if second_fold_material_plan is not None:
+                                # The lower/right hand may need a later peel
+                                # because its second jaw does not finish the
+                                # staged close until frame 469.  Do not apply
+                                # that delay to the upper/left hand: doing so
+                                # shifts its page-turn window and creates a
+                                # large Cartesian step near frame 544.
+                                staged_page_turn = (
+                                    hand_index == 1
+                                    and args.second_fold_right_staged_close
+                                )
+                                coordinated_upper_wait = (
+                                    hand_index == 0
+                                    and args.second_fold_right_staged_close
+                                )
+                                # Do not pull the upper grasp while the lower
+                                # hand is still sweeping its second jaw closed.
+                                # The former accidental shared delay revealed
+                                # that this coordination is necessary for the
+                                # shallow front-surface pinch to survive.
+                                hold_end = (
+                                    480
+                                    if staged_page_turn
+                                    else (469 if coordinated_upper_wait else 455)
+                                )
+                                # Keep the lower/right peel slow enough for the
+                                # shallow front-surface pinch to remain engaged.
+                                # Its later page-turn speed is controlled by the
+                                # travel scale instead of shortening this lift.
+                                peel_end = (
+                                    505
+                                    if staged_page_turn
+                                    else (490 if coordinated_upper_wait else 480)
+                                )
+                                if int(source_frame) <= hold_end:
+                                    progress = 0.0
+                                    staged_tcp = start_tcp.copy()
+                                elif int(source_frame) <= peel_end:
+                                    peel_progress = smoothstep(
+                                        (int(source_frame) - hold_end)
+                                        / float(peel_end - hold_end)
+                                    )
+                                    progress = 0.0
+                                    staged_tcp = start_tcp.copy()
+                                    staged_tcp[2] += (
+                                        args.second_fold_peel_lift * peel_progress
+                                    )
+                                else:
+                                    progress = smoothstep(
+                                        (int(source_frame) - peel_end)
+                                        / float(583 - peel_end)
+                                    )
+                                    center_x = 0.5 * (
+                                        start_tcp[0] + end_tcp[0]
+                                    )
+                                    signed_radius = 0.5 * (
+                                        start_tcp[0] - end_tcp[0]
+                                    )
+                                    theta = np.pi * progress
+                                    staged_tcp = start_tcp.copy()
+                                    staged_tcp[0] = (
+                                        center_x
+                                        + signed_radius * np.cos(theta)
+                                    )
+                                    staged_tcp[1] = (
+                                        (1.0 - progress) * start_tcp[1]
+                                        + progress * end_tcp[1]
+                                    )
+                                    arc_height = float(
+                                        second_fold_material_plan["hands"][
+                                            hand_index
+                                        ].get(
+                                            "arc_height_m",
+                                            max(
+                                                args.second_fold_roll_arc_height,
+                                                abs(signed_radius),
+                                            ),
+                                        )
+                                    )
+                                    arc_height = max(
+                                        arc_height, abs(signed_radius)
+                                    )
+                                    staged_tcp[2] = (
+                                        (1.0 - progress)
+                                        * (
+                                            start_tcp[2]
+                                            + args.second_fold_peel_lift
+                                        )
+                                        + progress * end_tcp[2]
+                                        + arc_height * np.sin(theta)
+                                    )
+                            elif int(source_frame) <= 465:
+                                peel_progress = smoothstep(
+                                    (int(source_frame) - 439) / 26.0
+                                )
+                                progress = 0.0
+                                staged_tcp = start_tcp.copy()
+                                staged_tcp[2] += (
+                                    args.second_fold_peel_lift * peel_progress
+                                )
+                            else:
+                                progress = smoothstep(
+                                    (int(source_frame) - 465) / float(570 - 465)
+                                )
+                                staged_tcp = (
+                                    (1.0 - progress) * start_tcp
+                                    + progress * end_tcp
+                                )
+                                staged_tcp[2] += (
+                                    args.second_fold_peel_lift * (1.0 - progress)
+                                )
+                                radius = 0.5 * abs(start_tcp[0] - end_tcp[0])
+                                staged_tcp[2] += max(
+                                    args.second_fold_roll_arc_height, radius
+                                ) * np.sin(np.pi * progress)
+                            if second_fold_flip_quats is not None:
+                                start_quat, end_quat = second_fold_flip_quats[
+                                    hand_index
+                                ]
+                                quat = slerp_quat_wxyz(
+                                    start_quat, end_quat, progress
+                                )
+                        else:
+                            # Move in-plane and upward together. The legacy
+                            # staged path remains exactly reproducible when the
+                            # corner-flip controls stay at their defaults.
+                            progress = smoothstep(
+                                (int(source_frame) - 439) / float(570 - 439)
+                            )
+                            staged_tcp = (
+                                (1.0 - progress) * start_tcp
+                                + progress * end_tcp
+                            )
+                            staged_tcp[2] += (
+                                args.second_fold_roll_arc_height
+                                * np.sin(np.pi * progress)
+                            )
                     else:
                         # Legacy lift / level-transfer / place path retained so
                         # previous experiments remain exactly reproducible.
@@ -3493,6 +4503,12 @@ def main() -> None:
             if np.any(third_fold_world_xy):
                 targets[1] = (
                     targets[1][0] + third_fold_world_xy,
+                    targets[1][1],
+                )
+
+            if np.any(third_fold_grasp_extra_xy):
+                targets[1] = (
+                    targets[1][0] + third_fold_grasp_extra_xy,
                     targets[1][1],
                 )
 
@@ -3545,43 +4561,85 @@ def main() -> None:
 
             if args.third_fold_release_hold:
                 source_frame_int = int(source_frame)
-                if source_frame_int == 920:
+                release_source = args.third_fold_release_source_frame
+                release_open_end = release_source + 25
+                if source_frame_int == release_source:
                     third_fold_release_target = (
                         targets[1][0].copy(),
                         targets[1][1].copy(),
                     )
-                elif 921 <= source_frame_int <= 979:
+                elif release_source < source_frame_int <= 979:
                     if third_fold_release_target is None:
                         raise RuntimeError(
-                            "Third-fold release hold did not capture source frame 920"
+                            "Third-fold release hold did not capture source frame "
+                            f"{release_source}"
                         )
                     held_tcp, held_quat = third_fold_release_target
-                    if source_frame_int <= 945:
+                    if source_frame_int <= release_open_end:
                         targets[1] = (held_tcp.copy(), held_quat.copy())
                     else:
-                        retreat = 0.04 * smoothstep(
-                            (source_frame_int - 945) / float(979 - 945)
+                        retreat = args.third_fold_release_retreat_height * smoothstep(
+                            (source_frame_int - release_open_end)
+                            / float(979 - release_open_end)
                         )
                         targets[1] = (
                             held_tcp + np.array([0.0, 0.0, retreat]),
                             held_quat.copy(),
                         )
 
-            if (
-                args.third_fold_release_hold
-                and int(source_frame) > 920
-                and frame > 0
+            if frame > 0 and (
+                (
+                    args.third_fold_release_hold
+                    and int(source_frame)
+                    > args.third_fold_release_source_frame
+                )
+                or (
+                    second_fold_custom_motion
+                    and 340 <= int(source_frame) <= 619
+                )
             ):
                 # The public trajectory retreats laterally after release and is
-                # a poor IK seed for the deliberately stationary/vertical path.
-                # Seed from the previous corrected pose to stay on one smooth
-                # reachable branch.
+                # a poor IK seed for custom release/fold paths. Seed from the
+                # previous corrected pose to stay on one smooth reachable branch.
                 corrected = corrected_joint_q[frame - 1].copy()
             else:
                 corrected = corrected_joint_q[frame].copy()
+            if second_fold_material_plan is not None:
+                second_fold_target_cache[int(source_frame)] = tuple(
+                    (np.asarray(tcp).copy(), np.asarray(quat).copy())
+                    for tcp, quat in targets
+                )
+            if second_fold_material_plan is not None and 438 <= int(source_frame) <= 442:
+                print(
+                    "second_fold_ik_target "
+                    f"frame={int(source_frame)} "
+                    + " ".join(
+                        f"{hand_name}="
+                        f"{np.asarray(target_tcp).round(9).tolist()}"
+                        for hand_name, (target_tcp, _) in zip(
+                            ("left", "right"), targets
+                        )
+                    )
+                )
             for hand_name, link, indices, (target_tcp, target_quat) in zip(
                 ("left", "right"), lift_links, lift_arm_indices, targets
             ):
+                if second_fold_material_plan is not None:
+                    close_frame = 393 if hand_name == "left" else 439
+                    if close_frame < int(source_frame) <= 455:
+                        # The material-plan grasp pose is intentionally held
+                        # fixed before peeling. Re-solving a redundant 6-DoF
+                        # arm against the identical target can jump to another
+                        # valid IK branch even when the TCP target did not move.
+                        # Keep the previous arm solution during this hold; the
+                        # source finger commands are restored below as usual.
+                        continue
+                ik_solver_iters = (
+                    15
+                    if second_fold_material_plan is not None
+                    and 340 <= int(source_frame) <= 619
+                    else 50
+                )
                 corrected, error = robot.inverse_kinematics(
                     link=link,
                     pos=target_tcp,
@@ -3590,7 +4648,7 @@ def main() -> None:
                     init_qpos=corrected,
                     dofs_idx_local=indices,
                     max_samples=1,
-                    max_solver_iters=50,
+                    max_solver_iters=ik_solver_iters,
                     pos_tol=1.0e-4,
                     rot_tol=1.0e-4,
                     return_error=True,
@@ -3609,7 +4667,992 @@ def main() -> None:
             ]
             corrected_joint_q[frame] = corrected
             corrected_frames += 1
+        if second_fold_material_plan is not None:
+            if args.second_fold_terminal_center_inset != 0.0:
+                if not args.second_fold_causal_ik:
+                    raise ValueError(
+                        "--second-fold-terminal-center-inset requires "
+                        "--second-fold-causal-ik"
+                )
+                inset_start = args.second_fold_terminal_center_inset_start
+                for cached_source, cached_targets in list(
+                    second_fold_target_cache.items()
+                ):
+                    if cached_source <= inset_start:
+                        continue
+                    inset_weight = smoothstep(
+                        min(
+                            1.0,
+                            (cached_source - inset_start)
+                            / float(583 - inset_start),
+                        )
+                    )
+                    shifted_targets = []
+                    for cached_tcp, cached_quat in cached_targets:
+                        shifted_tcp = np.asarray(cached_tcp).copy()
+                        shifted_tcp[0] -= (
+                            args.second_fold_terminal_center_inset * inset_weight
+                        )
+                        shifted_targets.append(
+                            (shifted_tcp, np.asarray(cached_quat).copy())
+                        )
+                    second_fold_target_cache[cached_source] = tuple(
+                        shifted_targets
+                    )
+
+            def reverse_plan_arm_approach(
+                hand_index: int, start_source: int, close_source: int
+            ) -> None:
+                segment = np.flatnonzero(
+                    (source_frames >= start_source)
+                    & (source_frames <= close_source)
+                )
+                if len(segment) < 2:
+                    return
+                arm_indices = np.asarray(
+                    lift_arm_indices[hand_index], dtype=np.int64
+                )
+                next_arm_q = corrected_joint_q[
+                    int(segment[-1]), arm_indices
+                ].copy()
+                for sample in segment[-2::-1]:
+                    sample = int(sample)
+                    source = int(source_frames[sample])
+                    target_tcp, target_quat = second_fold_target_cache[source][
+                        hand_index
+                    ]
+                    seed = corrected_joint_q[sample].copy()
+                    seed[arm_indices] = next_arm_q
+                    solved, _ = robot.inverse_kinematics(
+                        link=lift_links[hand_index],
+                        pos=target_tcp,
+                        quat=target_quat,
+                        local_point=TCP_LOCAL,
+                        init_qpos=seed,
+                        dofs_idx_local=arm_indices,
+                        max_samples=1,
+                        max_solver_iters=15,
+                        pos_tol=1.0e-4,
+                        rot_tol=1.0e-4,
+                        return_error=True,
+                    )
+                    solved = as_numpy(solved).reshape(-1)
+                    next_arm_q = solved[arm_indices].copy()
+                    corrected_joint_q[sample, arm_indices] = next_arm_q
+
+            def smooth_arm_segment(
+                hand_index: int, start_source: int, end_source: int
+            ) -> None:
+                segment_mask = np.flatnonzero(
+                    (source_frames >= start_source)
+                    & (source_frames <= end_source)
+                )
+                if len(segment_mask) < 2:
+                    return
+                arm_indices = np.asarray(
+                    lift_arm_indices[hand_index], dtype=np.int64
+                )
+                first = int(segment_mask[0])
+                last = int(segment_mask[-1])
+                q_start = corrected_joint_q[first, arm_indices].copy()
+                q_end = corrected_joint_q[last, arm_indices].copy()
+                delta = (q_end - q_start + np.pi) % (2.0 * np.pi) - np.pi
+                source_span = float(
+                    source_frames[last] - source_frames[first]
+                )
+                for sample in segment_mask:
+                    progress = smoothstep(
+                        (source_frames[int(sample)] - source_frames[first])
+                        / source_span
+                    )
+                    corrected_joint_q[int(sample), arm_indices] = (
+                        q_start + progress * delta
+                    )
+
+            # Per-frame Cartesian IK can switch between redundant arm
+            # solutions even when adjacent TCP targets are nearly identical.
+            # Plan the approach and initial peel from IK keyframes, then use a
+            # shortest-angle joint interpolation between those keyframes.
+            left_plan_close = (
+                439 if args.second_fold_left_staged_close else 393
+            )
+            if not args.second_fold_causal_ik:
+                solve_and_hold_arm_keyframe(
+                    0,
+                    left_plan_close,
+                    480 if args.second_fold_left_staged_close else 455,
+                )
+                solve_and_hold_arm_keyframe(
+                    1, 439, 480 if args.second_fold_right_staged_close else 455
+                )
+                smooth_arm_segment(0, 340, left_plan_close)
+                smooth_arm_segment(1, 400, 439)
+                smooth_arm_segment(
+                    0,
+                    480 if args.second_fold_left_staged_close else 455,
+                    505 if args.second_fold_left_staged_close else 480,
+                )
+                smooth_arm_segment(
+                    1,
+                    480 if args.second_fold_right_staged_close else 455,
+                    505 if args.second_fold_right_staged_close else 480,
+                )
+                smooth_arm_segment(0, 480, 583)
+                smooth_arm_segment(
+                    1, 505 if args.second_fold_right_staged_close else 480, 583
+                )
+            placement_sample = np.flatnonzero(source_frames == 583)
+            release_hold_samples = np.flatnonzero(
+                (source_frames >= 583) & (source_frames <= 619)
+            )
+            if len(placement_sample) == 1 and len(release_hold_samples):
+                placement_sample = int(placement_sample[0])
+                for arm_indices in lift_arm_indices:
+                    arm_indices = np.asarray(arm_indices, dtype=np.int64)
+                    corrected_joint_q[
+                        release_hold_samples[:, None], arm_indices[None, :]
+                    ] = corrected_joint_q[
+                        placement_sample, arm_indices
+                    ][None, :]
+
+            if args.second_fold_causal_ik:
+                bridge_q = None
+                if args.load_third_fold_checkpoint is not None:
+                    _, _, bridge_meta_path = checkpoint_sidecars(
+                        args.load_third_fold_checkpoint
+                    )
+                    bridge_meta = json.loads(
+                        bridge_meta_path.read_text(encoding="utf-8")
+                    )
+                    if int(bridge_meta["source_frame"]) == 339:
+                        bridge_q = np.asarray(
+                            bridge_meta["previous_q"], dtype=np.float64
+                        ).copy()
+                else:
+                    bridge_samples = np.flatnonzero(source_frames == 339)
+                    if len(bridge_samples) == 1:
+                        bridge_q = corrected_joint_q[
+                            int(bridge_samples[0])
+                        ].copy()
+                if bridge_q is not None:
+                    robot.set_qpos(bridge_q, zero_velocity=True)
+                    bridge_tcps = []
+                    bridge_quats = []
+                    for link in lift_links:
+                        bridge_pos = as_numpy(link.get_pos()).reshape(3)
+                        bridge_quat = as_numpy(link.get_quat()).reshape(4)
+                        bridge_tcps.append(
+                            bridge_pos
+                            + quat_wxyz_to_matrix(bridge_quat) @ TCP_LOCAL
+                        )
+                        bridge_quats.append(bridge_quat)
+                    bridge_end = 400
+                    bridge_end_targets = second_fold_target_cache[bridge_end]
+                    for bridge_source in range(340, bridge_end + 1):
+                        bridge_weight = smoothstep(
+                            (bridge_source - 339) / float(bridge_end - 339)
+                        )
+                        second_fold_target_cache[bridge_source] = tuple(
+                            (
+                                (1.0 - bridge_weight) * bridge_tcps[hand]
+                                + bridge_weight * bridge_end_targets[hand][0],
+                                slerp_quat_wxyz(
+                                    bridge_quats[hand],
+                                    bridge_end_targets[hand][1],
+                                    bridge_weight,
+                                ),
+                            )
+                            for hand in range(2)
+                        )
+
+            # Reconstruct the material-plan arm trajectory with Cartesian
+            # continuation. Each source-frame target is subdivided into small
+            # position/orientation waypoints and solved from the preceding
+            # joint state. This preserves the intended page-turn arc while
+            # preventing the redundant arms from switching IK branches.
+            continuation_samples = np.flatnonzero(
+                (source_frames >= 340) & (source_frames <= 583)
+            )
+            if len(continuation_samples):
+                first_sample = int(continuation_samples[0])
+                if args.second_fold_causal_ik:
+                    seed_samples = np.flatnonzero(source_frames == 339)
+                    if len(seed_samples) != 1:
+                        raise RuntimeError(
+                            "Causal second-fold IK requires source frame 339 "
+                            f"exactly once, found {len(seed_samples)}"
+                        )
+                    seed_sample = int(seed_samples[0])
+                    if args.load_third_fold_checkpoint is not None:
+                        _, _, causal_meta_path = checkpoint_sidecars(
+                            args.load_third_fold_checkpoint
+                        )
+                        causal_meta = json.loads(
+                            causal_meta_path.read_text(encoding="utf-8")
+                        )
+                        causal_checkpoint_source = int(
+                            causal_meta["source_frame"]
+                        )
+                        if causal_checkpoint_source == 339:
+                            continuation_q = np.asarray(
+                                causal_meta["previous_q"], dtype=np.float64
+                            ).copy()
+                        elif causal_checkpoint_source >= 583:
+                            # The loaded checkpoint starts after the complete
+                            # second fold. Its real previous_q will seed the
+                            # runtime suffix; this offline second-fold plan is
+                            # retained only for diagnostics and is never run.
+                            continuation_q = corrected_joint_q[
+                                seed_sample
+                            ].copy()
+                        else:
+                            raise RuntimeError(
+                                "Causal second-fold IK checkpoint must be at "
+                                "source 339 or after the completed fold (>=583), "
+                                f"got {causal_checkpoint_source}"
+                            )
+                    else:
+                        continuation_q = corrected_joint_q[seed_sample].copy()
+                else:
+                    continuation_q = corrected_joint_q[
+                        max(0, first_sample - 1)
+                    ].copy()
+                continuation_max_error = 0.0
+                continuation_max_error_source = -1
+                continuation_max_error_hand = -1
+                continuation_max_step = 0.0
+                for sample in continuation_samples:
+                    sample = int(sample)
+                    source = int(source_frames[sample])
+                    previous_q = continuation_q.copy()
+                    robot.set_qpos(continuation_q, zero_velocity=True)
+                    start_tcps = []
+                    start_quats = []
+                    target_tcps = []
+                    target_quats = []
+                    hand_needs_solve = []
+                    hand_rot_masks = []
+                    waypoint_count = 1
+                    for hand_index, link in enumerate(lift_links):
+                        link_pos = as_numpy(link.get_pos()).reshape(3)
+                        link_quat = as_numpy(link.get_quat()).reshape(4)
+                        start_tcp = (
+                            link_pos
+                            + quat_wxyz_to_matrix(link_quat) @ TCP_LOCAL
+                        )
+                        target_tcp, target_quat = second_fold_target_cache[
+                            source
+                        ][hand_index]
+                        position_distance = float(
+                            np.linalg.norm(target_tcp - start_tcp)
+                        )
+                        orientation_mode = str(
+                            second_fold_material_plan["hands"][hand_index].get(
+                                "ik_orientation_mode", "closing_y"
+                            )
+                        )
+                        if orientation_mode == "full":
+                            quat_dot = float(
+                                np.clip(
+                                    abs(np.dot(link_quat, target_quat)),
+                                    0.0,
+                                    1.0,
+                                )
+                            )
+                            rotation_distance = float(
+                                2.0 * np.arccos(quat_dot)
+                            )
+                            rot_mask = [True, True, True]
+                        elif orientation_mode in (
+                            "closing_y", "length_x", "tool_z"
+                        ):
+                            aligned_axis = (
+                                1
+                                if orientation_mode == "closing_y"
+                                else (0 if orientation_mode == "length_x" else 2)
+                            )
+                            start_aligned_axis = (
+                                quat_wxyz_to_matrix(link_quat)[:, aligned_axis]
+                            )
+                            target_aligned_axis = (
+                                quat_wxyz_to_matrix(target_quat)[:, aligned_axis]
+                            )
+                            aligned_axis_dot = float(
+                                np.clip(
+                                    np.dot(
+                                        start_aligned_axis,
+                                        target_aligned_axis,
+                                    ),
+                                    -1.0,
+                                    1.0,
+                                )
+                            )
+                            rotation_distance = float(
+                                np.arccos(aligned_axis_dot)
+                            )
+                            rot_mask = (
+                                [False, True, False]
+                                if orientation_mode == "closing_y"
+                                else (
+                                    [True, False, False]
+                                    if orientation_mode == "length_x"
+                                    else [False, False, True]
+                                )
+                            )
+                        else:
+                            raise ValueError(
+                                "Unsupported second-fold IK orientation mode "
+                                f"{orientation_mode!r}"
+                            )
+                        needs_solve = (
+                            position_distance > 2.5e-4
+                            or rotation_distance > np.deg2rad(0.2)
+                        )
+                        if sample > first_sample:
+                            previous_source = int(source_frames[sample - 1])
+                            previous_target_tcp, previous_target_quat = (
+                                second_fold_target_cache[previous_source][
+                                    hand_index
+                                ]
+                            )
+                            previous_target_axis = quat_wxyz_to_matrix(
+                                previous_target_quat
+                            )[:, aligned_axis if orientation_mode != "full" else 2]
+                            current_target_axis = quat_wxyz_to_matrix(
+                                target_quat
+                            )[:, aligned_axis if orientation_mode != "full" else 2]
+                            target_is_held = (
+                                np.linalg.norm(
+                                    target_tcp - previous_target_tcp
+                                )
+                                <= 1.0e-9
+                                and np.arccos(
+                                    np.clip(
+                                        np.dot(
+                                            previous_target_axis,
+                                            current_target_axis,
+                                        ),
+                                        -1.0,
+                                        1.0,
+                                    )
+                                )
+                                <= 1.0e-8
+                            )
+                            if target_is_held:
+                                needs_solve = False
+                        waypoint_count = max(
+                            waypoint_count,
+                            int(np.ceil(position_distance / 0.004)),
+                            int(np.ceil(rotation_distance / np.deg2rad(3.0))),
+                        )
+                        start_tcps.append(start_tcp)
+                        start_quats.append(link_quat)
+                        target_tcps.append(target_tcp)
+                        target_quats.append(target_quat)
+                        hand_needs_solve.append(needs_solve)
+                        hand_rot_masks.append(rot_mask)
+                    if waypoint_count > 64:
+                        raise RuntimeError(
+                            "Second-fold Cartesian continuation lost the "
+                            "previous target; required more than 64 waypoints "
+                            f"at source={source}, count={waypoint_count}"
+                        )
+                    for waypoint in range(1, waypoint_count + 1):
+                        progress = waypoint / float(waypoint_count)
+                        waypoint_tcps = [
+                            (1.0 - progress) * start_tcp
+                            + progress * target_tcp
+                            for start_tcp, target_tcp in zip(
+                                start_tcps, target_tcps
+                            )
+                        ]
+                        waypoint_quats = [
+                            slerp_quat_wxyz(start_quat, target_quat, progress)
+                            for start_quat, target_quat in zip(
+                                start_quats, target_quats
+                            )
+                        ]
+                        # The two arms have disjoint DOFs. Continue each one
+                        # independently and skip an arm whose target is already
+                        # satisfied. This prevents repeated underconstrained IK
+                        # calls from drifting a stationary wrist while the
+                        # other hand is still approaching its grasp.
+                        for hand_index, (
+                            link,
+                            arm_indices,
+                            waypoint_tcp,
+                            waypoint_quat,
+                            needs_solve,
+                            rot_mask,
+                        ) in enumerate(
+                            zip(
+                                lift_links,
+                                lift_arm_indices,
+                                waypoint_tcps,
+                                waypoint_quats,
+                                hand_needs_solve,
+                                hand_rot_masks,
+                            )
+                        ):
+                            if not needs_solve:
+                                continue
+                            accepted_q = continuation_q.copy()
+                            solved, error = robot.inverse_kinematics(
+                                link=link,
+                                pos=waypoint_tcp,
+                                quat=waypoint_quat,
+                                local_point=TCP_LOCAL,
+                                init_qpos=continuation_q,
+                                dofs_idx_local=np.asarray(
+                                    arm_indices, dtype=np.int64
+                                ),
+                                max_samples=1,
+                                max_solver_iters=30,
+                                damping=0.05,
+                                max_step_size=0.1,
+                                pos_tol=1.0e-4,
+                                rot_tol=1.0e-4,
+                                rot_mask=rot_mask,
+                                return_error=True,
+                            )
+                            candidate_q = as_numpy(solved).reshape(-1)
+                            # The relaxed rotation components are diagnostic,
+                            # not constraints. Gate continuation on TCP
+                            # position error, which is what determines the
+                            # cloth trajectory.
+                            waypoint_error = float(
+                                np.linalg.norm(as_numpy(error).reshape(-1)[:3])
+                            )
+                            arm_indices_array = np.asarray(
+                                arm_indices, dtype=np.int64
+                            )
+                            waypoint_joint_delta = float(
+                                np.max(
+                                    np.abs(
+                                        candidate_q[arm_indices_array]
+                                        - accepted_q[arm_indices_array]
+                                    )
+                                )
+                            )
+                            if waypoint_error > 3.0e-3:
+                                raise RuntimeError(
+                                    "Second-fold IK position residual exceeds "
+                                    "3 mm: "
+                                    f"source={source} hand={hand_index} "
+                                    f"waypoint={waypoint}/{waypoint_count} "
+                                    f"error_m={waypoint_error:.6f}"
+                                )
+                            if waypoint_joint_delta > 0.05:
+                                raise RuntimeError(
+                                    "Second-fold IK waypoint joint delta exceeds "
+                                    "0.05 rad: "
+                                    f"source={source} hand={hand_index} "
+                                    f"waypoint={waypoint}/{waypoint_count} "
+                                    f"delta_rad={waypoint_joint_delta:.6f}"
+                                )
+                            continuation_q = candidate_q
+                            if waypoint_error > continuation_max_error:
+                                continuation_max_error = waypoint_error
+                                continuation_max_error_source = source
+                                continuation_max_error_hand = hand_index
+                    corrected_joint_q[
+                        sample, np.concatenate(lift_arm_indices)
+                    ] = continuation_q[np.concatenate(lift_arm_indices)]
+                    source_frame_joint_delta = float(
+                        np.max(
+                            np.abs(
+                                continuation_q[
+                                    np.concatenate(lift_arm_indices)
+                                ]
+                                - previous_q[
+                                    np.concatenate(lift_arm_indices)
+                                ]
+                            )
+                        )
+                    )
+                    continuation_max_step = max(
+                        continuation_max_step, source_frame_joint_delta
+                    )
+                print(
+                    "second_fold_cartesian_continuation "
+                    f"max_error={continuation_max_error:.6f} "
+                    f"max_error_source={continuation_max_error_source} "
+                    f"max_error_hand={continuation_max_error_hand} "
+                    f"max_arm_step_rad={continuation_max_step:.6f}"
+                )
+                max_target_step = 0.0
+                max_target_step_at = (-1, -1)
+                max_target_axis_step = 0.0
+                max_target_axis_step_at = (-1, -1)
+                max_fold_target_step = 0.0
+                max_fold_target_step_at = (-1, -1)
+                target_sources = [
+                    int(source_frames[int(sample)])
+                    for sample in continuation_samples
+                ]
+                for previous_source, current_source in zip(
+                    target_sources[:-1], target_sources[1:]
+                ):
+                    for hand_index in range(len(lift_links)):
+                        previous_tcp, previous_quat = (
+                            second_fold_target_cache[previous_source][hand_index]
+                        )
+                        current_tcp, current_quat = (
+                            second_fold_target_cache[current_source][hand_index]
+                        )
+                        target_step = float(
+                            np.linalg.norm(current_tcp - previous_tcp)
+                        )
+                        previous_axis = quat_wxyz_to_matrix(previous_quat)[:, 2]
+                        current_axis = quat_wxyz_to_matrix(current_quat)[:, 2]
+                        axis_step = float(
+                            np.arccos(
+                                np.clip(
+                                    np.dot(previous_axis, current_axis),
+                                    -1.0,
+                                    1.0,
+                                )
+                            )
+                        )
+                        if target_step > max_target_step:
+                            max_target_step = target_step
+                            max_target_step_at = (current_source, hand_index)
+                        if (
+                            current_source >= 480
+                            and target_step > max_fold_target_step
+                        ):
+                            max_fold_target_step = target_step
+                            max_fold_target_step_at = (
+                                current_source,
+                                hand_index,
+                            )
+                        if axis_step > max_target_axis_step:
+                            max_target_axis_step = axis_step
+                            max_target_axis_step_at = (
+                                current_source,
+                                hand_index,
+                            )
+                print(
+                    "second_fold_cartesian_target_continuity "
+                    f"max_tcp_step_mm={1000.0 * max_target_step:.6f} "
+                    f"max_tcp_step_at={max_target_step_at} "
+                    f"max_fold_tcp_step_mm="
+                    f"{1000.0 * max_fold_target_step:.6f} "
+                    f"max_fold_tcp_step_at={max_fold_target_step_at} "
+                    f"max_tool_axis_step_deg="
+                    f"{np.rad2deg(max_target_axis_step):.6f} "
+                    f"max_tool_axis_step_at={max_target_axis_step_at}"
+                )
+                if max_target_step > 0.012:
+                    raise RuntimeError(
+                        "Second-fold approach target step exceeds 12 mm: "
+                        f"step_m={max_target_step:.6f} "
+                        f"at={max_target_step_at}"
+                    )
+                if max_fold_target_step > 0.0048:
+                    raise RuntimeError(
+                        "Second-fold peel/page target step exceeds 4.8 mm: "
+                        f"step_m={max_fold_target_step:.6f} "
+                        f"at={max_fold_target_step_at}"
+                    )
+                if max_target_axis_step > np.deg2rad(2.0):
+                    raise RuntimeError(
+                        "Second-fold Cartesian target tool-axis step exceeds "
+                        f"2 deg: step_deg="
+                        f"{np.rad2deg(max_target_axis_step):.6f} "
+                        f"at={max_target_axis_step_at}"
+                    )
+                placement_sample = np.flatnonzero(source_frames == 583)
+                if len(placement_sample) == 1 and len(release_hold_samples):
+                    placement_sample = int(placement_sample[0])
+                    for arm_indices in lift_arm_indices:
+                        arm_indices = np.asarray(arm_indices, dtype=np.int64)
+                        corrected_joint_q[
+                            release_hold_samples[:, None], arm_indices[None, :]
+                        ] = corrected_joint_q[
+                            placement_sample, arm_indices
+                        ][None, :]
+            second_fold_samples = np.flatnonzero(
+                (source_frames >= 340) & (source_frames <= 583)
+            )
+            if len(second_fold_samples) >= 2:
+                second_fold_arm_indices = np.concatenate(lift_arm_indices)
+                second_fold_arm_steps = np.abs(
+                    np.diff(
+                        corrected_joint_q[np.ix_(
+                            second_fold_samples, second_fold_arm_indices
+                        )],
+                        axis=0,
+                    )
+                )
+                worst_flat = int(np.argmax(second_fold_arm_steps))
+                worst_row, worst_col = np.unravel_index(
+                    worst_flat, second_fold_arm_steps.shape
+                )
+                print(
+                    "second_fold_joint_continuity "
+                    f"max_step_rad={second_fold_arm_steps[worst_row, worst_col]:.6f} "
+                    f"source_transition="
+                    f"{int(source_frames[second_fold_samples[worst_row]])}->"
+                    f"{int(source_frames[second_fold_samples[worst_row + 1]])} "
+                    f"joint_index={int(second_fold_arm_indices[worst_col])}"
+                )
+                if second_fold_arm_steps[worst_row, worst_col] > 0.06:
+                    raise RuntimeError(
+                        "Second-fold source-frame joint delta exceeds 0.06 rad: "
+                        f"delta_rad="
+                        f"{second_fold_arm_steps[worst_row, worst_col]:.6f} "
+                        f"source_transition="
+                        f"{int(source_frames[second_fold_samples[worst_row]])}->"
+                        f"{int(source_frames[second_fold_samples[worst_row + 1]])}"
+                    )
+        if args.third_fold_causal_ik:
+            if args.load_third_fold_checkpoint is not None:
+                _, _, causal_meta_path = checkpoint_sidecars(
+                    args.load_third_fold_checkpoint
+                )
+                causal_meta = json.loads(
+                    causal_meta_path.read_text(encoding="utf-8")
+                )
+                causal_source = int(causal_meta["source_frame"])
+                if causal_source != 619:
+                    raise ValueError(
+                        "Third-fold causal IK requires a source-619 checkpoint, "
+                        f"got source={causal_source}"
+                    )
+                causal_q = np.asarray(
+                    causal_meta["previous_q"], dtype=np.float64
+                ).copy()
+            else:
+                causal_samples_619 = np.flatnonzero(source_frames == 619)
+                if len(causal_samples_619) != 1:
+                    raise ValueError(
+                        "Single-process third-fold causal IK requires source "
+                        f"frame 619 exactly once, found {len(causal_samples_619)}"
+                    )
+                causal_q = corrected_joint_q[
+                    int(causal_samples_619[0])
+                ].copy()
+            robot.set_qpos(causal_q, zero_velocity=True)
+            bridge_tcps = []
+            bridge_quats = []
+            for link in lift_links:
+                bridge_pos = as_numpy(link.get_pos()).reshape(3)
+                bridge_quat = as_numpy(link.get_quat()).reshape(4)
+                bridge_tcps.append(
+                    bridge_pos + quat_wxyz_to_matrix(bridge_quat) @ TCP_LOCAL
+                )
+                bridge_quats.append(bridge_quat)
+
+            causal_samples = np.flatnonzero(
+                (source_frames >= 620) & (source_frames <= 979)
+            )
+            causal_max_error = 0.0
+            causal_max_joint_step = 0.0
+            causal_max_tcp_step = 0.0
+            previous_accepted_tcps = [tcp.copy() for tcp in bridge_tcps]
+            all_arm_indices = np.concatenate(lift_arm_indices)
+            for sample in causal_samples:
+                sample = int(sample)
+                source = int(source_frames[sample])
+                # The left arm has no third-fold task, and its frame-619 pose
+                # is much farther from the public home path than the right
+                # arm's approach pose. Give it a longer bridge so it visibly
+                # withdraws instead of snapping home while the right hand
+                # approaches the waist edge.
+                bridge_end_sources = (720, 650)
+                frame_targets = []
+                for hand, bridge_end in enumerate(bridge_end_sources):
+                    if source <= bridge_end:
+                        bridge_weight = smoothstep(
+                            (source - 619) / float(bridge_end - 619)
+                        )
+                        nominal_tcp, nominal_quat = second_fold_target_cache[
+                            bridge_end
+                        ][hand]
+                        frame_targets.append(
+                            (
+                                (1.0 - bridge_weight) * bridge_tcps[hand]
+                                + bridge_weight * nominal_tcp,
+                                slerp_quat_wxyz(
+                                    bridge_quats[hand],
+                                    nominal_quat,
+                                    bridge_weight,
+                                ),
+                            )
+                        )
+                    elif hand == 0:
+                        # The left hand has no task in fold three. Keep it at
+                        # the smooth withdrawal endpoint instead of rejoining
+                        # the public trajectory's discontinuous 919->920 path.
+                        frame_targets.append(second_fold_target_cache[720][0])
+                    else:
+                        frame_targets.append(
+                            second_fold_target_cache[source][hand]
+                        )
+
+                robot.set_qpos(causal_q, zero_velocity=True)
+                start_tcps = []
+                start_quats = []
+                waypoint_count = 1
+                for hand, link in enumerate(lift_links):
+                    link_pos = as_numpy(link.get_pos()).reshape(3)
+                    link_quat = as_numpy(link.get_quat()).reshape(4)
+                    start_tcp = link_pos + quat_wxyz_to_matrix(link_quat) @ TCP_LOCAL
+                    target_tcp, target_quat = frame_targets[hand]
+                    quat_dot = float(
+                        np.clip(abs(np.dot(link_quat, target_quat)), 0.0, 1.0)
+                    )
+                    rotation_distance = 2.0 * np.arccos(quat_dot)
+                    waypoint_count = max(
+                        waypoint_count,
+                        int(np.ceil(np.linalg.norm(target_tcp - start_tcp) / 0.004)),
+                        int(np.ceil(rotation_distance / np.deg2rad(3.0))),
+                    )
+                    start_tcps.append(start_tcp)
+                    start_quats.append(link_quat)
+                if waypoint_count > 64:
+                    raise RuntimeError(
+                        "Third-fold causal IK lost continuity: "
+                        f"source={source} waypoints={waypoint_count}"
+                    )
+
+                previous_frame_q = causal_q.copy()
+                for waypoint in range(1, waypoint_count + 1):
+                    progress = waypoint / float(waypoint_count)
+                    for hand, (link, arm_indices) in enumerate(
+                        zip(lift_links, lift_arm_indices)
+                    ):
+                        target_tcp, target_quat = frame_targets[hand]
+                        waypoint_tcp = (
+                            (1.0 - progress) * start_tcps[hand]
+                            + progress * target_tcp
+                        )
+                        waypoint_quat = slerp_quat_wxyz(
+                            start_quats[hand], target_quat, progress
+                        )
+                        accepted_q = causal_q.copy()
+                        solved, error = robot.inverse_kinematics(
+                            link=link,
+                            pos=waypoint_tcp,
+                            quat=waypoint_quat,
+                            local_point=TCP_LOCAL,
+                            init_qpos=causal_q,
+                            dofs_idx_local=np.asarray(arm_indices, dtype=np.int64),
+                            max_samples=1,
+                            max_solver_iters=50,
+                            damping=0.05,
+                            max_step_size=0.1,
+                            pos_tol=1.0e-4,
+                            rot_tol=1.0e-4,
+                            return_error=True,
+                        )
+                        candidate_q = as_numpy(solved).reshape(-1)
+                        position_error = float(
+                            np.linalg.norm(as_numpy(error).reshape(-1)[:3])
+                        )
+                        arm_indices_array = np.asarray(arm_indices, dtype=np.int64)
+                        waypoint_joint_delta = float(
+                            np.max(
+                                np.abs(
+                                    candidate_q[arm_indices_array]
+                                    - accepted_q[arm_indices_array]
+                                )
+                            )
+                        )
+                        if position_error > 3.0e-3:
+                            raise RuntimeError(
+                                "Third-fold IK position residual exceeds 3 mm: "
+                                f"source={source} hand={hand} "
+                                f"error_m={position_error:.6f}"
+                            )
+                        if waypoint_joint_delta > 0.05:
+                            raise RuntimeError(
+                                "Third-fold IK waypoint joint delta exceeds "
+                                f"0.05 rad: source={source} hand={hand} "
+                                f"delta_rad={waypoint_joint_delta:.6f}"
+                            )
+                        causal_q = candidate_q
+                        causal_max_error = max(causal_max_error, position_error)
+                # Store the exact full generalized state that was used by the
+                # continuation solve. Keeping only the arm slices can silently
+                # combine them with a different source state and invalidate the
+                # FK target even when the offline IK residual is tiny.
+                causal_q[all_finger_dof_indices] = source_joint_q[
+                    sample, all_finger_dof_indices
+                ]
+                corrected_joint_q[sample] = causal_q
+                robot.set_qpos(corrected_joint_q[sample], zero_velocity=True)
+                for hand, link in enumerate(lift_links):
+                    verified_pos = as_numpy(link.get_pos()).reshape(3)
+                    verified_quat = as_numpy(link.get_quat()).reshape(4)
+                    verified_tcp = (
+                        verified_pos
+                        + quat_wxyz_to_matrix(verified_quat) @ TCP_LOCAL
+                    )
+                    verified_error = float(
+                        np.linalg.norm(verified_tcp - frame_targets[hand][0])
+                    )
+                    if verified_error > 3.0e-3:
+                        raise RuntimeError(
+                            "Third-fold stored-q FK residual exceeds 3 mm: "
+                            f"source={source} hand={hand} "
+                            f"error_m={verified_error:.6f}"
+                        )
+                source_joint_delta = float(
+                    np.max(
+                        np.abs(
+                            causal_q[all_arm_indices]
+                            - previous_frame_q[all_arm_indices]
+                        )
+                    )
+                )
+                causal_max_joint_step = max(
+                    causal_max_joint_step, source_joint_delta
+                )
+                for hand, (target_tcp, _) in enumerate(frame_targets):
+                    causal_max_tcp_step = max(
+                        causal_max_tcp_step,
+                        float(
+                            np.linalg.norm(
+                                target_tcp - previous_accepted_tcps[hand]
+                            )
+                        ),
+                    )
+                    previous_accepted_tcps[hand] = np.asarray(target_tcp).copy()
+            print(
+                "third_fold_causal_ik "
+                f"max_error_m={causal_max_error:.6f} "
+                f"max_joint_step_rad={causal_max_joint_step:.6f} "
+                f"max_tcp_step_mm={causal_max_tcp_step * 1000.0:.3f}"
+            )
+        if (
+            args.third_fold_release_hold
+            and args.third_fold_release_source_frame != 920
+            and int(np.max(source_frames)) >= args.third_fold_release_source_frame
+        ):
+            release_source = args.third_fold_release_source_frame
+            release_open_end = release_source + 25
+            release_samples = np.flatnonzero(source_frames == release_source)
+            if len(release_samples) != 1:
+                raise RuntimeError(
+                    "Early third-fold release requires its source frame exactly "
+                    f"once, got source={release_source} count={len(release_samples)}"
+                )
+            release_sample = int(release_samples[0])
+            right_arm_indices = np.asarray(
+                lift_arm_indices[1], dtype=np.int64
+            )
+            held_q = corrected_joint_q[release_sample].copy()
+            robot.set_qpos(held_q, zero_velocity=True)
+            right_link = lift_links[1]
+            held_pos = as_numpy(right_link.get_pos(relative=False)).reshape(3)
+            held_quat = as_numpy(right_link.get_quat(relative=False)).reshape(4)
+            held_tcp = held_pos + quat_wxyz_to_matrix(held_quat) @ TCP_LOCAL
+            hold_samples = np.flatnonzero(
+                (source_frames >= release_source)
+                & (source_frames <= release_open_end)
+            )
+            corrected_joint_q[
+                hold_samples[:, None], right_arm_indices[None, :]
+            ] = held_q[right_arm_indices][None, :]
+            retreat_q = held_q.copy()
+            retreat_samples = np.flatnonzero(
+                (source_frames > release_open_end) & (source_frames <= 979)
+            )
+            for sample in retreat_samples:
+                sample = int(sample)
+                source = int(source_frames[sample])
+                if args.third_fold_release_retreat_height == 0.0:
+                    corrected_joint_q[sample, right_arm_indices] = held_q[
+                        right_arm_indices
+                    ]
+                    continue
+                retreat = args.third_fold_release_retreat_height * smoothstep(
+                    (source - release_open_end)
+                    / float(979 - release_open_end)
+                )
+                target_tcp = held_tcp + np.array([0.0, 0.0, retreat])
+                robot.set_qpos(retreat_q, zero_velocity=True)
+                solved, error = robot.inverse_kinematics(
+                    link=right_link,
+                    pos=target_tcp,
+                    quat=held_quat,
+                    local_point=TCP_LOCAL,
+                    init_qpos=retreat_q,
+                    dofs_idx_local=right_arm_indices,
+                    max_samples=1,
+                    max_solver_iters=30,
+                    damping=0.05,
+                    max_step_size=0.05,
+                    pos_tol=1.0e-4,
+                    rot_tol=1.0e-4,
+                    return_error=True,
+                )
+                solved = as_numpy(solved).reshape(-1)
+                position_error = float(
+                    np.linalg.norm(as_numpy(error).reshape(-1)[:3])
+                )
+                arm_step = float(
+                    np.max(
+                        np.abs(
+                            solved[right_arm_indices]
+                            - retreat_q[right_arm_indices]
+                        )
+                    )
+                )
+                if position_error > 5.0e-3 or arm_step > 0.05:
+                    raise RuntimeError(
+                        "Early third-fold retreat IK gate failed: "
+                        f"source={source} position_error_m={position_error:.6f} "
+                        f"arm_step_rad={arm_step:.6f}"
+                    )
+                retreat_q = solved
+                corrected_joint_q[sample, right_arm_indices] = retreat_q[
+                    right_arm_indices
+                ]
+
         joint_q = corrected_joint_q
+        if args.resolved_joint_trajectory is not None:
+            resolved_path = require_file(
+                args.resolved_joint_trajectory.expanduser().resolve()
+            )
+            with np.load(resolved_path, allow_pickle=False) as resolved_data:
+                resolved_source_frames = np.asarray(
+                    resolved_data["source_frames"], dtype=np.int64
+                ).reshape(-1)
+                resolved_robot_q = np.asarray(
+                    resolved_data["robot_q"], dtype=np.float64
+                )
+            if resolved_robot_q.shape != (len(resolved_source_frames), joint_q.shape[1]):
+                raise ValueError(
+                    "--resolved-joint-trajectory shape mismatch: "
+                    f"source_frames={resolved_source_frames.shape}, "
+                    f"robot_q={resolved_robot_q.shape}, expected (*, {joint_q.shape[1]})"
+                )
+            if len(np.unique(resolved_source_frames)) != len(resolved_source_frames):
+                raise ValueError("--resolved-joint-trajectory contains duplicate source frames")
+            if not np.all(np.isfinite(resolved_robot_q)):
+                raise ValueError("--resolved-joint-trajectory robot_q contains non-finite values")
+            source_to_sample = {
+                int(source): sample for sample, source in enumerate(source_frames)
+            }
+            applied = 0
+            for override_index, source in enumerate(resolved_source_frames):
+                sample = source_to_sample.get(int(source))
+                if sample is None:
+                    continue
+                joint_q[sample] = resolved_robot_q[override_index]
+                applied += 1
+            if applied == 0:
+                raise ValueError(
+                    "--resolved-joint-trajectory has no source frames in this run"
+                )
+            print(
+                f"resolved_joint_trajectory={resolved_path} applied_frames={applied} "
+                f"source_range={resolved_source_frames.min()}:"
+                f"{resolved_source_frames.max()}"
+            )
         print(
             f"first_grasp_clearance_lift={args.first_grasp_clearance_lift:.4f}m "
             f"first_grasp_left_depth={args.first_grasp_left_depth:.4f}m "
@@ -3623,6 +5666,14 @@ def main() -> None:
             f"second_fold_transport_lift={args.second_fold_transport_lift:.4f}m "
             f"second_fold_roll_arc_height={args.second_fold_roll_arc_height:.4f}m "
             f"second_fold_roll_path={args.second_fold_roll_path} "
+            f"second_fold_corner_grasp_xy="
+            f"({args.second_fold_left_grasp_world_x:.4f},"
+            f"{args.second_fold_left_grasp_world_y:.4f})/"
+            f"({args.second_fold_right_grasp_world_x:.4f},"
+            f"{args.second_fold_right_grasp_world_y:.4f})m "
+            f"second_fold_travel_scale={args.second_fold_travel_scale:.3f} "
+            f"second_fold_peel_lift={args.second_fold_peel_lift:.4f}m "
+            f"second_fold_flip_deg={args.second_fold_flip_deg:.1f} "
             f"second_fold_lift_first_planar_hold={args.second_fold_lift_first_planar_hold} "
             f"second_fold_placement_relax={args.second_fold_placement_relax:.4f}m "
             f"second_fold_placement_lift={args.second_fold_placement_lift:.4f}m "
@@ -3708,7 +5759,7 @@ def main() -> None:
                     f"summary={target_clearance_summary}"
                 )
 
-            if args.third_fold_smooth_rotation:
+            if args.third_fold_smooth_rotation and len(smoothed_right_quats) > 1:
                 smoothed_right_quats = np.asarray(
                     smoothed_right_quats, dtype=np.float64
                 )
@@ -3736,16 +5787,23 @@ def main() -> None:
                         f"single-frame step; summary={rotation_smoothing_summary}"
                     )
 
-            if args.third_fold_release_hold:
+            if (
+                args.third_fold_release_hold
+                and int(np.max(source_frames)) >= args.third_fold_release_source_frame
+            ):
+                release_source = args.third_fold_release_source_frame
+                release_open_end = release_source + 25
                 release_indices = np.flatnonzero(
-                    (source_frames >= 920) & (source_frames <= 979)
+                    (source_frames >= release_source) & (source_frames <= 979)
                 )
-                expected_release_frames = np.arange(920, 980, dtype=np.int64)
+                expected_release_frames = np.arange(
+                    release_source, 980, dtype=np.int64
+                )
                 actual_release_frames = source_frames[release_indices].astype(np.int64)
                 if not np.array_equal(actual_release_frames, expected_release_frames):
                     raise RuntimeError(
                         "Third-fold release continuity gate requires every source "
-                        "frame from 920 through 979"
+                        f"frame from {release_source} through 979"
                     )
 
                 release_tcp = []
@@ -3779,7 +5837,9 @@ def main() -> None:
                 max_arm_joint_step = float(
                     np.max(np.abs(np.diff(release_arm_q, axis=0)))
                 )
-                hold_end = int(np.searchsorted(actual_release_frames, 946))
+                hold_end = int(
+                    np.searchsorted(actual_release_frames, release_open_end + 1)
+                )
                 max_hold_drift = float(
                     np.max(
                         np.linalg.norm(
@@ -3828,10 +5888,20 @@ def main() -> None:
                     or max_hold_drift > 0.0005
                     or max_retreat_xy_drift > 0.001
                     or min_retreat_z_step < -5.0e-5
-                    or not 0.039 <= retreat_rise <= 0.041
-                    or max_finger_source_error > 1.0e-9
-                    or min_opening_finger_step < -1.0e-9
-                    or final_finger_min < 0.0439
+                    or not (
+                        args.third_fold_release_retreat_height - 0.001
+                        <= retreat_rise
+                        <= args.third_fold_release_retreat_height + 0.001
+                    )
+                    or (
+                        release_source == 920
+                        and max_finger_source_error > 1.0e-9
+                    )
+                    or (
+                        release_source == 920
+                        and min_opening_finger_step < -1.0e-9
+                    )
+                    or (release_source == 920 and final_finger_min < 0.0439)
                 ):
                     raise RuntimeError(
                         "Third-fold release continuity gate failed: "
@@ -3998,6 +6068,8 @@ def main() -> None:
             "cloth_thickness": args.cloth_thickness,
             "cloth_bending": args.cloth_bending,
             "cloth_friction": args.cloth_friction,
+            "cloth_self_friction": args.cloth_self_friction,
+            "cloth_table_pair_friction": args.cloth_table_pair_friction,
             "table_friction": args.table_friction,
             "robot_friction": args.robot_friction,
             "initial_shirt": [args.initial_shirt_x, args.initial_shirt_y, args.initial_shirt_z],
@@ -4040,6 +6112,21 @@ def main() -> None:
                 ),
             }
         )
+        if args.action_plan_trajectory:
+            # B/C may append a new suffix but must not rewrite any executed
+            # command. Do not compare container path/size: they change on append.
+            if not 0 <= prefix_source_frame < len(joint_q):
+                raise ValueError("Action-plan checkpoint prefix is outside timeline")
+            digest = hashlib.sha256()
+            for prefix in (joint_q[:prefix_source_frame + 1], openness[:prefix_source_frame + 1]):
+                digest.update(np.ascontiguousarray(prefix, dtype="<f8").tobytes())
+            signature.pop("trajectory")
+            signature.pop("trajectory_size")
+            signature.update({
+                "format": "genesis-ipc-action-plan-prefix-v1",
+                "action_prefix_sha256": digest.hexdigest(),
+                "robot_urdf_sha256": hashlib.sha256(urdf.read_bytes()).hexdigest(),
+            })
         return signature
 
     persistent_save_source_frame = (
@@ -4186,17 +6273,52 @@ def main() -> None:
 
     def finger_targets(frame: int, q: np.ndarray) -> np.ndarray:
         targets = q.copy()
-        if args.finger_overclose <= 0.0 and args.right_finger_overclose_extra <= 0.0:
+        if args.action_plan_trajectory:
+            return targets
+        if (
+            args.finger_overclose <= 0.0
+            and args.right_finger_overclose_extra <= 0.0
+            and args.second_fold_right_overclose_extra <= 0.0
+        ):
             return targets
         close_weight = np.clip((0.5 - openness[frame]) / 0.5, 0.0, 1.0)
         for hand_index, indices in enumerate(finger_dof_indices):
             overclose = args.finger_overclose
+            control_lower = FINGER_URDF_LOWER
             if hand_index == 1:
                 overclose += args.right_finger_overclose_extra
+                if 400 <= int(source_frames[frame]) <= 585:
+                    overclose += args.second_fold_right_overclose_extra
+                    # A negative PD target supplies a small sustained pinch
+                    # force at the physical URDF lower stop.  The actual joint
+                    # remains limited by the robot model and IPC collision; do
+                    # not clamp this second-fold-only control margin away.
+                    control_lower -= (
+                        args.second_fold_right_overclose_extra
+                        * close_weight[hand_index]
+                    )
             targets[indices] = np.maximum(
                 targets[indices] - overclose * close_weight[hand_index],
-                FINGER_URDF_LOWER,
+                control_lower,
             )
+        if args.third_fold_release_hold:
+            source_frame = int(source_frames[frame])
+            release_source = args.third_fold_release_source_frame
+            release_open_end = release_source + 25
+            if source_frame >= release_source:
+                open_weight = smoothstep(
+                    np.clip(
+                        (source_frame - release_source)
+                        / float(release_open_end - release_source),
+                        0.0,
+                        1.0,
+                    )
+                )
+                right_indices = finger_dof_indices[1]
+                targets[right_indices] = (
+                    (1.0 - open_weight) * targets[right_indices]
+                    + open_weight * FINGER_URDF_UPPER
+                )
         return targets
 
     def set_hybrid_kinematic_dofs(frame: int, q: np.ndarray) -> None:
@@ -4237,6 +6359,20 @@ def main() -> None:
 
     def capture_diagnostic_state(source_frame: int, commanded_q: np.ndarray) -> None:
         """Write numeric and visual evidence from one synchronized scene state."""
+        if source_frame in args.contact_dump_frames and not args.replay_states:
+            import importlib.util
+            path = Path(__file__).resolve().parents[1] / 'tools/contact_dump.py'
+            if args.keyframe_diagnostics_dir is not None:
+                output = args.keyframe_diagnostics_dir / f'contacts_{source_frame}.json'
+                if not output.exists():
+                    try:
+                        spec = importlib.util.spec_from_file_location('shirtdemo_contact_dump', path)
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
+                        module.dump_contacts(cloth.sim.coupler, output)
+                    except Exception as error:
+                        output.parent.mkdir(parents=True, exist_ok=True)
+                        output.write_text(json.dumps({'error':repr(error),'source_frame':source_frame}))
         current_q = robot.get_qpos()
         save_second_fold_debug(source_frame, current_q, commanded_q)
         save_third_fold_debug(source_frame, current_q, commanded_q)
@@ -4248,11 +6384,48 @@ def main() -> None:
         right_link = both_debug_links["right_link26"]
         right_pos = as_numpy(right_link.get_pos(relative=False)).reshape(3)
         right_quat = as_numpy(right_link.get_quat(relative=False)).reshape(4)
+        marker_handles = []
+        if (
+            args.debug_second_fold_material_markers
+            and source_frame in (0, 332)
+        ):
+            cloth_positions = as_numpy(cloth.get_state().pos).astype(
+                np.float64
+            ).reshape((-1, 3))
+            marker_specs = (
+                (1248, (2147, 2908, 151, 1323, 851, 1569)),
+                (39, (684, 3052, 2082, 1079, 396, 3310)),
+            )
+            for anchor_id, patch_ids in marker_specs:
+                anchor = cloth_positions[anchor_id]
+                grasp = np.median(cloth_positions[np.asarray(patch_ids)], axis=0)
+                for point, radius, color in (
+                    (anchor, 0.011, (1.0, 0.85, 0.0, 1.0)),
+                    (grasp, 0.007, (1.0, 0.25, 0.0, 1.0)),
+                ):
+                    visible = point + np.array((0.0, 0.0, 0.007))
+                    marker_handles.append(
+                        scene.draw_debug_sphere(
+                            visible,
+                            radius=radius,
+                            color=color,
+                        )
+                    )
+                    marker_handles.append(
+                        scene.draw_debug_line(
+                            point,
+                            visible,
+                            radius=0.0015,
+                            color=color,
+                        )
+                    )
         keyframe_visuals.capture(
             source_frame,
             right_pos + quat_wxyz_to_matrix(right_quat) @ TCP_LOCAL,
             ipc_proxy_visuals if args.visualize_ipc_proxies else None,
         )
+        for handle in marker_handles:
+            scene.clear_debug_object(handle)
 
     start_frame = 0
     previous_q = joint_q[0].copy()
@@ -4260,6 +6433,8 @@ def main() -> None:
     settled_cloth_summary = None
     settled_cloth_snapshot_path = None
     loaded_checkpoint_meta = None
+    checkpoint_material_override = None
+    checkpoint_path_relocation = None
     if args.load_third_fold_checkpoint is not None:
         scene_ckpt, ipc_ckpt, meta_ckpt = checkpoint_sidecars(
             args.load_third_fold_checkpoint
@@ -4271,23 +6446,63 @@ def main() -> None:
         saved_signature = loaded_checkpoint_meta.get("signature")
         load_source_frame = int(loaded_checkpoint_meta["source_frame"])
         expected_load_signature = build_checkpoint_signature(load_source_frame)
-        if saved_signature != expected_load_signature:
-            differing = sorted(
-                key
-                for key in set(saved_signature or {}) | set(expected_load_signature)
-                if (saved_signature or {}).get(key) != expected_load_signature.get(key)
-            )
-            difference_values = {
-                key: {
-                    "saved": (saved_signature or {}).get(key),
-                    "current": expected_load_signature.get(key),
+        differing = sorted(
+            key
+            for key in set(saved_signature or {}) | set(expected_load_signature)
+            if (saved_signature or {}).get(key) != expected_load_signature.get(key)
+        )
+        material_keys = {"cloth_E", "cloth_bending", "cloth_self_friction", "cloth_table_pair_friction"}
+        relocation_keys = {"shirt_obj", "trajectory"}
+        if differing:
+            allowed_differences = set()
+            if args.allow_material_change_on_checkpoint:
+                allowed_differences.update(material_keys)
+            if args.allow_checkpoint_path_relocation:
+                allowed_differences.update(relocation_keys)
+            if set(differing).issubset(allowed_differences):
+                checkpoint_material_override = {
+                    key: {
+                        "checkpoint": (saved_signature or {}).get(key),
+                        "active": expected_load_signature.get(key),
+                    }
+                    for key in differing
+                    if key in material_keys
                 }
-                for key in differing
-            }
-            raise RuntimeError(
-                "Third-fold checkpoint is incompatible with this prefix configuration; "
-                f"differing fields={differing} values={difference_values}"
-            )
+                checkpoint_path_relocation = {
+                    key: {
+                        "checkpoint": (saved_signature or {}).get(key),
+                        "active": expected_load_signature.get(key),
+                    }
+                    for key in differing
+                    if key in relocation_keys
+                }
+                if checkpoint_material_override:
+                    print(
+                        "checkpoint_material_override=allowed "
+                        f"fields={sorted(checkpoint_material_override)} "
+                        f"values={checkpoint_material_override}"
+                    )
+                if checkpoint_path_relocation:
+                    print(
+                        "checkpoint_path_relocation=allowed "
+                        f"fields={sorted(checkpoint_path_relocation)} "
+                        f"values={checkpoint_path_relocation}"
+                    )
+            else:
+                difference_values = {
+                    key: {
+                        "saved": (saved_signature or {}).get(key),
+                        "current": expected_load_signature.get(key),
+                    }
+                    for key in differing
+                }
+                raise RuntimeError(
+                    "Third-fold checkpoint is incompatible with this prefix configuration; "
+                    f"differing fields={differing} values={difference_values}. "
+                    "Use --allow-material-change-on-checkpoint only for a segment-local "
+                    "material sensitivity screen, and --allow-checkpoint-path-relocation "
+                    "only for verified host-path migration."
+                )
         scene.load_checkpoint(scene_ckpt)
         scene._t = int(loaded_checkpoint_meta["scene_t"])
         scene._sim._cur_substep_global = int(
@@ -4393,6 +6608,17 @@ def main() -> None:
             if args.record_multi_view
             else {primary_record_view: camera}
         )
+        closeup_hand='right' if args.replay_six_view else args.replay_closeup_hand
+        closeup_name=closeup_hand+'_grasp'
+        if closeup_hand=='left' and 'right_grasp' in replay_cameras:
+            replay_cameras['left_grasp']=replay_cameras.pop('right_grasp')
+        overview_name='overview'
+        if args.replay_overview_left_grasp:
+            if closeup_hand!='right' or 'overview' not in replay_cameras:
+                raise ValueError('Overview-left replacement needs multiview with right closeup')
+            overview_name='left_grasp'
+            replay_cameras[overview_name]=replay_cameras.pop('overview')
+            if primary_record_view=='overview':primary_record_view=overview_name
         replay_outputs = {}
         replay_encoders = {}
         for view_name in replay_cameras:
@@ -4425,16 +6651,23 @@ def main() -> None:
                     )
                 scene._visualizer.update(force=True)
 
-                right_link = both_debug_links["right_link26"]
+                right_link = both_debug_links['left_link16' if closeup_hand=='left' else 'right_link26']
                 right_pos = as_numpy(right_link.get_pos(relative=False)).reshape(3)
                 right_quat = as_numpy(right_link.get_quat(relative=False)).reshape(4)
                 right_tcp = right_pos + quat_wxyz_to_matrix(right_quat) @ TCP_LOCAL
-                if "right_grasp" in replay_cameras:
-                    replay_cameras["right_grasp"].set_pose(
-                        pos=tuple(right_tcp + np.array((0.26, -0.32, 0.18))),
+                if closeup_name in replay_cameras:
+                    replay_cameras[closeup_name].set_pose(
+                        pos=tuple(right_tcp + np.array((0.26, .32 if closeup_hand=='left' else -.32, 0.18))),
                         lookat=tuple(right_tcp),
                         up=(0.0, 0.0, 1.0),
                     )
+                if args.replay_overview_left_grasp or args.replay_six_view:
+                    left_link=both_debug_links['left_link16']
+                    left_pos=as_numpy(left_link.get_pos(relative=False)).reshape(3)
+                    left_quat=as_numpy(left_link.get_quat(relative=False)).reshape(4)
+                    left_tcp=left_pos+quat_wxyz_to_matrix(left_quat)@TCP_LOCAL
+                    replay_cameras['left_grasp'].set_pose(
+                        pos=tuple(left_tcp+np.array((.20,.22,.12))),lookat=tuple(left_tcp),up=(0.,0.,1.))
                 for view_name, replay_camera in replay_cameras.items():
                     rgb = replay_camera.render(
                         rgb=True,
@@ -4477,18 +6710,24 @@ def main() -> None:
                     f"{args.output.stem}_multiview{args.output.suffix}"
                 )
                 command = [ffmpeg, "-y"]
-                for view_name in (
-                    "overview",
+                ordered_replay_views=(
+                    overview_name,
                     "overhead",
                     "shirt_bottom",
-                    "right_grasp",
-                ):
+                    args.replay_closeup_hand+'_grasp',
+                )
+                if args.replay_six_view:
+                    ordered_replay_views=('overview','overhead','shirt_bottom','left_grasp','right_grasp','base_side')
+                for view_name in ordered_replay_views:
                     command.extend(("-i", str(replay_outputs[view_name])))
+                stack_filter=(
+                    '[0:v][1:v][2:v][3:v][4:v][5:v]xstack=inputs=6:layout=0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0:fill=black[out]'
+                    if args.replay_six_view else
+                    '[0:v][1:v][2:v][3:v]xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0:fill=black[out]')
                 command.extend(
                     (
                         "-filter_complex",
-                        "[0:v][1:v][2:v][3:v]"
-                        "xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0:fill=black[out]",
+                        stack_filter,
                         "-map",
                         "[out]",
                         "-c:v",
@@ -4517,6 +6756,7 @@ def main() -> None:
                 str(replay_multiview) if replay_multiview is not None else None
             ),
             "physics_advanced": False,
+            "closeup_hand": args.replay_closeup_hand,
         }
         manifest_path = args.output.with_suffix(".replay.json")
         manifest_path.write_text(
@@ -4600,6 +6840,8 @@ def main() -> None:
     checkpoint = None
     checkpoint_path = args.output.with_suffix(".third_fold_checkpoint.pkl")
     persistent_checkpoint_saved = False
+    persistent_checkpoints_saved = {}
+    validate_checkpoint_save_frames(persistent_checkpoint_requests, source_frames, start_frame)
     for frame in range(start_frame, len(joint_q)):
         target_q = joint_q[frame]
         tick = time.perf_counter()
@@ -4671,14 +6913,17 @@ def main() -> None:
                 virtual_grasp.report_tracking(int(source_frames[frame]))
         step_times.append(time.perf_counter() - tick)
         previous_q = target_q
+        save_source_frame = int(source_frames[frame])
         if (
-            args.save_third_fold_checkpoint is not None
-            and not persistent_checkpoint_saved
-            and int(source_frames[frame]) == persistent_save_source_frame
+            save_source_frame in persistent_checkpoint_requests
+            and save_source_frame not in persistent_checkpoints_saved
         ):
             scene_ckpt, ipc_ckpt, meta_ckpt = checkpoint_sidecars(
-                args.save_third_fold_checkpoint
+                persistent_checkpoint_requests[save_source_frame]
             )
+            for target in (scene_ckpt, ipc_ckpt, meta_ckpt):
+                if target.exists() or target.is_symlink():
+                    raise FileExistsError(f"Refusing to overwrite checkpoint file: {target}")
             scene_ckpt.parent.mkdir(parents=True, exist_ok=True)
             scene.save_checkpoint(scene_ckpt)
             checkpoint_arrays = snapshot_ipc_state(cloth.sim.coupler)
@@ -4687,7 +6932,7 @@ def main() -> None:
                     diagnostic_initial_cloth_pos
                 )
             np.savez_compressed(ipc_ckpt, **checkpoint_arrays)
-            save_signature = build_checkpoint_signature(persistent_save_source_frame)
+            save_signature = build_checkpoint_signature(save_source_frame)
             persistent_meta = {
                 "format": save_signature["format"],
                 "source_frame": int(source_frames[frame]),
@@ -4703,7 +6948,14 @@ def main() -> None:
             meta_ckpt.write_text(
                 json.dumps(persistent_meta, indent=2), encoding="utf-8"
             )
-            persistent_checkpoint_saved = True
+            persistent_checkpoints_saved[save_source_frame] = {
+                "scene": str(scene_ckpt), "ipc": str(ipc_ckpt), "meta": str(meta_ckpt)
+            }
+            if (
+                args.save_third_fold_checkpoint is not None
+                and save_source_frame == persistent_save_source_frame
+            ):
+                persistent_checkpoint_saved = True
             print(
                 "persistent_third_fold_checkpoint_saved "
                 f"source_frame={int(source_frames[frame])} scene={scene_ckpt} "
@@ -4884,12 +7136,13 @@ def main() -> None:
                 )
 
     checkpoint_verify = None
-    if (
-        args.save_third_fold_checkpoint is not None and not persistent_checkpoint_saved
-    ):
+    missing_checkpoints = sorted(
+        set(persistent_checkpoint_requests) - set(persistent_checkpoints_saved)
+    )
+    if missing_checkpoints:
         raise RuntimeError(
-            "Requested persistent checkpoint source frame was not present: "
-            f"{persistent_save_source_frame}"
+            "Requested persistent checkpoint source frames were not saved: "
+            f"{missing_checkpoints}"
         )
     tcp_telemetry_file.close()
     if args.verify_third_fold_checkpoint:
@@ -5002,9 +7255,11 @@ def main() -> None:
     ipc_proxy_pose_diagnostics = (
         ipc_proxy_visuals.finish() if ipc_proxy_visuals is not None else None
     )
-    second_fold_motion_summary = summarize_second_fold_motion(second_fold_debug_dir)
-    fold_layering_summary = summarize_fold_layering(second_fold_debug_dir)
-    third_fold_motion_summary = summarize_third_fold_motion(third_fold_debug_dir)
+    # Explicit action plans have a new timeline. The legacy 340/620 boundaries
+    # do not identify their folds and must not produce misleading PASS/FAILs.
+    second_fold_motion_summary = None if args.action_plan_trajectory else summarize_second_fold_motion(second_fold_debug_dir)
+    fold_layering_summary = None if args.action_plan_trajectory else summarize_fold_layering(second_fold_debug_dir)
+    third_fold_motion_summary = None if args.action_plan_trajectory else summarize_third_fold_motion(third_fold_debug_dir)
 
     # Viewer recording is independent of Camera recording. The stock Viewer
     # deletes its temporary video when the window closes if the user started
@@ -5073,6 +7328,8 @@ def main() -> None:
         "cloth_areal_density_kg_m2": args.cloth_rho * args.cloth_thickness,
         "cloth_bending": args.cloth_bending,
         "cloth_friction": args.cloth_friction,
+        "cloth_self_friction": args.cloth_self_friction,
+        "cloth_table_pair_friction": args.cloth_table_pair_friction,
         "table_friction": args.table_friction,
         "robot_friction": args.robot_friction,
         "fast_preview": args.fast_preview,
@@ -5125,6 +7382,31 @@ def main() -> None:
         "second_fold_transport_lift": args.second_fold_transport_lift,
         "second_fold_roll_arc_height": args.second_fold_roll_arc_height,
         "second_fold_roll_path": args.second_fold_roll_path,
+        "second_fold_left_grasp_world_x": args.second_fold_left_grasp_world_x,
+        "second_fold_left_grasp_world_y": args.second_fold_left_grasp_world_y,
+        "second_fold_right_grasp_world_x": args.second_fold_right_grasp_world_x,
+        "second_fold_right_grasp_world_y": args.second_fold_right_grasp_world_y,
+        "second_fold_travel_scale": args.second_fold_travel_scale,
+        "second_fold_causal_ik": args.second_fold_causal_ik,
+        "second_fold_terminal_center_inset": (
+            args.second_fold_terminal_center_inset
+        ),
+        "second_fold_terminal_center_inset_start": (
+            args.second_fold_terminal_center_inset_start
+        ),
+        "second_fold_material_plan": (
+            str(args.second_fold_material_plan)
+            if args.second_fold_material_plan is not None
+            else None
+        ),
+        "resolved_joint_trajectory": (
+            str(args.resolved_joint_trajectory.expanduser().resolve())
+            if args.resolved_joint_trajectory is not None
+            else None
+        ),
+        "action_plan_trajectory": args.action_plan_trajectory,
+        "second_fold_peel_lift": args.second_fold_peel_lift,
+        "second_fold_flip_deg": args.second_fold_flip_deg,
         "second_fold_lift_first_planar_hold": args.second_fold_lift_first_planar_hold,
         "second_fold_placement_relax": args.second_fold_placement_relax,
         "second_fold_placement_lift": args.second_fold_placement_lift,
@@ -5138,6 +7420,8 @@ def main() -> None:
         "third_fold_right_grasp_lateral": args.third_fold_right_grasp_lateral,
         "third_fold_right_grasp_world_x": args.third_fold_right_grasp_world_x,
         "third_fold_right_grasp_world_y": args.third_fold_right_grasp_world_y,
+        "third_fold_grasp_extra_world_x": args.third_fold_grasp_extra_world_x,
+        "third_fold_grasp_extra_world_y": args.third_fold_grasp_extra_world_y,
         "third_fold_placement_depth": args.third_fold_placement_depth,
         "third_fold_post_close_lift": args.third_fold_post_close_lift,
         "third_fold_outward_pull_cancel": args.third_fold_outward_pull_cancel,
@@ -5145,6 +7429,14 @@ def main() -> None:
         "third_fold_placement_level": args.third_fold_placement_level,
         "third_fold_front_plane_roll_deg": args.third_fold_front_plane_roll_deg,
         "third_fold_smooth_rotation": args.third_fold_smooth_rotation,
+        "third_fold_causal_ik": args.third_fold_causal_ik,
+        "third_fold_release_hold": args.third_fold_release_hold,
+        "third_fold_release_source_frame": (
+            args.third_fold_release_source_frame
+        ),
+        "third_fold_release_retreat_height": (
+            args.third_fold_release_retreat_height
+        ),
         "debug_third_fold_dir": (
             str(third_fold_debug_dir) if third_fold_debug_dir is not None else None
         ),
@@ -5164,6 +7456,11 @@ def main() -> None:
         "third_fold_motion_summary": third_fold_motion_summary,
         "viewer_recording": str(viewer_recording_path) if viewer_recording_path else None,
         "third_fold_checkpoint_verify": checkpoint_verify,
+        "persistent_checkpoints_saved": persistent_checkpoints_saved,
+        "persistent_checkpoints_requested": {
+            str(source_frame): str(path)
+            for source_frame, path in persistent_checkpoint_requests.items()
+        },
         "persistent_third_fold_checkpoint_saved": (
             str(checkpoint_sidecars(args.save_third_fold_checkpoint)[0])
             if persistent_checkpoint_saved
@@ -5182,6 +7479,10 @@ def main() -> None:
             if loaded_checkpoint_meta is not None
             else None
         ),
+        "checkpoint_material_override": checkpoint_material_override,
+        "checkpoint_path_relocation": checkpoint_path_relocation,
+        "allow_material_change_on_checkpoint": args.allow_material_change_on_checkpoint,
+        "allow_checkpoint_path_relocation": args.allow_checkpoint_path_relocation,
         "finger_kp": args.finger_kp,
         "finger_kv": args.finger_kv,
         "contact_grasp_summary": (
@@ -5201,6 +7502,7 @@ def main() -> None:
             "thickness": args.cloth_thickness,
             "bending_stiffness": args.cloth_bending,
             "friction_mu": args.cloth_friction,
+            "self_friction_mu": args.cloth_self_friction,
         },
         "entities": {"table": str(table.uid), "robot": str(robot.uid), "cloth": str(cloth.uid)},
     }
