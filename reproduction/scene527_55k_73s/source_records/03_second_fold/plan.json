@@ -1,0 +1,585 @@
+{
+  "stage": "second_collar_height_sync",
+  "start_frame": 1135,
+  "reference_frame": 1135,
+  "fps": 60,
+  "start": {
+    "left": {
+      "pos": [
+        0.40004529984423404,
+        0.2389007145033141,
+        0.8112963425147962
+      ],
+      "quat": [
+        0.7661492640602509,
+        -0.0014279847153978668,
+        0.6424123908816769,
+        0.017876970696297474
+      ],
+      "opening": 0.0
+    },
+    "right": {
+      "pos": [
+        0.40004722564251016,
+        -0.304899284081402,
+        0.8112967101186238
+      ],
+      "quat": [
+        0.7661494388082851,
+        0.0014272322629093994,
+        0.64241213946842,
+        -0.017878576157650244
+      ],
+      "opening": 0.0
+    }
+  },
+  "actions": [
+    {
+      "id": "D_release_old",
+      "duration_frames": 72,
+      "left": {
+        "pos": [
+          0.40004529984423404,
+          0.2389007145033141,
+          0.8112963425147962
+        ],
+        "quat": [
+          0.7661492640602509,
+          -0.0014279847153978668,
+          0.6424123908816769,
+          0.017876970696297474
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.40004722564251016,
+          -0.304899284081402,
+          0.8112967101186238
+        ],
+        "quat": [
+          0.7661494388082851,
+          0.0014272322629093994,
+          0.64241213946842,
+          -0.017878576157650244
+        ],
+        "opening": 0.014666666666666666
+      }
+    },
+    {
+      "id": "D_clear_old_grip",
+      "duration_frames": 45,
+      "left": {
+        "pos": [
+          0.40004529984423404,
+          0.2389007145033141,
+          0.8512963425147962
+        ],
+        "quat": [
+          0.7661492640602509,
+          -0.0014279847153978668,
+          0.6424123908816769,
+          0.017876970696297474
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.40004722564251016,
+          -0.304899284081402,
+          0.8512967101186238
+        ],
+        "quat": [
+          0.7661494388082851,
+          0.0014272322629093994,
+          0.64241213946842,
+          -0.017878576157650244
+        ],
+        "opening": 0.014666666666666666
+      },
+      "position_end_velocity_mps": {
+        "left": [
+          0,
+          0,
+          0.025
+        ],
+        "right": [
+          0,
+          0,
+          0.025
+        ]
+      }
+    },
+    {
+      "id": "D_pregrasp",
+      "duration_frames": 90,
+      "left": {
+        "pos": [
+          0.7293942955699065,
+          0.19108877628992346,
+          0.8515859138409093
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.606101601340571,
+          -0.30127807952858593,
+          0.8469486457324762
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.014666666666666666
+      },
+      "position_end_velocity_mps": {
+        "left": [
+          0,
+          0,
+          -0.03
+        ],
+        "right": [
+          0,
+          0,
+          -0.03
+        ]
+      }
+    },
+    {
+      "id": "D_grasp",
+      "duration_frames": 72,
+      "left": {
+        "pos": [
+          0.7293942955699065,
+          0.19108877628992346,
+          0.8044964420238927
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.606101601340571,
+          -0.30127807952858593,
+          0.8044121624446648
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.014666666666666666
+      }
+    },
+    {
+      "id": "D_close",
+      "duration_frames": 72,
+      "left": {
+        "pos": [
+          0.7293942955699065,
+          0.19108877628992346,
+          0.8044964420238927
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.606101601340571,
+          -0.30127807952858593,
+          0.8044121624446648
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.0
+      }
+    },
+    {
+      "id": "D_lift50",
+      "duration_frames": 72,
+      "left": {
+        "pos": [
+          0.6693942955699066,
+          0.19108877628992346,
+          0.9550000000000001
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.5961016013405712,
+          -0.30127807952858593,
+          0.905
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.0
+      },
+      "position_end_velocity_mps": {
+        "left": [
+          -0.04,
+          0,
+          0
+        ],
+        "right": [
+          -0.025,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "D_transport_air",
+      "duration_frames": 240,
+      "left": {
+        "pos": [
+          0.4035,
+          0.21586133817288788,
+          0.89
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.401,
+          -0.316707587437421,
+          0.89
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.0
+      }
+    },
+    {
+      "id": "D_open_one_third",
+      "duration_frames": 36,
+      "left": {
+        "pos": [
+          0.4035,
+          0.21586133817288788,
+          0.89
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.401,
+          -0.316707587437421,
+          0.89
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.014666666666666666
+      }
+    },
+    {
+      "id": "D_open_while_retreat",
+      "duration_frames": 45,
+      "left": {
+        "pos": [
+          0.4035,
+          0.21586133817288788,
+          0.9315859138409093
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.401,
+          -0.316707587437421,
+          0.9269486457324763
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.014666666666666666
+      }
+    },
+    {
+      "id": "D_observe_fall",
+      "duration_frames": 60,
+      "left": {
+        "pos": [
+          0.4035,
+          0.21586133817288788,
+          0.9315859138409093
+        ],
+        "quat": [
+          0.7661493837129114,
+          -0.0014249735403269897,
+          0.6424123853725259,
+          0.01787228040056887
+        ],
+        "opening": 0.014666666666666666
+      },
+      "right": {
+        "pos": [
+          0.401,
+          -0.316707587437421,
+          0.9269486457324763
+        ],
+        "quat": [
+          0.7661546237906298,
+          0.001427434361769679,
+          0.6424059536142315,
+          -0.017878636311845296
+        ],
+        "opening": 0.014666666666666666
+      }
+    }
+  ],
+  "phase_frames": {
+    "D_release_old": {
+      "start": 1135,
+      "end": 1207
+    },
+    "D_clear_old_grip": {
+      "start": 1207,
+      "end": 1252
+    },
+    "D_pregrasp": {
+      "start": 1252,
+      "end": 1342
+    },
+    "D_grasp": {
+      "start": 1342,
+      "end": 1414
+    },
+    "D_close": {
+      "start": 1414,
+      "end": 1486
+    },
+    "D_lift50": {
+      "start": 1486,
+      "end": 1558
+    },
+    "D_transport_air": {
+      "start": 1558,
+      "end": 1798
+    },
+    "D_open_one_third": {
+      "start": 1798,
+      "end": 1834
+    },
+    "D_open_while_retreat": {
+      "start": 1834,
+      "end": 1879
+    },
+    "D_observe_fall": {
+      "start": 1879,
+      "end": 1939
+    }
+  },
+  "picked_record": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_tidy_x400_review/edits/regrasp_points_20260928T131047.443019Z.json",
+  "material_world_m": {
+    "left": [
+      0.7293942955699066,
+      0.19108877628992346,
+      0.8017227107532878
+    ],
+    "right": [
+      0.6061016013405711,
+      -0.301278079528586,
+      0.8016513926631877
+    ]
+  },
+  "grasp_tcp_offset_z_m": {
+    "left": 0.0035000000000000005,
+    "right": 0.0033125000000000003
+  },
+  "additional_grasp_lower_mm": {
+    "left": 6.5,
+    "right": 2.0
+  },
+  "transport_raise_mm": 20.0,
+  "transport_raise_semantics": "Raise lifted transport and air release together; keep grasp/pregrasp unchanged; no final vertical press",
+  "timing_speed_factors": {
+    "empty": 2.0,
+    "near_cloth": 1.25,
+    "loaded": 1.25,
+    "gripper": 1.25
+  },
+  "gripper_text": "",
+  "note": "Release old closed grip before retreat. Current mirrored orientation. Historical second-fold TCP offsets L+10/R+5.3125mm are provisional, revalidated by IK. Use user drop XY at original grasp TCP Z+50mm plus transport_raise_mm; deeper grasp does not lower release. No vertical pressing/lowering. No extra spread beyond user XY; no intermediate pure waits. Terminal 60f observes falling cloth. Native55k depth-only replay from current checkpoint; old material identities are not rebound.",
+  "picked_record_sha256": "07126803a3e089c209d7054fe836942ee9fd98fbd29b6ada171bdb49fdc7b298",
+  "seam_adjustment": {
+    "right_lift_x_m": -0.01,
+    "scope": "Grasp and release unchanged; approach transfer earlier during right lift to avoid observed joint jump",
+    "source": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_deeper_pull_review/runs/20260928T024933848482Z/action_plans/20260928T024934290714Z/plan.json",
+    "source_sha256": "44d359c044052dd22cfa7228946f60a0e0d320fb48e31a65ce1c7271c25d1e1a"
+  },
+  "depth_revision": {
+    "lower_m": {
+      "left": 0.0005894718170166016,
+      "right": 0.0005364832878112793
+    },
+    "only_action_ids": [
+      "D_grasp",
+      "D_close"
+    ],
+    "scope": "Only selected grasp/close Z endpoints change. XY, orientation, timing, opening and all other endpoints fixed. No cloth point remapping."
+  },
+  "active_hand": "left",
+  "depth_source_plan": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_deeper_pull_review/runs/20260928T024933848482Z/action_plans/20260928T025036775250Z/plan.json",
+  "depth_source_sha256": "cf9ec359a18c6404188c45ad097f2b17a66eb26a8991c049debf2eb159e1d5f3",
+  "placement_revision": {
+    "hand": "right",
+    "picked_record": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_deeper_pull_review/edits/regrasp_points_20260928T033830.560002Z.json",
+    "picked_sha256": "99648fbbfb50276f73ad633fa0b8395a35742d85bcab00d10774d6c9073fd79a",
+    "source_plan": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_deeper_pull_review/runs/20260928T024933848482Z/depth_search/action_plans/20260928T025153525928Z/plan.json",
+    "source_sha256": "a00890b257c60ca9c1b9993b1b51e7fad94c537348ebcedcbf57823ad05ce9b9",
+    "scope": "Explicit requested hand placement XY only. Keep air-release Z, both grasps/depths, poses/timing and opposite placement; retain10mm right lift seam adaptation.",
+    "input_reference_world_m": [
+      0.4740446081280061,
+      -0.2902867375060976,
+      0.8081471333985304
+    ]
+  },
+  "diagnosis_semantics": "New material grasp XY and drop XY; preserve proven per-phase TCP Z/orientation/timing and right lift X-10mm. JSON Z is reference, not TCP. No physics.",
+  "source_plan": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/right_drop_revision/20260928T034416792266Z/action_plans/20260928T034417237815Z/plan.json",
+  "height_trial": {
+    "transport_z_mm": 880.0,
+    "left_lift_pull_mm": 20.0,
+    "left_release_x_mm": null,
+    "left_retreat_x_mm": null,
+    "preserved": "grasp XYZ, release XY, posture, durations, retreat endpoints; right lift X-10mm retained"
+  },
+  "both_release_x_mm": 405.0,
+  "distance_constraint": {
+    "target_m": 0.5125689256103089,
+    "extra_mm": 5.0,
+    "adjusted_left_y_m": 0.20586133817288788
+  },
+  "gripper_events": [],
+  "partial_release": {
+    "source_plan": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_tidy_x400_review/diagnostics/20260928T131355430940Z/action_plans/20260928T131355865816Z/plan.json",
+    "source_sha256": "8a1452b67cf9bdd4b7f5732d132161599d8d1eb90e3ab7edc26229bd4a45a4b6",
+    "fraction": 0.3333333333333333,
+    "stationary_frames": 36,
+    "moving_frames": 45,
+    "original_retreat": true,
+    "retreat_delta_m": {
+      "left": [
+        0.0,
+        0.0,
+        0.04158591384090926
+      ],
+      "right": [
+        0.0,
+        0.0,
+        0.03694864573247625
+      ]
+    },
+    "note": "Commanded aperture, not force control. Old pickup and transport preserved; no physical success claim."
+  },
+  "aperture_revision": {
+    "source_plan": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_partial_release_original_036_045/action_plans/20260928T140203729571Z/plan.json",
+    "sha256": "2bf44f432944c2460ac00eb3d96da61437e2f99b9495022b7625ee27aa101b57",
+    "maximum_per_finger_m": 0.014666666666666666,
+    "close_target_m": 0,
+    "left_release_dx_m": 0.0025,
+    "grasp_center_shift_m": 0,
+    "semantics": "All open endpoints capped at one third original stroke.0.6s release to cap,0.75s original retreat holding cap. No extra center shift or force-control claim. Third-fold future cap is0.022m, not executed here."
+  },
+  "drop_spread_each_mm": 10.0,
+  "high_transport_revision": {
+    "source": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_aperture_third_left407p5/action_plans/20260928T143919064076Z/plan.json",
+    "sha256": "3bd4ef239093a453582fbbecee41e51a5c56c0c9cc921e512da894abe4f420c2",
+    "high_z_m": {
+      "left": 0.9550000000000001,
+      "right": 0.905
+    },
+    "release_z_m": 0.89,
+    "left_early_pull_m": 0.06,
+    "semantics": "No left-first wait; both lift simultaneously and share240f smooth transport/descent to890mm. Left lift extra height equals measured collar-to-left material grasp distance.",
+    "collar": {
+      "face": 36172,
+      "barycentric": [
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333
+      ],
+      "vertex_ids": [
+        19159,
+        24359,
+        23406
+      ],
+      "source_frame": 1135,
+      "world_m": [
+        0.632328450679779,
+        0.2165339191754659,
+        0.8015782237052917
+      ],
+      "left_grasp_distance_m": 0.10034567463128154,
+      "target_high_z_m": {
+        "left": 0.9550000000000001,
+        "right": 0.905
+      },
+      "semantics": "User overrides measured-distance compensation with fixed left-extra height; distance retained for provenance only.",
+      "user_override_left_extra_mm": 50.0
+    }
+  }
+}

@@ -1,0 +1,1550 @@
+{
+  "schema": "scene527-seven-stage-reproduction-v1",
+  "frames": 4373,
+  "fps": 60,
+  "cloth": "assets/cloth/short-shirt-55068f.obj",
+  "robot_urdf": "assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf",
+  "trajectory": "controls/trajectory.npz",
+  "preset": "configs/source_preset.args",
+  "topology": {
+    "vertices": 27811,
+    "faces": 55068
+  },
+  "stages": [
+    {
+      "id": "01_first_fold",
+      "name": "first_fold",
+      "frame_range": [
+        0,
+        739
+      ],
+      "previous_checkpoint": null,
+      "checkpoint_archive": "checkpoints/01_first_fold.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "f8a33e5b85ad25ee1e94922daa61b49500bcf65130b2da105542646b7d5fd958"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2712,
+          "sha256": "4b27123ea3ee0fb1da3d5be870efa3c048b7082edb400570d45f0a66fad979af"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1504094,
+          "sha256": "f4cc527d9d9ad5c78eb934a314cf7562374be6b51582d64b86574da3c4ae60c2"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 739,
+        "trajectory_index": 739,
+        "scene_t": 1540,
+        "sim_substep_global": 1540,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          -0.1210135668516159,
+          2.721544027328491,
+          2.605868101119995,
+          -1.284493327140808,
+          -0.046389926224946976,
+          -0.14445479214191437,
+          0.044,
+          0.044,
+          -0.0581270195543766,
+          2.6882150173187256,
+          2.5606167316436768,
+          -1.267101526260376,
+          0.01541182678192854,
+          -0.03207758441567421,
+          0.044,
+          0.044
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 739,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "252d262354864c7dbb9f43ae5d1f39f264f5a1124a2c470b2e1a8ec69c7e1922",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/01_first_fold.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "740",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93
+      }
+    },
+    {
+      "id": "02_first_pull",
+      "name": "first_pull",
+      "frame_range": [
+        740,
+        1135
+      ],
+      "previous_checkpoint": "01_first_fold",
+      "checkpoint_archive": "checkpoints/02_first_pull.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "e736ac66d78116102759bb16aa3af2b408e55c813eec09a6d48c67d3eac8a02b"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2714,
+          "sha256": "1107acf29549a21c1dc10450076c92a09ee9431ebc94cb6e447f0dba132b3812"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1535749,
+          "sha256": "ec8cc352c8ccff497c896ec341ae871b49736ad7f8435c1691fdceb7fd42ca71"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 1135,
+        "trajectory_index": 1135,
+        "scene_t": 2332,
+        "sim_substep_global": 2332,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          -0.09432438760995865,
+          1.6902127265930176,
+          0.4765177369117737,
+          -0.1853151172399521,
+          -0.04184236004948616,
+          -0.11813019216060638,
+          0.0,
+          0.0,
+          -0.25716865062713623,
+          1.7078062295913696,
+          0.49860474467277527,
+          -0.18590496480464935,
+          -0.01952940784394741,
+          -0.2280382364988327,
+          0.0,
+          0.0
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 1135,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "53112841606f581b4476b05c71b6f537f5125e08fc3a50b8ea45b3248b176a44",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/02_first_pull.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "1136",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93
+      }
+    },
+    {
+      "id": "03_second_fold",
+      "name": "second_fold",
+      "frame_range": [
+        1136,
+        1939
+      ],
+      "previous_checkpoint": "02_first_pull",
+      "checkpoint_archive": "checkpoints/03_second_fold.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "5e847c20d61ff7991c7b336418be001af94c3bc8cffc6c98290a479616746725"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2779,
+          "sha256": "f4da92892108801aaad92745246b334e3fe77fe0e14014b55105da4ccca6e43d"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1527768,
+          "sha256": "d16c1871ee537436c85c6bb8f7bb8809dc2bc658fad6af41d1b89943f5c0a426"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 1939,
+        "trajectory_index": 1939,
+        "scene_t": 3940,
+        "sim_substep_global": 3940,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          -0.20325227081775665,
+          1.3420207500457764,
+          0.7738454937934875,
+          -0.8363198637962341,
+          -0.060182809829711914,
+          -0.2256331443786621,
+          0.014666666666666666,
+          0.014666666666666666,
+          -0.3101283311843872,
+          1.36051607131958,
+          0.7680642008781433,
+          -0.8038972020149231,
+          -0.028760218992829323,
+          -0.28020238876342773,
+          0.014666666666666666,
+          0.014666666666666666
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 1939,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "64dcce1d67eab8de7775a479891a4eb9a02bc48affd7a4cd85e3c9cbf3d29b2c",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/03_second_fold.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "1940",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93
+      }
+    },
+    {
+      "id": "04_third_right",
+      "name": "third_right",
+      "frame_range": [
+        1940,
+        2614
+      ],
+      "previous_checkpoint": "03_second_fold",
+      "checkpoint_archive": "checkpoints/04_third_right.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "8f3d60b5b61b24e3583d9f33b136999e14463e9ead7a496059def803804adcef"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2747,
+          "sha256": "85e1ce426a2f0843cb94eb23e0390e01d232ff8aeef7c6c60d099b3d70a873f3"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1525421,
+          "sha256": "3961964a4eeaf5b1b4354097ea8bd6f5c2a4ef17e76bbdfd8575782565806156"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 2614,
+        "trajectory_index": 2614,
+        "scene_t": 5290,
+        "sim_substep_global": 5290,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          -0.20325227081775665,
+          1.3420207500457764,
+          0.7738454937934875,
+          -0.8363198637962341,
+          -0.060182809829711914,
+          -0.2256331443786621,
+          0.014666666666666666,
+          0.014666666666666666,
+          0.28676557540893555,
+          1.604480266571045,
+          1.0114113092422485,
+          -0.7020707726478577,
+          -0.7453519105911255,
+          0.39511656761169434,
+          0.022,
+          0.022
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 2614,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "1e67d2489d50831368843774065b351ef9808a598a31a893dee7abd8eab58245",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/04_third_right.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "2615",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93",
+        "--contact-dump-frames",
+        "2108",
+        "2128",
+        "2143",
+        "2158",
+        "2182",
+        "2206",
+        "2290",
+        "2374",
+        "2434",
+        "2494",
+        "2531",
+        "2569",
+        "2591",
+        "2614"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93
+      }
+    },
+    {
+      "id": "05_third_left",
+      "name": "third_left",
+      "frame_range": [
+        2615,
+        3292
+      ],
+      "previous_checkpoint": "04_third_right",
+      "checkpoint_archive": "checkpoints/05_third_left.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "036dd7c8ac70f4358be1b9c28c1a4ab4f3234e06a6cc2ed22390dfe5e8068628"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2714,
+          "sha256": "de25fa00610392de2347b0cd5428e9e82f437c3ed102342e830ee508bc10377d"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1533824,
+          "sha256": "a11a2b4366600e8e197038962b8e872953ad0c2588485af533aac5c626892940"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 3292,
+        "trajectory_index": 3292,
+        "scene_t": 6646,
+        "sim_substep_global": 6646,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          -0.5429187417030334,
+          1.6570111513137817,
+          1.0433577299118042,
+          -0.4802705943584442,
+          0.650302529335022,
+          -0.7064340710639954,
+          0.022,
+          0.022,
+          -0.29562103748321533,
+          1.7445558309555054,
+          1.1671137809753418,
+          -1.2768319845199585,
+          -0.7429109811782837,
+          -0.4066719114780426,
+          0.022,
+          0.022
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 3292,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "c9c0d6d48a4a9f271ac2c3f4056d0399008842814afb2563c545c1d652e8d4e0",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/05_third_left.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "3293",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93",
+        "--contact-dump-frames",
+        "2786",
+        "2806",
+        "2821",
+        "2836",
+        "2860",
+        "2884",
+        "2968",
+        "3052",
+        "3112",
+        "3172",
+        "3209",
+        "3247",
+        "3269",
+        "3292"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93
+      }
+    },
+    {
+      "id": "06_sweep",
+      "name": "sweep",
+      "frame_range": [
+        3293,
+        3592
+      ],
+      "previous_checkpoint": "05_third_left",
+      "checkpoint_archive": "checkpoints/06_sweep.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "953425230e4aadd0593153d05f2ca567114a25c9b9648600976920430da66c64"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2713,
+          "sha256": "b26ea07233e9b123fb78ec1d6ee10cb9805ef1d2da21052ead2d2487a5eec085"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1531091,
+          "sha256": "e9774528b44082ac096b9558eae8159180bad0a8312209656c092e6a855441a3"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 3592,
+        "trajectory_index": 3592,
+        "scene_t": 7246,
+        "sim_substep_global": 7246,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          -0.8896582722663879,
+          2.4772756099700928,
+          2.049976110458374,
+          -1.1434907913208008,
+          2.382973462999871e-07,
+          -0.8896577954292297,
+          0.0,
+          0.0,
+          -0.29562103748321533,
+          1.7445558309555054,
+          1.1671137809753418,
+          -1.2768319845199585,
+          -0.7429109811782837,
+          -0.4066719114780426,
+          0.022,
+          0.022
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 3592,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "f59525afe60a83a7fbbc4dec1a8d191c7eb5b195956b0b636322539bfb8f13f8",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/06_sweep.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "3593",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93",
+        "--contact-dump-frames",
+        "3382",
+        "3427",
+        "3449",
+        "3472",
+        "3517",
+        "3562",
+        "3577",
+        "3592"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93
+      }
+    },
+    {
+      "id": "07_press_slide_home",
+      "name": "press_slide_home",
+      "frame_range": [
+        3593,
+        4372
+      ],
+      "previous_checkpoint": "06_sweep",
+      "checkpoint_archive": "checkpoints/07_press_slide_home.tar.gz",
+      "checkpoint_members": {
+        "checkpoint.pkl": {
+          "bytes": 70006230,
+          "sha256": "38a3d70b94c3517d873eb6a09895821c6599c369339e6528c70e432ce4359531"
+        },
+        "checkpoint.meta.json": {
+          "bytes": 2826,
+          "sha256": "0db165ac0a6c0df631c14af3d398d1aecdc2c54ae6fc248af10d9080448f681b"
+        },
+        "checkpoint.ipc_state.npz": {
+          "bytes": 1503502,
+          "sha256": "11480a262edfb0d32b79a873ba9bc6295177773fe1ff4847264db43b671e96bf"
+        }
+      },
+      "checkpoint_meta": {
+        "format": "genesis-ipc-action-plan-prefix-v1",
+        "source_frame": 4372,
+        "trajectory_index": 4372,
+        "scene_t": 8806,
+        "sim_substep_global": 8806,
+        "previous_q": [
+          -1.0324662902405635e-08,
+          -1.0869571021032698e-08,
+          1.0839153574693228e-08,
+          0.01633414626121521,
+          0.09313822537660599,
+          0.00027902182773686945,
+          0.008716324344277382,
+          -0.007105274125933647,
+          0.017046628519892693,
+          0.04399922315776348,
+          0.04399922315776348,
+          0.007566210348159075,
+          0.01623239554464817,
+          5.7670578826218843e-05,
+          0.005387809593230486,
+          0.01679011434316635,
+          0.001073648571036756,
+          0.03647502325475216,
+          0.03647502325475216
+        ],
+        "signature": {
+          "format": "genesis-ipc-action-plan-prefix-v1",
+          "prefix_source_frame": 4372,
+          "shirt_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+          "shirt_obj_size": 2551348,
+          "cloth_vertices": 27811,
+          "trajectory_stride": 1,
+          "action_fps": 60.0,
+          "physics_dt": 0.008333333333333333,
+          "substeps": 2,
+          "drive_mode": "direct",
+          "robot_coup_type": "two_way_soft_constraint",
+          "two_way_coupling": false,
+          "contact_d_hat": 0.0015,
+          "cloth_E": 20000.0,
+          "cloth_rho": 800.0,
+          "cloth_thickness": 0.0001,
+          "cloth_bending": 40.0,
+          "cloth_friction": 1.0,
+          "cloth_self_friction": 2.0,
+          "cloth_table_pair_friction": 1.0,
+          "table_friction": 1.0,
+          "robot_friction": 2.0,
+          "initial_shirt": [
+            0.667,
+            0.015,
+            0.93
+          ],
+          "settle_frames": 60,
+          "finger_overclose": 0.001,
+          "right_finger_overclose_extra": 0.00025,
+          "finger_kp": 1000.0,
+          "finger_kv": 50.0,
+          "exact_finger_collision": true,
+          "ipc_constraint_strength_translation": 300.0,
+          "ipc_constraint_strength_rotation": 1000.0,
+          "ipc_rigid_rigid_contact": true,
+          "first_grasp_clearance_lift": 0.04,
+          "first_grasp_left_depth": 0.008,
+          "first_grasp_left_world_y": 0.0,
+          "first_grasp_right_depth": 0.003,
+          "first_fold_tcp_lift": 0.015,
+          "first_fold_transfer_lift": 0.05,
+          "first_fold_stack_overlap": -0.015,
+          "second_fold_left_approach_lift": 0.06,
+          "second_fold_right_approach_lift": 0.08,
+          "second_fold_transport_lift": 0.0,
+          "second_fold_roll_arc_height": 0.04,
+          "second_fold_roll_path": "smooth_arc",
+          "second_fold_lift_first_planar_hold": false,
+          "second_fold_placement_relax": 0.06,
+          "second_fold_placement_lift": 0.0,
+          "second_fold_stack_overlap": 0.125,
+          "second_fold_correction_release_start": 600,
+          "second_fold_correction_release_end": 619,
+          "action_prefix_sha256": "de83a1aa15713109910f7bcadb8eb8a3ca02b716ffa3e6d44cf5ed8b53f73d0e",
+          "robot_urdf_sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d"
+        },
+        "diagnostic_reference_source_frame": 0
+      },
+      "replay": "reference_replays/07_press_slide_home.npz",
+      "args": [
+        "--action-plan-trajectory",
+        "--frames",
+        "4373",
+        "--action-fps",
+        "60.0",
+        "--expected-cloth-vertices",
+        "27811",
+        "--expected-cloth-faces",
+        "55068",
+        "--cloth-bending",
+        "40.0",
+        "--cloth-E",
+        "20000.0",
+        "--cloth-self-friction",
+        "2.0",
+        "--initial-shirt-x",
+        "0.667",
+        "--initial-shirt-y",
+        "0.015",
+        "--initial-shirt-z",
+        "0.93",
+        "--cloth-table-pair-friction",
+        "1.0",
+        "--no-shadows",
+        "--allow-material-change-on-checkpoint",
+        "--contact-dump-frames",
+        "3727",
+        "3802",
+        "3877",
+        "3967",
+        "4372"
+      ],
+      "source_physics": {
+        "action_fps": 60.0,
+        "cloth_bending": 40.0,
+        "cloth_E": 20000.0,
+        "cloth_self_friction": 2.0,
+        "initial_shirt_x": 0.667,
+        "initial_shirt_y": 0.015,
+        "initial_shirt_z": 0.93,
+        "cloth_table_pair_friction": 1.0
+      }
+    }
+  ],
+  "files": {
+    "controls/trajectory.npz": {
+      "bytes": 140577,
+      "sha256": "fc95729acd82e2293f31535fe073e449eac5be3c8a807a2c5c34bbbfab090464",
+      "role": "robot_command",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/trajectory.npz"
+    },
+    "assets/cloth/short-shirt-55068f.obj": {
+      "bytes": 2551348,
+      "sha256": "92ad1f68995a2d8b827d9de1c896465f436b8384c38d311abc9eadbbec9cf9cd",
+      "role": "cloth",
+      "source": "transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj"
+    },
+    "assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf": {
+      "bytes": 23595,
+      "sha256": "391193ceae0a63c7679530e700a2f2641855c79bb80f7055fe6f7cf7d43c013d",
+      "role": "robot_urdf",
+      "source": "assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf"
+    },
+    "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link1.STL": {
+      "bytes": 161284,
+      "sha256": "86fe043261954c68f8cca7ca8531774a595a4e0a94c868de7b682cbe349e437d",
+      "role": "robot_mesh",
+      "source": "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link1.STL"
+    },
+    "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link2.STL": {
+      "bytes": 2147584,
+      "sha256": "d039c569b210418477d03614e541a2cb610a34d56c95cf39eea05fd89be77a0d",
+      "role": "robot_mesh",
+      "source": "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link2.STL"
+    },
+    "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link3.STL": {
+      "bytes": 957184,
+      "sha256": "56b33fcb12291193a6374ecd6c9ef75a40c7c2c560ad0a16d28214362320f801",
+      "role": "robot_mesh",
+      "source": "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link3.STL"
+    },
+    "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link4.STL": {
+      "bytes": 136584,
+      "sha256": "f7d2b7388f59bd7acac4c4e0f06e3681850731ea2db8a48e9d7db7217b656755",
+      "role": "robot_mesh",
+      "source": "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link4.STL"
+    },
+    "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link5.STL": {
+      "bytes": 734584,
+      "sha256": "f5fc02334a63f980bb5d843711d44530e3cfefb89fa0b0b8aa3b3851e3d61929",
+      "role": "robot_mesh",
+      "source": "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link5.STL"
+    },
+    "assets/robots/dual_x5_2025_ipc_v1/meshes/left_link15_ipc_hull.obj": {
+      "bytes": 17914,
+      "sha256": "d887ae9a9bb1b198c595ddd72d7fb246b006ca74bc7909dd3cccc9a70fb83b27",
+      "role": "robot_mesh",
+      "source": "assets/robots/dual_x5_2025_ipc_v1/meshes/left_link15_ipc_hull.obj"
+    },
+    "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/62449317_left_link16.STL": {
+      "bytes": 1148884,
+      "sha256": "d61fff9fc22912d6d58852501b8405b76c009589af9cc173c4bef8682221cfac",
+      "role": "robot_mesh",
+      "source": "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/62449317_left_link16.STL"
+    },
+    "assets/robots/dual_x5_2025_ipc_v1/meshes/left_link16_ipc_hull.obj": {
+      "bytes": 15133,
+      "sha256": "e25491b460e508de9aef0fa0a7800882f66e5ab82b8256e1908c7f48523e69df",
+      "role": "robot_mesh",
+      "source": "assets/robots/dual_x5_2025_ipc_v1/meshes/left_link16_ipc_hull.obj"
+    },
+    "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/456a019e_left_link17.STL": {
+      "bytes": 375084,
+      "sha256": "5aeb93355602e61df81584cd98ed6ceda6c0fd68d331971f920a3adb6a2d54c9",
+      "role": "robot_mesh",
+      "source": "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/456a019e_left_link17.STL"
+    },
+    "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/e3fbb293_left_link18.STL": {
+      "bytes": 383684,
+      "sha256": "e7264a85a9d3a8a5f83ebea631497a040553f20c8d107a75db181d0186c28a35",
+      "role": "robot_mesh",
+      "source": "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/e3fbb293_left_link18.STL"
+    },
+    "assets/robots/dual_x5_2025_ipc_v1/meshes/right_link25_ipc_hull.obj": {
+      "bytes": 17914,
+      "sha256": "d887ae9a9bb1b198c595ddd72d7fb246b006ca74bc7909dd3cccc9a70fb83b27",
+      "role": "robot_mesh",
+      "source": "assets/robots/dual_x5_2025_ipc_v1/meshes/right_link25_ipc_hull.obj"
+    },
+    "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/8d891049_right_link26.STL": {
+      "bytes": 1148884,
+      "sha256": "8aec01a9ab9c86b95682863eef860e583c6039cc5679238266a5811e00e8d817",
+      "role": "robot_mesh",
+      "source": "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/8d891049_right_link26.STL"
+    },
+    "assets/robots/dual_x5_2025_ipc_v1/meshes/right_link26_ipc_hull.obj": {
+      "bytes": 15132,
+      "sha256": "3fe26e2aca302365e4a48384dd9bb991a1c52e05865823a1f510727669adedda",
+      "role": "robot_mesh",
+      "source": "assets/robots/dual_x5_2025_ipc_v1/meshes/right_link26_ipc_hull.obj"
+    },
+    "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/d17ab828_right_link27.STL": {
+      "bytes": 375084,
+      "sha256": "9af488e36fac2cd6aa5c39351afad8c5065be84f8636fd7178fa29486f6b5c3d",
+      "role": "robot_mesh",
+      "source": "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/d17ab828_right_link27.STL"
+    },
+    "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/98b471b0_right_link28.STL": {
+      "bytes": 383684,
+      "sha256": "3671b257d78e21961388b8bfab09caeb3657e4596b96b0ceb4bf3403dfcdb522",
+      "role": "robot_mesh",
+      "source": "transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/98b471b0_right_link28.STL"
+    },
+    "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/base_link.STL": {
+      "bytes": 722784,
+      "sha256": "0c3b630320f94609da92957b1c95f090541e96e7e5a3a3f6389db6ccbdcc7c4d",
+      "role": "robot_mesh",
+      "source": "transport/arx_x5_official_20260920/extracted_2025/X5/meshes/base_link.STL"
+    },
+    "configs/source_preset.args": {
+      "bytes": 1896,
+      "sha256": "44f40083e5ec643a0e8f4a22142982a00d7256fb2e16c1067b3e6e0b62c6ab43",
+      "role": "physics_preset",
+      "source": "src/genesis_ipc_shirt_demo/configs/dhat_1p5_pure_friction.args"
+    },
+    "checkpoints/01_first_fold.tar.gz": {
+      "bytes": 10105328,
+      "sha256": "1788461f1d87e8f9ab0471c236deaf4b4cedc6c3c58a9a872a35161abc599cdf",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/01_first_fold.npz": {
+      "bytes": 213289138,
+      "sha256": "0cb3facac9e85532317fb580d2eb6b412c7bcbc1700ae893e029c86c1c2b44b6",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/01_first_fold/metrics.json": {
+      "bytes": 11157,
+      "sha256": "5efb170d4a77a6528ab9a518c9e9a1182483cf54ba605435dba5aa4400a47e14",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/run_bundle/stage_physics.json"
+    },
+    "source_records/01_first_fold/tcp.csv": {
+      "bytes": 177931,
+      "sha256": "39136d27e04b3fc34e41b1cb02b94f2e6f9e1007991e4d1bab8a9cad843961e6",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/01_first_fold/source_config.json": {
+      "bytes": 5685,
+      "sha256": "3e3969e905cd661d42fa529f6e7f6b7ac3b7e6d58410471f2c485e29b2f27dc9",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/config.json"
+    },
+    "source_records/01_first_fold/manifest.json": {
+      "bytes": 5490,
+      "sha256": "00aed3e191f92f3f073703595762c81f7b9583d11360b992aa451d74edddecff",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/run_bundle/manifest.json"
+    },
+    "source_records/01_first_fold/plan.json": {
+      "bytes": 11957,
+      "sha256": "f303b1448312b8adf87dac08b3ba3d088bf9b638351dbd7c63ee6bf3c52158ff",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/plan.json"
+    },
+    "checkpoints/02_first_pull.tar.gz": {
+      "bytes": 10155655,
+      "sha256": "0cbcd8fe0fb02cb0ff09914b9984d38fdeaf2ed2d0d4c68efecc46d6a9ff06d6",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/02_first_pull.npz": {
+      "bytes": 115229450,
+      "sha256": "58f5d293c603a1c0c5771f95de9cd5c76aba8a919ecdaf72e67968bbc896ea52",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/02_first_pull/metrics.json": {
+      "bytes": 10577,
+      "sha256": "db16ee84aa9bc2d942e228d0a68927f41a69408672191ce559efe8e72e697409",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_physics.json"
+    },
+    "source_records/02_first_pull/tcp.csv": {
+      "bytes": 96566,
+      "sha256": "3aa4ca3ee97afc24f5120ba1e60e0aa53fa3187bac70b083a644c05e0ceacda7",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/02_first_pull/source_config.json": {
+      "bytes": 6889,
+      "sha256": "2608ea19f12d37c24837ceac4773b46f6ecd6cde80af414a1580b7a846c0d2ec",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/config.json"
+    },
+    "source_records/02_first_pull/manifest.json": {
+      "bytes": 5787,
+      "sha256": "043b5d80ed9ed8e33dae5ce4101e2476cb99a1e1b792e111e6a777fded812b91",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/manifest.json"
+    },
+    "source_records/02_first_pull/plan.json": {
+      "bytes": 4844,
+      "sha256": "deb63f7151cf2fc9d1a3bc90db517d5872680279f19dde296a1ac1c1f5e9079b",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/plan.json"
+    },
+    "checkpoints/03_second_fold.tar.gz": {
+      "bytes": 10155541,
+      "sha256": "8fdf3a89bad217235abd649fc9e569d596333c5b2f56498d474d15712c07022e",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/03_second_fold.npz": {
+      "bytes": 238248536,
+      "sha256": "474e6777f1f1efa6db59dbd31da484edebd880a6c4f265854fc801a7b07d9ca7",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/03_second_fold/metrics.json": {
+      "bytes": 10560,
+      "sha256": "cea2aaecffa09ae34695005e757401ff5591b2b5927d9fd13786adbfdadaa884",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/run_bundle/stage_physics.json"
+    },
+    "source_records/03_second_fold/tcp.csv": {
+      "bytes": 197597,
+      "sha256": "05a445c7af1e724b8a4b3c2eddd2c10d62666d0222120b2758c75bebc6676fc2",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/03_second_fold/source_config.json": {
+      "bytes": 6286,
+      "sha256": "681ca3533da9fcf852ac7bfbf80ee966cae6db840b8cee02bb339748203762fe",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/config.json"
+    },
+    "source_records/03_second_fold/manifest.json": {
+      "bytes": 6201,
+      "sha256": "2237d4ca69b1c6cd67039fa7918321617517c6a4f245dcb091116504ed0b697c",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/run_bundle/manifest.json"
+    },
+    "source_records/03_second_fold/plan.json": {
+      "bytes": 16199,
+      "sha256": "22de6f8477ce286ed68c39442e96d6c3432a19b08f758ba87cea44c230caf85d",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/plan.json"
+    },
+    "checkpoints/04_third_right.tar.gz": {
+      "bytes": 10159976,
+      "sha256": "b5773118604558fa2acc8898a1480e686d74867aee161ebc248dea3f5f3e5150",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/04_third_right.npz": {
+      "bytes": 201689395,
+      "sha256": "218b5ace654072f62ac10cc76bdb732b40c610e084400664e0d892a26c65bd36",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/04_third_right/metrics.json": {
+      "bytes": 9559,
+      "sha256": "5a16a6dbccf2fc7699cd075d273559a48e9d3254d9747aa314bb9882f8ab2c45",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/run_bundle/stage_physics.json"
+    },
+    "source_records/04_third_right/tcp.csv": {
+      "bytes": 164151,
+      "sha256": "ee5c365318bf7dcf3eea49d42be01923b6f27dc16ee969a95f5328c1f8b3e4a1",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/04_third_right/source_config.json": {
+      "bytes": 6356,
+      "sha256": "82015a96695a65dfd1f6af36c25fe644119a0635a6f90c0b1d797198e7c5b256",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/config.json"
+    },
+    "source_records/04_third_right/manifest.json": {
+      "bytes": 6654,
+      "sha256": "84636b5d0ac26a0651268aead6264200cf7b5055dbff1ec0b135c268619e3dcf",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/run_bundle/manifest.json"
+    },
+    "source_records/04_third_right/plan.json": {
+      "bytes": 10029,
+      "sha256": "d82c10ad06a2303bfd89c95af020034365aa4b08d043718d1d8c86295f342ef4",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/plan.json"
+    },
+    "checkpoints/05_third_left.tar.gz": {
+      "bytes": 10179840,
+      "sha256": "95e227270a1e1f77be8a888525ec315430d4766aeeafcf2e56b67d8e66e5ad09",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/05_third_left.npz": {
+      "bytes": 204614524,
+      "sha256": "6590305bbf5a75b5a43e2b1031b61f446d33497d38cd6753a18713ad98f7cea4",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/05_third_left/metrics.json": {
+      "bytes": 10371,
+      "sha256": "602d56f26a942f06133ccfd8bfbfa0957ae1830883b6b733dbccfa794b6fb708",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/stage_physics.json"
+    },
+    "source_records/05_third_left/tcp.csv": {
+      "bytes": 165763,
+      "sha256": "193c2c732680e54bcf5789e5e2db94ed33ea59f95f7592aaea99d532d06ca869",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/05_third_left/source_config.json": {
+      "bytes": 6410,
+      "sha256": "8795198317c83ab6fc7ca81237dc1dc7d522300e065805f1cac411b1b409b841",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/config.json"
+    },
+    "source_records/05_third_left/manifest.json": {
+      "bytes": 6687,
+      "sha256": "fa6d0f9807d5297edd39ad0d9938cb62e33a0dea1f013120f6af8780a2771a88",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/manifest.json"
+    },
+    "source_records/05_third_left/plan.json": {
+      "bytes": 9627,
+      "sha256": "9c616eafdea0c1a81bb21df0d67d517798df7de33ecf45cfc10497fa4ba76016",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/plan.json"
+    },
+    "checkpoints/06_sweep.tar.gz": {
+      "bytes": 10177121,
+      "sha256": "f95a8a8b2794553a7996b3d28d568150afaad9542f6c272041a1266179cca92a",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/06_sweep.npz": {
+      "bytes": 91110083,
+      "sha256": "42372ee1e5b125dcf74418e3d3b7b62432cf494b5fdcd55c1b641762e919e8f7",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/06_sweep/metrics.json": {
+      "bytes": 9493,
+      "sha256": "394f448d535e98facf39855b662b4496956c1840a4cf8449267eae1f0a54d1ed",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/stage_physics.json"
+    },
+    "source_records/06_sweep/tcp.csv": {
+      "bytes": 73967,
+      "sha256": "df1b93ab4ca7d8ecdc59741ccd9771f182df3a3e3cf2e3a99568ebf33bd1b705",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/06_sweep/source_config.json": {
+      "bytes": 6509,
+      "sha256": "e9cb9c4d001e72e190819495ab16366d136eabd51b4fc7bd3ba97e1a477130c9",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/config.json"
+    },
+    "source_records/06_sweep/manifest.json": {
+      "bytes": 6439,
+      "sha256": "e98e4d16a8d86d88c90e88ca28f763e94e6a81221e28ce5e51f48961db3a0e5c",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/manifest.json"
+    },
+    "source_records/06_sweep/plan.json": {
+      "bytes": 5524,
+      "sha256": "503e62627d5397a5138d0b8db92d180b52aa1cc1cd01e1a31875e787c8630482",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/plan.json"
+    },
+    "checkpoints/07_press_slide_home.tar.gz": {
+      "bytes": 10112244,
+      "sha256": "6b3f2aa28cdc9e793ef71ae5c18cab6b1afd2755faeb657bfa7d1915a289813b",
+      "role": "checkpoint_archive",
+      "source": null
+    },
+    "reference_replays/07_press_slide_home.npz": {
+      "bytes": 229145926,
+      "sha256": "4738ad6d2792ca7268f4bcfdb87d744aa19dd64f80ba512c065f938a967c25b4",
+      "role": "saved_replay",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/stage_physics.replay_states.npz"
+    },
+    "source_records/07_press_slide_home/metrics.json": {
+      "bytes": 10020,
+      "sha256": "066acc6db1d4431ba55e7cb541d2e9d7911be713b07dde41ff8313ad7b75e06d",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/stage_physics.json"
+    },
+    "source_records/07_press_slide_home/tcp.csv": {
+      "bytes": 190472,
+      "sha256": "a7b37a73d2c6f352512fe0ffcdb7ebd79a606396fe405a7770919fd1f7734f12",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/stage_physics_tcp_trajectory.csv"
+    },
+    "source_records/07_press_slide_home/source_config.json": {
+      "bytes": 6992,
+      "sha256": "d963bac026d37dd7aae6a802997189668940c2b63483d54cc2657716bb069e61",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/config.json"
+    },
+    "source_records/07_press_slide_home/manifest.json": {
+      "bytes": 6037,
+      "sha256": "643e5ef6e9cf4af15de1139815ab88e8d0aaecbe37a48f5ceabc2a0ec559fc39",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/manifest.json"
+    },
+    "source_records/07_press_slide_home/plan.json": {
+      "bytes": 3858,
+      "sha256": "86c8bf6fb5bde2646680c03569368d779ba180297a7c9cef79aaefcc23a56562",
+      "role": "source_record",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/plan.json"
+    },
+    "reference/hero.mp4": {
+      "bytes": 24055512,
+      "sha256": "9ad6f0b620c41c67c11a81ab758a745de154f4d74a9bad6d20888edc17f180ae",
+      "role": "reference_video",
+      "source": "outputs/workbench/scene527_55068/deliverables/20260930_segmented73s_closer_third_fourview/hero_closer/deliverables/hero.mp4"
+    },
+    "isaac/cloth_overlay.usda": {
+      "bytes": 3641934,
+      "sha256": "5486d97c2107ac575d3caad4148ebccc37a603e45e4f11fc3ab0e363be389ec2",
+      "role": "isaac_input",
+      "source": "outputs/workbench/scene527_55068/deliverables/20260930_segmented73s_closer_third_fourview/hero_closer/scene.usda"
+    },
+    "isaac/robot_overlay.usda": {
+      "bytes": 38094740,
+      "sha256": "567f268f1d1dfe48e253b02fca65fc1cd1bd1958e5f586cd7a8f245934cf1aa6",
+      "role": "isaac_input",
+      "source": "outputs/material-calibration/scene527_55068/render-tests/dual_x5_right_grasp_v4/scene.usda"
+    },
+    "isaac/robot_visuals.npz": {
+      "bytes": 5655519,
+      "sha256": "47c8c96f6ba15a8e2ff5815f9012b8969969cd2c8f0221cbf5a8893338dcdd79",
+      "role": "isaac_input",
+      "source": "outputs/workbench/scene527_55068/deliverables/20260930_segmented73s_closer_third_fourview/hero_closer/robot.npz"
+    },
+    "isaac/renderer.py": {
+      "bytes": 12996,
+      "sha256": "b65082a97bffb09d70c84f462aaf8d9b80830e1ea3e497eb65aa182db41dfa5f",
+      "role": "isaac_input",
+      "source": "outputs/workbench/scene527_55068/deliverables/20260930_segmented73s_closer_third_fourview/hero_closer/renderer.py"
+    },
+    "isaac/controller.py": {
+      "bytes": 14795,
+      "sha256": "e734e8e5dec28b503025b925463e6bff7b05261e29750352985b9c787ae8b30f",
+      "role": "isaac_input",
+      "source": "render_jobs/scene527_8000_raytraced_hero_isaac50/adapted/hero_raytraced_controller.py"
+    },
+    "isaac/frozen_scene.tar.gz": {
+      "bytes": 88434183,
+      "sha256": "5ae40cd493e75ae4bd6fe9457b7f26d5431f3735f9a8dbd61416812b8f2bbf8e",
+      "role": "isaac_scene_archive",
+      "source": null
+    },
+    "isaac/settings.json": {
+      "bytes": 684,
+      "sha256": "8d2ba7904881c1d7915e151ffcf490ebb85bdd9f7cd9b56fb2d27c6e69faf73a",
+      "role": "isaac_settings",
+      "source": null
+    }
+  },
+  "checkpoint_native_cache_restored": false,
+  "physics_continuous": false,
+  "publication_scope": "user-requested reproduction data on existing repository branch",
+  "isaac": {
+    "cloth_overlay": "isaac/cloth_overlay.usda",
+    "robot_overlay": "isaac/robot_overlay.usda",
+    "robot_visuals": "isaac/robot_visuals.npz",
+    "renderer": "isaac/renderer.py",
+    "controller": "isaac/controller.py",
+    "frozen_scene_archive": "isaac/frozen_scene.tar.gz",
+    "settings": "isaac/settings.json"
+  },
+  "isaac_dependency_audit": {
+    "layers": 3,
+    "resolved_scene_assets": 442,
+    "required_builtin_mdl": "OmniPBR.mdl supplied by Isaac runtime",
+    "cpu_audited": true,
+    "gpu_render_rerun": false
+  }
+}

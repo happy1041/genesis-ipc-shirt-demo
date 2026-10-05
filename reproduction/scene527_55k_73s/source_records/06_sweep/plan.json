@@ -1,0 +1,243 @@
+{
+  "stage": "55k_closed_left_sweep_z865_extraY25",
+  "active_hand": "left",
+  "start_frame": 3292,
+  "reference_frame": 3292,
+  "fps": 60,
+  "start": {
+    "left": {
+      "pos": [
+        0.4303894289092574,
+        -0.03608893680645138,
+        0.9806905137086588
+      ],
+      "quat": [
+        0.6532821517081101,
+        -0.27059903527886287,
+        0.6532804851199652,
+        -0.27059785684146426
+      ],
+      "opening": 0.022
+    },
+    "right": {
+      "pos": [
+        0.43835038461305953,
+        -0.19997135263246663,
+        0.9838481402039663
+      ],
+      "quat": [
+        0.6532836629370051,
+        0.2705995220078663,
+        0.653279654577114,
+        0.2705957267665742
+      ],
+      "opening": 0.022
+    }
+  },
+  "actions": [
+    {
+      "id": "P_close_air",
+      "duration_frames": 45,
+      "left": {
+        "pos": [
+          0.4303894289092574,
+          -0.03608893680645138,
+          0.9806905137086588
+        ],
+        "quat": [
+          0.6532821517081101,
+          -0.27059903527886287,
+          0.6532804851199652,
+          -0.27059785684146426
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    },
+    {
+      "id": "P_preclose",
+      "duration_frames": 90,
+      "left": {
+        "pos": [
+          0.46657,
+          -0.0433,
+          0.92
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      },
+      "position_end_velocity_mps": {
+        "left": [
+          0,
+          0,
+          -0.04
+        ]
+      }
+    },
+    {
+      "id": "P_press",
+      "duration_frames": 45,
+      "left": {
+        "pos": [
+          0.46657,
+          -0.0433,
+          0.865
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    },
+    {
+      "id": "P_push",
+      "duration_frames": 90,
+      "left": {
+        "pos": [
+          0.46657,
+          -0.11550897379440764,
+          0.865
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    },
+    {
+      "id": "X_settle",
+      "duration_frames": 30,
+      "left": {
+        "pos": [
+          0.46657,
+          -0.11550897379440764,
+          0.865
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    }
+  ],
+  "phase_frames": {
+    "P_close_air": {
+      "start": 3292,
+      "end": 3337
+    },
+    "P_preclose": {
+      "start": 3337,
+      "end": 3427
+    },
+    "P_press": {
+      "start": 3427,
+      "end": 3472
+    },
+    "P_push": {
+      "start": 3472,
+      "end": 3562
+    },
+    "X_settle": {
+      "start": 3562,
+      "end": 3592
+    }
+  },
+  "gripper_text": "",
+  "gripper_events": [],
+  "interaction_mode": "closed_gripper_push",
+  "picked_record": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_descend_sweep_review/edits/regrasp_points_20260929T015938.676646Z.json",
+  "picked_record_sha256": "f44d8cfa17e4a95c9fb8427636367f8967950ce076d217e5f55a3a0e34120848",
+  "planner_sha256": "ee959eb265186638cea30c8bc14c2cf6893990789cf56562845079f50c6970be",
+  "note": "Stop closed at B, settle0.5s; no further press, push or retreat. A.z is TCP reference; geometry preflight saved separately.",
+  "revision": {
+    "parent_plan": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_descend_sweep_run_v2/action_plans/20260929T020226958725Z/plan.json",
+    "parent_sha256": "6feffbede28e9237251d621269c8ab79b5edafb9ffda6e81d402cefd223dfd6a",
+    "z_delta_m": -0.005,
+    "end_y_delta_m": -0.025,
+    "rotation": "Complete vertical rotation during approach; continuous descent with nonzero approach end velocity",
+    "saved_frames": 45
+  }
+}

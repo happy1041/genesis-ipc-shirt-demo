@@ -1,0 +1,43 @@
+{
+  "frames": 4373,
+  "fps": 60,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "chunk_size": 120,
+  "views": [
+    "hero"
+  ],
+  "camera_config": {
+    "hero": {
+      "mode": "static",
+      "pos_m": [
+        0.5449379061659178,
+        1.1689282039801279,
+        1.5040329535802206
+      ],
+      "lookat_m": [
+        -0.36518628150224686,
+        2.9067846119403837,
+        0.8120988607406616
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "fov_deg": 55,
+      "near_m": 0.03,
+      "far_m": 100.0
+    }
+  },
+  "demo_translation_m": [
+    -1,
+    2.925,
+    0
+  ],
+  "rt_subframes": 2,
+  "expected_cloth_vertices": 27811,
+  "expected_cloth_faces": 55068
+}

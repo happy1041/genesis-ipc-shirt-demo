@@ -1,0 +1,208 @@
+{
+  "name": "55k第三折末态：左爪下降＋负Y扫平点位",
+  "active_segment": "action_continuation",
+  "replay": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/stage_physics.replay_states.npz",
+  "cloth_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+  "atlas": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/native55k.garment_atlas.npz",
+  "robot_urdf": "/home/hasinon/ShirtDemo/assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf",
+  "ik_orientation_mode": "full",
+  "robot_base_pos_m": [
+    0,
+    0,
+    0.17
+  ],
+  "patch_output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/patches",
+  "tcp_csvs": [
+    "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/stage_physics_tcp_trajectory.csv"
+  ],
+  "video_segments": [
+    {
+      "source_range": [
+        2615,
+        3292
+      ],
+      "video": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/stage_overhead.mp4",
+      "video_frame_start": 0
+    }
+  ],
+  "camera": {
+    "view": "overhead",
+    "resolution": [
+      800,
+      600
+    ],
+    "pos_m": [
+      1.48,
+      0,
+      2.45
+    ],
+    "lookat_m": [
+      0.68,
+      0,
+      0.8
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "vertical_fov_deg": 42
+  },
+  "default_frame": 3292,
+  "display_frame_range": [
+    2615,
+    3292
+  ],
+  "trajectory_editor": {
+    "stage": "action_continuation",
+    "label": "上一动作末态 → 下一动作",
+    "default_hand": "left",
+    "frame_range": [
+      2615,
+      3292
+    ],
+    "limits": {
+      "max_step_mm": 12.5,
+      "max_speed_mps": 0.75,
+      "max_accel_mps2": 20.0
+    },
+    "phases": [
+      {
+        "id": "completed",
+        "label": "已完成动作",
+        "range": [
+          2615,
+          3292
+        ],
+        "color": "#357d83"
+      }
+    ],
+    "events": [
+      {
+        "frame": 3292,
+        "label": "新动作起点 / checkpoint",
+        "kind": "boundary"
+      }
+    ],
+    "hands": {
+      "left": {
+        "label": "left",
+        "color": "#48d58a",
+        "material_contact_frame": 3292,
+        "nodes": [
+          {
+            "frame": 2615,
+            "name": "completed start",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 3292,
+            "name": "checkpoint / next start",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 2615,
+            "zero": true
+          },
+          {
+            "frame": 3292,
+            "zero": true
+          }
+        ]
+      },
+      "right": {
+        "label": "right",
+        "color": "#ff6b78",
+        "material_contact_frame": 3292,
+        "nodes": [
+          {
+            "frame": 2615,
+            "name": "completed start",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 3292,
+            "name": "checkpoint / next start",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 2615,
+            "zero": true
+          },
+          {
+            "frame": 3292,
+            "zero": true
+          }
+        ]
+      }
+    },
+    "material_anchors": []
+  },
+  "planning_command_trajectory": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/trajectory.npz",
+  "action_plan_ik": {
+    "min_tool_table_clearance_m": 0.0005,
+    "min_clearance_delta_m": 0.0
+  },
+  "expected_cloth_vertices": 27811,
+  "expected_cloth_faces": 55068,
+  "background_mode": "video",
+  "replay_fps": 60,
+  "action_manifest": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/manifest.json",
+  "action_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/checkpoint.pkl",
+  "start_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/checkpoint.pkl",
+  "checkpoint_measured_minus_commanded_q": [
+    -1.0320316157219622e-08,
+    -1.085425171964971e-08,
+    1.0836487263077288e-08,
+    6.020069122314453e-06,
+    0.0008056163787841797,
+    -0.0008295774459838867,
+    -9.98377799987793e-06,
+    -6.276369094848633e-05,
+    1.2695789337158203e-05,
+    2.065661549568304e-05,
+    -3.258709609508387e-05,
+    2.2649765014648438e-06,
+    0.0008988380432128906,
+    -0.0008200407028198242,
+    0.00015497207641601562,
+    5.257129669189453e-05,
+    -1.761317253112793e-05,
+    -0.00010706309974193445,
+    0.00011983501911163458
+  ],
+  "regrasp_edit_binding": {
+    "frame": 3292,
+    "hands": [
+      "left",
+      "right"
+    ],
+    "placement_enabled": true,
+    "default_pick_mode": "placement",
+    "output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_descend_sweep_review/edits",
+    "selection_title": "左爪闭合：下降 → −Y扫平 → 后续下压",
+    "placement_title": "指定下降高度与水平停止位置",
+    "selection_instruction": "两个槽位均属于左爪，非双手抓点。只指定落点即可保存，不需要选材料抓点。",
+    "instruction": "A：下降终点，Z为下降到的世界高度；B：−Y平移停止参考点。执行时平移保持A的X/Z，仅取B的Y；下压深度及最终推移待后续确认。",
+    "execution_hand": "left",
+    "waypoint_slots": {
+      "left": {
+        "label": "下降终点 A",
+        "role": "descent_target_xyz"
+      },
+      "right": {
+        "label": "−Y停止点 B",
+        "role": "sweep_end_y_at_A_xz"
+      }
+    },
+    "motion_intent": "left_closed_gripper; descend_to_A_xyz; sweep_negative_world_y_to_B_y_keep_A_xz; later_press_and_push_unspecified; no_automatic_execution"
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "stage": "push_far_then_home",
+  "active_hand": "left",
+  "start_frame": 3592,
+  "reference_frame": 3592,
+  "fps": 60,
+  "start": {
+    "left": {
+      "pos": [
+        0.46655778532992137,
+        -0.1154665673471865,
+        0.8649950897980427
+      ],
+      "quat": [
+        0.7071080594867712,
+        -1.5423020825729657e-06,
+        0.7071055028798331,
+        -1.8794773791362609e-06
+      ],
+      "opening": 0.0
+    },
+    "right": {
+      "pos": [
+        0.43835038461305953,
+        -0.19997135263246663,
+        0.9838481402039663
+      ],
+      "quat": [
+        0.6532836629370051,
+        0.2705995220078663,
+        0.653279654577114,
+        0.2705957267665742
+      ],
+      "opening": 0.022
+    }
+  },
+  "actions": [
+    {
+      "id": "P_press",
+      "duration_frames": 60,
+      "left": {
+        "pos": [
+          0.46655778532992137,
+          -0.1154665673471865,
+          0.82
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    },
+    {
+      "id": "P_push",
+      "duration_frames": 150,
+      "left": {
+        "pos": [
+          0.6095058476772517,
+          0.22952723185324683,
+          0.82
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    },
+    {
+      "id": "X_retreat",
+      "duration_frames": 90,
+      "left": {
+        "pos": [
+          0.6095058476772517,
+          0.22952723185324683,
+          0.9
+        ],
+        "quat": [
+          0.7071067811865476,
+          0.0,
+          0.7071067811865475,
+          0.0
+        ],
+        "opening": 0.0
+      },
+      "right": {
+        "pos": [
+          0.43835038461305953,
+          -0.19997135263246663,
+          0.9838481402039663
+        ],
+        "quat": [
+          0.6532836629370051,
+          0.2705995220078663,
+          0.653279654577114,
+          0.2705957267665742
+        ],
+        "opening": 0.022
+      }
+    }
+  ],
+  "phase_frames": {
+    "P_press": {
+      "start": 3592,
+      "end": 3652
+    },
+    "P_push": {
+      "start": 3652,
+      "end": 3802
+    },
+    "X_retreat": {
+      "start": 3802,
+      "end": 3892
+    },
+    "return_left": {
+      "start": 3892,
+      "end": 4132
+    },
+    "return_right": {
+      "start": 4132,
+      "end": 4312
+    },
+    "X_settle": {
+      "start": 4312,
+      "end": 4372
+    }
+  },
+  "gripper_text": "",
+  "gripper_events": [],
+  "note": "Push endpoint X+100mm; no dwell between push/lift/return; lift80mm closed before opening. Reset target is frame0 original robot pose, cloth is not reset.",
+  "planner_sha256": "d82484dae46a7906699365023382e78cf0a70a7701182377caeb3d7cf4ea037f",
+  "home_seed": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/seed.npz",
+  "home_sha256": "ebd3f6fa4afb36a4073bd96e0bfd5bfa8d2b341e656fbbc69086eab00aab50ff",
+  "return_method": "Full per-frame FK targets from smooth joint interpolation, left240frames then right180; no dwell until final60frames. See compiled.json; actions list describes prefix only."
+}

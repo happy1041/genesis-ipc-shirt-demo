@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-05",
+  "asset_and_file_hash_verification": true,
+  "seven_checkpoint_triplets_and_prefixes_verified": true,
+  "portable_urdf_all_mesh_references_resolved": true,
+  "unit_tests_passed": 4,
+  "python_and_shell_syntax_passed": true,
+  "gpu_smoke_tests": [
+    {
+      "stage": "second_fold",
+      "input_checkpoint_frame": 1135,
+      "executed_source_frames": [1136, 1137],
+      "executed_frames": 2,
+      "exit_code": 0,
+      "cloth_positions_finite": true,
+      "cloth_table_pair_override": null,
+      "output_checkpoint_frame": 1137
+    },
+    {
+      "stage": "press_slide_home",
+      "input_checkpoint_frame": 3592,
+      "executed_source_frames": [3593, 3594],
+      "executed_frames": 2,
+      "exit_code": 0,
+      "cloth_positions_finite": true,
+      "cloth_table_pair_override": 1.0,
+      "output_checkpoint_frame": 3594
+    }
+  ],
+  "isaac_preparation": {
+    "cpu_job_created": true,
+    "usd_layers": 3,
+    "resolved_scene_assets": 442,
+    "outside_job_asset_dependencies": 0,
+    "required_builtin_mdl": "OmniPBR.mdl",
+    "cloth_pos_equal_to_original_hero": true,
+    "source_frames_equal_to_original_hero": true,
+    "robot_visuals_byte_equal_to_original_hero": true,
+    "camera_config_equal_to_original_hero": true,
+    "controller_config_status_check": true,
+    "new_gpu_render": false
+  },
+  "full_new_physics_rerun": false,
+  "scope": "Input completeness, checkpoint relocation/load and two-frame execution. Not full folding-quality or cross-machine determinism certification."
+}

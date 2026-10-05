@@ -1,0 +1,231 @@
+{
+  "name": "55k扫平末态：回A下压820／左上推移测量",
+  "active_segment": "action_continuation",
+  "replay": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/stage_physics.replay_states.npz",
+  "cloth_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+  "atlas": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/native55k.garment_atlas.npz",
+  "robot_urdf": "/home/hasinon/ShirtDemo/assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf",
+  "ik_orientation_mode": "full",
+  "robot_base_pos_m": [
+    0,
+    0,
+    0.17
+  ],
+  "patch_output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/patches",
+  "tcp_csvs": [
+    "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/stage_physics_tcp_trajectory.csv"
+  ],
+  "video_segments": [
+    {
+      "source_range": [
+        3293,
+        3592
+      ],
+      "video": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/stage_overhead.mp4",
+      "video_frame_start": 0
+    }
+  ],
+  "camera": {
+    "view": "overhead",
+    "resolution": [
+      800,
+      600
+    ],
+    "pos_m": [
+      1.48,
+      0,
+      2.45
+    ],
+    "lookat_m": [
+      0.68,
+      0,
+      0.8
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "vertical_fov_deg": 42
+  },
+  "default_frame": 3592,
+  "display_frame_range": [
+    3293,
+    3592
+  ],
+  "trajectory_editor": {
+    "stage": "action_continuation",
+    "label": "上一动作末态 → 下一动作",
+    "default_hand": "left",
+    "frame_range": [
+      3293,
+      3592
+    ],
+    "limits": {
+      "max_step_mm": 12.5,
+      "max_speed_mps": 0.75,
+      "max_accel_mps2": 20.0
+    },
+    "phases": [
+      {
+        "id": "completed",
+        "label": "已完成动作",
+        "range": [
+          3293,
+          3592
+        ],
+        "color": "#357d83"
+      }
+    ],
+    "events": [
+      {
+        "frame": 3592,
+        "label": "新动作起点 / checkpoint",
+        "kind": "boundary"
+      }
+    ],
+    "hands": {
+      "left": {
+        "label": "left",
+        "color": "#48d58a",
+        "material_contact_frame": 3592,
+        "nodes": [
+          {
+            "frame": 3293,
+            "name": "completed start",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 3592,
+            "name": "checkpoint / next start",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 3293,
+            "zero": true
+          },
+          {
+            "frame": 3592,
+            "zero": true
+          }
+        ]
+      },
+      "right": {
+        "label": "right",
+        "color": "#ff6b78",
+        "material_contact_frame": 3592,
+        "nodes": [
+          {
+            "frame": 3293,
+            "name": "completed start",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 3592,
+            "name": "checkpoint / next start",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 3293,
+            "zero": true
+          },
+          {
+            "frame": 3592,
+            "zero": true
+          }
+        ]
+      }
+    },
+    "material_anchors": []
+  },
+  "planning_command_trajectory": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/trajectory.npz",
+  "action_plan_ik": {
+    "min_tool_table_clearance_m": 0.0005,
+    "min_clearance_delta_m": 0.0
+  },
+  "expected_cloth_vertices": 27811,
+  "expected_cloth_faces": 55068,
+  "background_mode": "video",
+  "replay_fps": 60,
+  "action_manifest": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/manifest.json",
+  "action_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/checkpoint.pkl",
+  "start_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/checkpoint.pkl",
+  "checkpoint_measured_minus_commanded_q": [
+    -1.0331896227455672e-08,
+    -1.0880532919088637e-08,
+    1.0838395070322804e-08,
+    3.874301910400391e-06,
+    0.0010912418365478516,
+    -0.0003325939178466797,
+    6.961822509765625e-05,
+    -1.039573426453444e-05,
+    -2.1457672119140625e-06,
+    -4.884583177044988e-05,
+    4.893241930403747e-05,
+    2.2649765014648438e-06,
+    0.0008988380432128906,
+    -0.0008200407028198242,
+    0.00015497207641601562,
+    5.257129669189453e-05,
+    -1.761317253112793e-05,
+    -0.00010706309974193445,
+    0.00011983501911163458
+  ],
+  "regrasp_edit_binding": {
+    "frame": 3592,
+    "hands": [
+      "left"
+    ],
+    "placement_enabled": true,
+    "default_pick_mode": "placement",
+    "interaction_mode": "closed_gripper_push",
+    "output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/final_push/20260929_returnA_press820_review/edits",
+    "selection_title": "左爪回A下压820mm，再向左上推移",
+    "placement_title": "测量／指定左上推移终点",
+    "selection_instruction": "抵点已固定，不需要重新选材料抓点。只指定推移终点即可保存。",
+    "instruction": "先回A=(466.57,-43.30,865)mm，再下压至(466.57,-43.30,820)mm；请指定左上推移终点XY。点衣物得到的表面Z不自动替代820mm。保存后先检查IK/桌面间隙，不自动执行。",
+    "motion_intent": "left_closed; return_to_A(0.46657,-0.04330,0.865); press_at_A_to_z0.820; user placement left XY specifies final slide destination; slide Z0.820 pending IK/contact checks; no execution on save",
+    "grasp_intent": {
+      "fixed_contact_tcp_world_m": [
+        0.46657,
+        -0.0433,
+        0.82
+      ],
+      "return_tcp_world_m": [
+        0.46657,
+        -0.0433,
+        0.865
+      ]
+    },
+    "reference_markers": [
+      {
+        "label": "A：回位XY／下压820",
+        "world_m": [
+          0.46657,
+          -0.0433,
+          0.82
+        ],
+        "color": "#ff70cc"
+      },
+      {
+        "label": "扫平停止B",
+        "world_m": [
+          0.46657,
+          -0.11550897379440764,
+          0.865
+        ],
+        "color": "#60e5ff"
+      }
+    ],
+    "return_label": "回到扫平末态3592"
+  },
+  "cloth_table_pair_friction_override": 1.0
+}

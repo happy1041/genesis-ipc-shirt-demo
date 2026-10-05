@@ -1,0 +1,199 @@
+{
+  "name": "55k新第一折＋两角回拉X400 · 第二折抓放点",
+  "active_segment": "action_continuation",
+  "replay": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_physics.replay_states.npz",
+  "cloth_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+  "atlas": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/native55k.garment_atlas.npz",
+  "robot_urdf": "/home/hasinon/ShirtDemo/assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf",
+  "ik_orientation_mode": "full",
+  "robot_base_pos_m": [
+    0,
+    0,
+    0.17
+  ],
+  "patch_output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/patches",
+  "tcp_csvs": [
+    "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_physics_tcp_trajectory.csv"
+  ],
+  "video_segments": [
+    {
+      "source_range": [
+        740,
+        1135
+      ],
+      "video": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_overhead.mp4",
+      "video_frame_start": 0
+    }
+  ],
+  "camera": {
+    "view": "overhead",
+    "resolution": [
+      800,
+      600
+    ],
+    "pos_m": [
+      1.48,
+      0,
+      2.45
+    ],
+    "lookat_m": [
+      0.68,
+      0,
+      0.8
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "vertical_fov_deg": 42
+  },
+  "default_frame": 1135,
+  "display_frame_range": [
+    740,
+    1135
+  ],
+  "trajectory_editor": {
+    "stage": "action_continuation",
+    "label": "新回拉1135末态 → 第二折双手抓放点",
+    "default_hand": "left",
+    "frame_range": [
+      740,
+      1135
+    ],
+    "limits": {
+      "max_step_mm": 12.5,
+      "max_speed_mps": 0.75,
+      "max_accel_mps2": 20
+    },
+    "phases": [
+      {
+        "id": "completed",
+        "label": "已完成动作",
+        "range": [
+          740,
+          1135
+        ],
+        "color": "#357d83"
+      }
+    ],
+    "events": [
+      {
+        "frame": 1135,
+        "label": "新动作起点 / checkpoint",
+        "kind": "boundary"
+      }
+    ],
+    "hands": {
+      "left": {
+        "label": "left",
+        "color": "#48d58a",
+        "material_contact_frame": 1135,
+        "nodes": [
+          {
+            "frame": 740,
+            "name": "completed start",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 1135,
+            "name": "checkpoint / next start",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 740,
+            "zero": true
+          },
+          {
+            "frame": 1135,
+            "zero": true
+          }
+        ]
+      },
+      "right": {
+        "label": "right",
+        "color": "#ff6b78",
+        "material_contact_frame": 1135,
+        "nodes": [
+          {
+            "frame": 740,
+            "name": "completed start",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 1135,
+            "name": "checkpoint / next start",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 740,
+            "zero": true
+          },
+          {
+            "frame": 1135,
+            "zero": true
+          }
+        ]
+      }
+    },
+    "material_anchors": []
+  },
+  "planning_command_trajectory": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/trajectory.npz",
+  "action_plan_ik": {
+    "min_tool_table_clearance_m": 0.0002,
+    "min_clearance_delta_m": 0
+  },
+  "expected_cloth_vertices": 27811,
+  "expected_cloth_faces": 55068,
+  "background_mode": "video",
+  "replay_fps": 60,
+  "action_manifest": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/manifest.json",
+  "action_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/checkpoint.pkl",
+  "start_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/checkpoint.pkl",
+  "checkpoint_measured_minus_commanded_q": [
+    -1.0356358437491053e-08,
+    -1.0827945651215032e-08,
+    1.0839046993282864e-08,
+    -1.259148120880127e-06,
+    0.0009914636611938477,
+    -0.00044468045234680176,
+    0.00010420382022857666,
+    2.898275852203369e-06,
+    -1.1995434761047363e-06,
+    -1.930287544382736e-05,
+    2.0015524569316767e-05,
+    1.4007091522216797e-06,
+    0.0010129213333129883,
+    -0.0004382133483886719,
+    0.00010353326797485352,
+    -4.908069968223572e-06,
+    -1.2218952178955078e-06,
+    -2.5191990062012337e-05,
+    2.5537456167512573e-05
+  ],
+  "regrasp_edit_binding": {
+    "frame": 1135,
+    "hands": [
+      "left",
+      "right"
+    ],
+    "placement_enabled": true,
+    "output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/second_fold/20260928_after_tidy_x400_review/edits",
+    "selection_title": "第二折：双手抓点",
+    "selection_instruction": "当前是新第一折后回拉X400的实际末态。选择左右手材料点和衣层；可部分保存。选点保持当前帧。",
+    "placement_title": "第二折：双手落点",
+    "instruction": "背景是740–1135实际回放，默认1135。此时双爪仍闭合，后续轨迹需先松开旧抓取。落点记录世界坐标参考，释放TCP高度需单独确认；保存不启动仿真。",
+    "return_label": "回到回拉末态1135",
+    "default_pick_mode": "grasp",
+    "grasp_intent": "human_second_fold_grasp_after_native55k_tidy_pull1135",
+    "motion_intent": "Wait for human picks; release prior grip before regrasp, use native1135 checkpoint. No automatic physics."
+  }
+}

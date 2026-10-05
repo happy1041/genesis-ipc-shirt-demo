@@ -1,0 +1,622 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="dual_x5_2025_ipc_articulated_gripper">
+  <link name="base_link">
+    <inertial>
+      <origin xyz="-0.010039 0.0013761 0.04956" rpy="0 0 0" />
+      <mass value="21.045" />
+      <inertia ixx="1.70029164" ixy="-0.00073232" ixz="-0.03255532" iyy="1.70804910" iyz="-0.00688370" izz="0.97173287" />
+    </inertial>
+  </link>
+  <link name="legacy_padding_1">
+    <inertial>
+      <origin xyz="0.035966 2.6831E-06 8.693E-07" rpy="0 0 0" />
+      <mass value="0.5746" />
+      <inertia ixx="0.00142306" ixy="0.00000000" ixz="0.00000000" iyy="0.00084449" iyz="0.00000002" izz="0.00084474" />
+    </inertial>
+  </link>
+  <joint name="joint1" type="continuous">
+    <origin xyz="0.15361 0.29246 -0.093" rpy="0 0 1.0472" />
+    <parent link="base_link" />
+    <child link="legacy_padding_1" />
+    <axis xyz="1 0 0" />
+    <limit effort="17" velocity="27" />
+  </joint>
+  <link name="legacy_padding_2">
+    <inertial>
+      <origin xyz="0.035966 2.8161E-06 7.9768E-09" rpy="0 0 0" />
+      <mass value="0.5746" />
+      <inertia ixx="0.00142306" ixy="0.00000000" ixz="0.00000000" iyy="0.00084449" iyz="0.00000002" izz="0.00084474" />
+    </inertial>
+  </link>
+  <joint name="joint2" type="continuous">
+    <origin xyz="0.15361 -0.29245 -0.093" rpy="0 0 -1.0472" />
+    <parent link="base_link" />
+    <child link="legacy_padding_2" />
+    <axis xyz="1 0 0" />
+    <limit effort="17" velocity="27" />
+  </joint>
+  <link name="legacy_padding_3">
+    <inertial>
+      <origin xyz="-0.035971 2.8084E-06 -1.6209E-07" rpy="0 0 0" />
+      <mass value="0.5746" />
+      <inertia ixx="0.00142306" ixy="0.00000000" ixz="0.00000000" iyy="0.00084449" iyz="0.00000002" izz="0.00084474" />
+    </inertial>
+  </link>
+  <joint name="joint3" type="continuous">
+    <origin xyz="-0.35293 0 -0.093" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="legacy_padding_3" />
+    <axis xyz="-1 0 0" />
+    <limit effort="17" velocity="27" />
+  </joint>
+  <link name="body4">
+    <inertial>
+      <origin xyz="-0.053315 -0.00061422 -0.0086454" rpy="0 0 0" />
+      <mass value="14.181" />
+      <inertia ixx="0.32744849" ixy="-0.00306617" ixz="0.05920163" iyy="0.36541112" iyz="0.00117932" izz="0.49616592" />
+    </inertial>
+  </link>
+  <joint name="joint4" type="fixed">
+    <origin xyz="0.094118 0.0010067 0.77" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="body4" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper="0.46" effort="400" velocity="0.15" />
+  </joint>
+  <link name="left_link11">
+    <inertial>
+      <origin xyz="0.00542314085032451 -0.00802886588436214 0.0170855431023106" rpy="0 0 0" />
+      <mass value="0.066982101964648" />
+      <inertia ixx="0.00008086" ixy="0.00000207" ixz="-0.00000876" iyy="0.00003211" iyz="0.00000440" izz="0.00007702" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint11" type="revolute">
+    <origin xyz="0.059949 0.25 0.0245" rpy="0 0 0" />
+    <parent link="body4" />
+    <child link="left_link11" />
+    <axis xyz="0 0 1" />
+    <limit lower="-2.094" upper="3.1416" effort="27" velocity="5.5" />
+  </joint>
+  <link name="left_link12">
+    <inertial>
+      <origin xyz="-0.132335419642583 -0.00401655346537838 0.00010940501314316" rpy="0 0 0" />
+      <mass value="1.10681273913005" />
+      <inertia ixx="0.00054299" ixy="-0.00000184" ixz="0.00003884" iyy="0.01652639" iyz="-0.00000035" izz="0.01654931" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint12" type="revolute">
+    <origin xyz="0.02 0 0.04" rpy="0 0 0" />
+    <parent link="left_link11" />
+    <child link="left_link12" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="3.665" effort="27" velocity="5.5" />
+  </joint>
+  <link name="left_link13">
+    <inertial>
+      <origin xyz="0.185438849130002 -0.000713687803552077 0.0516279411592777" rpy="0 0 0" />
+      <mass value="0.543164013838109" />
+      <inertia ixx="0.00036398" ixy="-0.00002814" ixz="-0.00039418" iyy="0.00422770" iyz="-0.00001179" izz="0.00419421" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 0.984313725490196 0.964705882352941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint13" type="revolute">
+    <origin xyz="-0.264 3E-05 0" rpy="0 0 0" />
+    <parent link="left_link12" />
+    <child link="left_link13" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="3.24" effort="27" velocity="5.5" />
+  </joint>
+  <link name="left_link14">
+    <inertial>
+      <origin xyz="0.0399662666191703 -0.00430452596262934 0.0350064737242635" rpy="0 0 0" />
+      <mass value="0.118272367738645" />
+      <inertia ixx="0.00019329" ixy="-0.00001619" ixz="-0.00008654" iyy="0.00023401" iyz="-0.00001744" izz="0.00014391" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.564705882352941 0.564705882352941 0.564705882352941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint14" type="revolute">
+    <origin xyz="0.245 -3E-05 0.056" rpy="0 0 0" />
+    <parent link="left_link13" />
+    <child link="left_link14" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-1.571" upper="1.571" effort="7" velocity="20" />
+  </joint>
+  <link name="left_link15">
+    <inertial>
+      <origin xyz="0.00294914453074186 8.40861931291625E-05 -0.0547949421237858" rpy="0 0 0" />
+      <mass value="0.673984769720165" />
+      <inertia ixx="0.00092704" ixy="0.00000049" ixz="0.00004559" iyy="0.00091568" iyz="0.00000053" izz="0.00028327" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link5.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/left_link15_ipc_hull.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint15" type="revolute">
+    <origin xyz="0.06775 0 0.0845" rpy="0 0 0" />
+    <parent link="left_link14" />
+    <child link="left_link15" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-1.571" upper="1.571" effort="7" velocity="20" />
+  </joint>
+  <link name="left_link16">
+    <inertial>
+      <origin xyz="0.040212 3.4542E-05 -0.010225" rpy="0 0 0" />
+      <mass value="0.34667" />
+      <inertia ixx="0.00047210" ixy="-0.00000041" ixz="-0.00002976" iyy="0.00049011" iyz="-0.00003393" izz="0.00018496" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/62449317_left_link16.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/left_link16_ipc_hull.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint16" type="revolute">
+    <origin xyz="0.02895 0 -0.0845" rpy="0 0 0" />
+    <parent link="left_link15" />
+    <child link="left_link16" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.9635" upper="2.094" effort="7" velocity="20" />
+  </joint>
+  <link name="left_link17">
+    <inertial>
+      <origin xyz="-0.0060354 -0.015602 0.013499" rpy="0 0 0" />
+      <mass value="0.08924" />
+      <inertia ixx="0.00009869" ixy="-0.00000394" ixz="0.00001011" iyy="0.00009021" iyz="0.00001113" izz="0.00006849" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/456a019e_left_link17.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/456a019e_left_link17.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint17" type="prismatic">
+    <origin xyz="0.08397 0.02721 -0.0062702" rpy="0 0 0" />
+    <parent link="left_link16" />
+    <child link="left_link17" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="0.044" effort="300" velocity="0.053" />
+  </joint>
+  <link name="left_link18">
+    <inertial>
+      <origin xyz="-0.00581 0.015593 -0.012255" rpy="0 0 0" />
+      <mass value="0.089402" />
+      <inertia ixx="0.00007306" ixy="0.00000404" ixz="-0.00001526" iyy="0.00006428" iyz="0.00000327" izz="0.00006822" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/e3fbb293_left_link18.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/e3fbb293_left_link18.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_joint18" type="prismatic">
+    <origin xyz="0.08397 -0.023638 -0.0062703" rpy="0 0 0" />
+    <parent link="left_link16" />
+    <child link="left_link18" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="0.044" effort="300" velocity="0.053" />
+  </joint>
+  <link name="right_link21">
+    <inertial>
+      <origin xyz="0.00542314085032451 -0.00802886588436214 0.0170855431023106" rpy="0 0 0" />
+      <mass value="0.066982101964648" />
+      <inertia ixx="0.00008086" ixy="0.00000207" ixz="-0.00000876" iyy="0.00003211" iyz="0.00000440" izz="0.00007702" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link1.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint21" type="revolute">
+    <origin xyz="0.059949 -0.25 0.0245" rpy="0 0 0" />
+    <parent link="body4" />
+    <child link="right_link21" />
+    <axis xyz="0 0 1" />
+    <limit lower="-2.094" upper="3.1416" effort="27" velocity="5.5" />
+  </joint>
+  <link name="right_link22">
+    <inertial>
+      <origin xyz="-0.132335419642583 -0.00401655346537838 0.00010940501314316" rpy="0 0 0" />
+      <mass value="1.10681273913005" />
+      <inertia ixx="0.00054299" ixy="-0.00000184" ixz="0.00003884" iyy="0.01652639" iyz="-0.00000035" izz="0.01654931" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link2.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint22" type="revolute">
+    <origin xyz="0.02 0 0.04" rpy="0 0 0" />
+    <parent link="right_link21" />
+    <child link="right_link22" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="3.665" effort="27" velocity="5.5" />
+  </joint>
+  <link name="right_link23">
+    <inertial>
+      <origin xyz="0.185438849130002 -0.000713687803552077 0.0516279411592777" rpy="0 0 0" />
+      <mass value="0.543164013838109" />
+      <inertia ixx="0.00036398" ixy="-0.00002814" ixz="-0.00039418" iyy="0.00422770" iyz="-0.00001179" izz="0.00419421" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link3.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 0.984313725490196 0.964705882352941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint23" type="revolute">
+    <origin xyz="-0.264 3E-05 0" rpy="0 0 0" />
+    <parent link="right_link22" />
+    <child link="right_link23" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="3.24" effort="27" velocity="5.5" />
+  </joint>
+  <link name="right_link24">
+    <inertial>
+      <origin xyz="0.0399662666191703 -0.00430452596262934 0.0350064737242635" rpy="0 0 0" />
+      <mass value="0.118272367738645" />
+      <inertia ixx="0.00019329" ixy="-0.00001619" ixz="-0.00008654" iyy="0.00023401" iyz="-0.00001744" izz="0.00014391" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link4.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.564705882352941 0.564705882352941 0.564705882352941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint24" type="revolute">
+    <origin xyz="0.245 -3E-05 0.056" rpy="0 0 0" />
+    <parent link="right_link23" />
+    <child link="right_link24" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-1.571" upper="1.571" effort="7" velocity="20" />
+  </joint>
+  <link name="right_link25">
+    <inertial>
+      <origin xyz="0.00294914453074186 8.40861931291625E-05 -0.0547949421237858" rpy="0 0 0" />
+      <mass value="0.673984769720165" />
+      <inertia ixx="0.00092704" ixy="0.00000049" ixz="0.00004559" iyy="0.00091568" iyz="0.00000053" izz="0.00028327" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/link5.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/right_link25_ipc_hull.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint25" type="revolute">
+    <origin xyz="0.06775 0 0.0845" rpy="0 0 0" />
+    <parent link="right_link24" />
+    <child link="right_link25" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-1.571" upper="1.571" effort="7" velocity="20" />
+  </joint>
+  <link name="right_link26">
+    <inertial>
+      <origin xyz="0.040212 3.4542E-05 -0.010225" rpy="0 0 0" />
+      <mass value="0.34667" />
+      <inertia ixx="0.00047210" ixy="-0.00000041" ixz="-0.00002976" iyy="0.00049011" iyz="-0.00003393" izz="0.00018496" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/8d891049_right_link26.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/right_link26_ipc_hull.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint26" type="revolute">
+    <origin xyz="0.02895 0 -0.0845" rpy="0 0 0" />
+    <parent link="right_link25" />
+    <child link="right_link26" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.9635" upper="2.094" effort="7" velocity="20" />
+  </joint>
+  <link name="right_link27">
+    <inertial>
+      <origin xyz="-0.0060354 -0.015602 0.013499" rpy="0 0 0" />
+      <mass value="0.08924" />
+      <inertia ixx="0.00009869" ixy="-0.00000394" ixz="0.00001011" iyy="0.00009021" iyz="0.00001113" izz="0.00006849" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/d17ab828_right_link27.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/d17ab828_right_link27.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint27" type="prismatic">
+    <origin xyz="0.08397 0.02721 -0.0062702" rpy="0 0 0" />
+    <parent link="right_link26" />
+    <child link="right_link27" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="0.044" effort="300" velocity="0.053" />
+  </joint>
+  <link name="right_link28">
+    <inertial>
+      <origin xyz="-0.00581 0.015593 -0.012255" rpy="0 0 0" />
+      <mass value="0.089402" />
+      <inertia ixx="0.00007306" ixy="0.00000404" ixz="-0.00001526" iyy="0.00006428" iyz="0.00000327" izz="0.00006822" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/98b471b0_right_link28.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/robolab_isaacsim_cloth_handoff_20260916/assets/robot/acone_ipc/meshes/98b471b0_right_link28.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_joint28" type="prismatic">
+    <origin xyz="0.08397 -0.023638 -0.0062703" rpy="0 0 0" />
+    <parent link="right_link26" />
+    <child link="right_link28" />
+    <axis xyz="0 -1 0" />
+    <limit lower="0" upper="0.044" effort="300" velocity="0.053" />
+  </joint>
+  <link name="left_x5_base">
+    <inertial>
+      <origin xyz="-2.77E-05 3.2821E-05 0.034516" rpy="0 0 0" />
+      <mass value="0.45749" />
+      <inertia ixx="0.00019677" ixy="0.00000035" ixz="0.00000051" iyy="0.00019854" iyz="-0.00000100" izz="0.00019572" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/base_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.41176 0.41176 0.41176 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_x5_base_mount" type="fixed">
+    <parent link="body4" />
+    <child link="left_x5_base" />
+    <origin xyz=".059949 0.25 -.036" rpy="0 0 0" />
+  </joint>
+  <link name="left_x5_pedestal">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius=".045" length=".104" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius=".045" length=".104" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_x5_pedestal_mount" type="fixed">
+    <parent link="body4" />
+    <child link="left_x5_pedestal" />
+    <origin xyz=".059949 0.25 -.088" rpy="0 0 0" />
+  </joint>
+  <link name="right_x5_base">
+    <inertial>
+      <origin xyz="-2.77E-05 3.2821E-05 0.034516" rpy="0 0 0" />
+      <mass value="0.45749" />
+      <inertia ixx="0.00019677" ixy="0.00000035" ixz="0.00000051" iyy="0.00019854" iyz="-0.00000100" izz="0.00019572" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/base_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.41176 0.41176 0.41176 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="../../../transport/arx_x5_official_20260920/extracted_2025/X5/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_x5_base_mount" type="fixed">
+    <parent link="body4" />
+    <child link="right_x5_base" />
+    <origin xyz=".059949 -0.25 -.036" rpy="0 0 0" />
+  </joint>
+  <link name="right_x5_pedestal">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius=".045" length=".104" />
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius=".045" length=".104" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_x5_pedestal_mount" type="fixed">
+    <parent link="body4" />
+    <child link="right_x5_pedestal" />
+    <origin xyz=".059949 -0.25 -.088" rpy="0 0 0" />
+  </joint>
+</robot>

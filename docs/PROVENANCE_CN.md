@@ -16,4 +16,4 @@
 
 从原七个分段运行记录核对，随附累计轨迹的前缀关节命令和双手开度逐元素一致。整理期间曾运行 Workbench 40 项 CPU 单元测试；它们随 Workbench 一起移除，不再作为当前精简仓库的测试覆盖范围。当前仓库只进行主程序 Python 语法与 Shell 语法检查，不代替 GPU 上的完整折叠测试。
 
-未包含SIM1/双X5模型、55k衣服、Isaac场景、视频、checkpoint或replay。新补丁验证了当前Genesis源码的重建；本次未执行新GPU仿真，也未在独立安装环境中复跑完整成片。
+本分支随后按用户要求补充了`reproduction/scene527_55k_73s/`：实际衣服与双X5引用网格、七套源checkpoint、七段replay、参数/plan/指标/TCP记录、参考hero，以及Isaac离线场景与代码。逐文件字节大小、SHA256与源路径在`bundle.json`中记录。物理入口、数据与验证边界见[复现指南](SCENE527_REPRODUCTION_CN.md)。

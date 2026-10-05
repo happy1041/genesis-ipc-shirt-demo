@@ -1,2 +1,8 @@
 # Diff context lines intentionally contain a single leading space.
 *.patch -whitespace
+reproduction/**/*.npz filter=lfs diff=lfs merge=lfs -text
+reproduction/**/*.tar.gz filter=lfs diff=lfs merge=lfs -text
+reproduction/**/*.STL filter=lfs diff=lfs merge=lfs -text
+reproduction/**/*.obj filter=lfs diff=lfs merge=lfs -text
+reproduction/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+reproduction/**/*.usda filter=lfs diff=lfs merge=lfs -text

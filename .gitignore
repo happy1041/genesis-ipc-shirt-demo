@@ -11,3 +11,4 @@ render_jobs/
 *.mp4
 *.replay_states.npz
 *.ipc_state.npz
+!reproduction/scene527_55k_73s/reference/hero.mp4

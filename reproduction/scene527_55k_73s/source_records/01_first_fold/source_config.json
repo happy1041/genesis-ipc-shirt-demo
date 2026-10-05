@@ -1,0 +1,187 @@
+{
+  "name": "55k第一折重调 · 袖口/领口包入 · 0–829回放",
+  "active_segment": "first_fold_review",
+  "replay": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/replay_prefix.npz",
+  "cloth_obj": "/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj",
+  "atlas": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/native55k.garment_atlas.npz",
+  "robot_urdf": "/home/hasinon/ShirtDemo/assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf",
+  "ik_orientation_mode": "full",
+  "robot_base_pos_m": [
+    0,
+    0,
+    0.17
+  ],
+  "patch_output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/patches",
+  "tcp_csvs": [
+    "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/full_continuous/20260927_current_pathtraced/physics/demo_physics_tcp_trajectory.csv"
+  ],
+  "video_segments": [
+    {
+      "source_range": [
+        0,
+        829
+      ],
+      "video": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/full_continuous/20260927_current_pathtraced/isaac_raytraced/deliverables/hero.mp4",
+      "video_frame_start": 0
+    }
+  ],
+  "camera": {
+    "view": "overhead",
+    "resolution": [
+      800,
+      600
+    ],
+    "pos_m": [
+      1.48,
+      0,
+      2.45
+    ],
+    "lookat_m": [
+      0.68,
+      0,
+      0.8
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "vertical_fov_deg": 42
+  },
+  "default_frame": 0,
+  "display_frame_range": [
+    0,
+    829
+  ],
+  "trajectory_editor": {
+    "stage": "action_continuation",
+    "label": "第一折0–829实际回放",
+    "default_hand": "left",
+    "frame_range": [
+      0,
+      829
+    ],
+    "limits": {
+      "max_step_mm": 12.5,
+      "max_speed_mps": 0.75,
+      "max_accel_mps2": 20
+    },
+    "phases": [
+      {
+        "id": "first_fold",
+        "label": "原第一折实际回放",
+        "range": [
+          0,
+          829
+        ],
+        "color": "#357d83"
+      }
+    ],
+    "events": [
+      {
+        "frame": 0,
+        "label": "初态：第一折抓点",
+        "kind": "boundary"
+      },
+      {
+        "frame": 829,
+        "label": "第一折结束：效果检查",
+        "kind": "boundary"
+      }
+    ],
+    "hands": {
+      "left": {
+        "label": "左手",
+        "color": "#48d58a",
+        "material_contact_frame": 0,
+        "nodes": [
+          {
+            "frame": 0,
+            "name": "初态",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 829,
+            "name": "折后末态",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 0,
+            "zero": true
+          },
+          {
+            "frame": 829,
+            "zero": true
+          }
+        ]
+      },
+      "right": {
+        "label": "右手",
+        "color": "#ff6b78",
+        "material_contact_frame": 0,
+        "nodes": [
+          {
+            "frame": 0,
+            "name": "初态",
+            "draggable": false,
+            "support_radius": 2
+          },
+          {
+            "frame": 829,
+            "name": "折后末态",
+            "draggable": false,
+            "support_radius": 2
+          }
+        ],
+        "semantic_path": [
+          {
+            "frame": 0,
+            "zero": true
+          },
+          {
+            "frame": 829,
+            "zero": true
+          }
+        ]
+      }
+    },
+    "material_anchors": [],
+    "default_node_frame": 0
+  },
+  "planning_command_trajectory": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/trajectory_prefix.npz",
+  "action_plan_ik": {
+    "min_tool_table_clearance_m": 0.0002,
+    "min_clearance_delta_m": 0.0
+  },
+  "expected_cloth_vertices": 27811,
+  "expected_cloth_faces": 55068,
+  "background_mode": "replay_cpu",
+  "replay_fps": 60,
+  "robot_visuals_npz": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/full_continuous/20260927_current_pathtraced/isaac_raytraced/robot.npz",
+  "robot_visuals_source_frames_npz": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/full_continuous/20260927_current_pathtraced/isaac_raytraced/replay.npz",
+  "regrasp_edit_binding": {
+    "frame": 0,
+    "hands": [
+      "left",
+      "right"
+    ],
+    "placement_enabled": true,
+    "output_dir": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_fold/20260928_tidy_rework_review/edits",
+    "selection_title": "第一折：双手抓点",
+    "selection_instruction": "默认初态0帧选择材料抓点；切到829查看折后袖口/领口形状。支持部分保存。",
+    "placement_title": "第一折：落点参考",
+    "instruction": "当前为第一折0–829实际回放，不含回拉。抓点锚定初态0；抓放点保存不运行仿真。后续第一折从初态重算，不用829末态当修改起点。",
+    "return_label": "回到第一折初态0",
+    "default_pick_mode": "grasp",
+    "motion_intent": "Redesign first fold to tuck sleeves and collar; human picks first, no automatic simulation."
+  },
+  "first_fold_review_provenance": {
+    "prefix_manifest": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_left_corner_review/prefix_manifest.json",
+    "previous_terminal_checkpoint": "/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/full_continuous/20260927_current_pathtraced/physics/checkpoints/source_000829.pkl",
+    "execution_disabled_until_initial_state_plan_prepared": true
+  }
+}
