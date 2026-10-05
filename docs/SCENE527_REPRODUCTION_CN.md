@@ -52,8 +52,13 @@ reproduction/scene527_55k_73s/
 
 ```bash
 git lfs install
+GIT_LFS_SKIP_SMUDGE=1 git clone --branch handoff/scene527-ipc-demo-20261005 \
+  https://github.com/happy1041/genesis-ipc-shirt-demo.git
+cd genesis-ipc-shirt-demo
 git lfs pull
 ```
+
+目前完整包位于这个交付分支，默认`main`仍是历史版本。已有克隆应先切换到该分支。约1.43GiB的大文件均需实际下载。[数据与原结果索引](../reproduction/scene527_55k_73s/INDEX.md)提供每段checkpoint、replay、plan、指标、TCP及原物理/渲染日志的直接入口。
 
 如果获得的是网页下载的zip或LFS指针文本，应改用Git克隆并执行`git lfs pull`。`bundle.json`与验证入口会检查实际文件大小和哈希，不会把指针文本当作模型或checkpoint。
 
@@ -128,3 +133,5 @@ URDF字节哈希属于checkpoint签名，不能随意改写其中的mesh路径�
 [验证摘要](../reproduction/scene527_55k_73s/VALIDATION.json)记录范围：全部文件和URDF引用核对、七套状态及命令前缀核对、4项CPU测试和语法检查均通过。已在迁移后的包路径下用原1135帧状态执行1136–1137帧、原3592帧状态执行3593–3594帧；两次前台GPU短跑均正常退出、状态有限并保存新checkpoint。
 
 Isaac准备工具实际生成了独立job；合并后的`cloth_pos`/`source_frames`与原hero输入完全相同，机器人视觉数据和相机配置保持相同。CPU USD依赖检查确认全部3层/442个资产位于新job中，controller配置检查通过。本次没有重跑完整4373帧物理，也没有重新执行整片Isaac GPU渲染。
+
+Git LFS实际上传完成后，在独立目录通过HTTPS重新克隆交付分支，不使用本机SSH认证配置；抽样下载55k衣服与1135帧checkpoint，文件大小、SHA256和checkpoint三件套成员哈希均与原输入一致。该检查没有重复下载全部大文件。

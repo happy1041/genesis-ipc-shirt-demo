@@ -5,6 +5,19 @@
   "portable_urdf_all_mesh_references_resolved": true,
   "unit_tests_passed": 4,
   "python_and_shell_syntax_passed": true,
+  "receiver_lfs_download": {
+    "fresh_clone": true,
+    "remote": "https://github.com/happy1041/genesis-ipc-shirt-demo.git",
+    "branch": "handoff/scene527-ipc-demo-20261005",
+    "authenticated_ssh_config_used": false,
+    "sampled_files": [
+      "assets/cloth/short-shirt-55068f.obj",
+      "checkpoints/02_first_pull.tar.gz"
+    ],
+    "sampled_file_sizes_and_sha256_verified": true,
+    "checkpoint_triplet_member_sizes_and_sha256_verified": true,
+    "full_receiver_download": false
+  },
   "gpu_smoke_tests": [
     {
       "stage": "second_fold",

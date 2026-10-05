@@ -1,0 +1,569 @@
+[38;5;159m[Genesis] [20:55:37] [INFO] [38;5;121m╭───────────────────────────────────────────────╮[0m[38;5;159m[0m
+[38;5;159m[Genesis] [20:55:37] [INFO] [38;5;121m│┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈[0m[38;5;159m [38;5;121m[1m[3mGenesis[0m[38;5;159m [38;5;121m┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈┉┈│[0m[38;5;159m[0m
+[38;5;159m[Genesis] [20:55:37] [INFO] [38;5;121m╰───────────────────────────────────────────────╯[0m[38;5;159m[0m
+[38;5;159m[Genesis] [20:55:37] [INFO] Running on [38;5;121m[4m[NVIDIA GeForce RTX 4090][0m[38;5;159m with backend [38;5;121m[4mgs.cuda[0m[38;5;159m. Device memory: [38;5;121m[4m23.48[0m[38;5;159m GB.[0m
+[38;5;159m[Genesis] [20:55:37] [INFO] 🚀 Genesis initialized. 🔖 version: [38;5;121m[4m1.3.2[0m[38;5;159m, 🎨 theme: [38;5;121m[4mdark[0m[38;5;159m, 🌱 seed: [38;5;121m[4m0[0m[38;5;159m, 🐛 debug: [38;5;121m[4mFalse[0m[38;5;159m, 📏 precision: [38;5;121m[4m32[0m[38;5;159m, 🔥 performance: [38;5;121m[4mFalse[0m[38;5;159m, 💬 verbose: [38;5;121m[4mINFO[0m[38;5;159m[0m
+[38;5;226m[Genesis] [20:55:37] [WARNING] 'max_FPS' is deprecated and will be removed; it now maps to 'refresh_rate'.[0m
+[38;5;159m[Genesis] [20:55:38] [INFO] Scene [38;5;121m[3m<734a377>[0m[38;5;159m created.[0m
+[38;5;159m[Genesis] [20:55:38] [INFO] Adding [38;5;121m<gs.engine.entities.RigidEntity>[0m[38;5;159m. idx: [38;5;121m0[0m[38;5;159m, uid: [38;5;121m[3m<57b4d83>[0m[38;5;159m, morph: [38;5;121m<gs.morphs.Box>[0m[38;5;159m, material: [38;5;121m<gs.materials.Rigid>[0m[38;5;159m.[0m
+[38;5;159m[Genesis] [20:55:38] [INFO] Adding [38;5;121m<gs.engine.entities.RigidEntity>[0m[38;5;159m. idx: [38;5;121m1[0m[38;5;159m, uid: [38;5;121m[3m<fd95146>[0m[38;5;159m, morph: [38;5;121m<gs.morphs.URDF(file='/home/hasinon/ShirtDemo/assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf')>[0m[38;5;159m, material: [38;5;121m<gs.materials.Rigid>[0m[38;5;159m.[0m
+[38;5;226m[Genesis] [20:55:39] [WARNING] At least one of the meshes contain many faces (7112). Consider setting 'morph.decimate=True' to speed up collision detection and improve numerical stability.[0m
+[38;5;226m[Genesis] [20:55:39] [WARNING] At least one of the meshes contain many faces (6844). Consider setting 'morph.decimate=True' to speed up collision detection and improve numerical stability.[0m
+[38;5;226m[Genesis] [20:55:39] [WARNING] At least one of the meshes contain many faces (7500). Consider setting 'morph.decimate=True' to speed up collision detection and improve numerical stability.[0m
+[38;5;226m[Genesis] [20:55:39] [WARNING] At least one of the meshes contain many faces (7672). Consider setting 'morph.decimate=True' to speed up collision detection and improve numerical stability.[0m
+[38;5;226m[Genesis] [20:55:39] [WARNING] At least one of the meshes contain many faces (7500). Consider setting 'morph.decimate=True' to speed up collision detection and improve numerical stability.[0m
+[38;5;226m[Genesis] [20:55:39] [WARNING] At least one of the meshes contain many faces (7672). Consider setting 'morph.decimate=True' to speed up collision detection and improve numerical stability.[0m
+SIM1 source joint order: ('joint1', 'joint2', 'joint3', 'left_joint11', 'left_joint12', 'left_joint13', 'left_joint14', 'left_joint15', 'left_joint16', 'left_joint17', 'left_joint18', 'right_joint21', 'right_joint22', 'right_joint23', 'right_joint24', 'right_joint25', 'right_joint26', 'right_joint27', 'right_joint28')
+Genesis joint order: ('joint1', 'joint2', 'joint3', 'left_joint11', 'left_joint12', 'left_joint13', 'left_joint14', 'left_joint15', 'left_joint16', 'left_joint17', 'left_joint18', 'right_joint21', 'right_joint22', 'right_joint23', 'right_joint24', 'right_joint25', 'right_joint26', 'right_joint27', 'right_joint28')
+Genesis <- source columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+[38;5;159m[Genesis] [20:55:39] [INFO] Adding [38;5;121m<gs.engine.entities.FEMEntity>[0m[38;5;159m. idx: [38;5;121m2[0m[38;5;159m, uid: [38;5;121m[3m<de9f6ca>[0m[38;5;159m, morph: [38;5;121m<gs.morphs.Mesh(file='/home/hasinon/ShirtDemo/transport/rendering_final/physics_source_scene527_55068/short-shirt-55068f.obj')>[0m[38;5;159m, material: [38;5;121m<gs.materials.FEM.Cloth>[0m[38;5;159m.[0m
+[38;5;159m[Genesis] [20:55:39] [INFO] Building scene [38;5;121m[3m<734a377>[0m[38;5;159m...[0m
+[38;5;226m[Genesis] [20:55:40] [WARNING] Filtered out geometry pairs causing self-collision for the neutral configuration (qpos0): (3, 6), (11, 14). Consider tuning Morph option 'decompose_robot_error_threshold' or specify dedicated collision meshes. This behavior can be disabled by setting Morph option 'enable_neutral_collision=True'.[0m
+[38;5;159m[Genesis] [20:55:41] [INFO] Entity <de9f6ca> added. class: FEMEntity, morph: Mesh, size: (55068, 27811), material: <gs.materials.FEM.Cloth>.[0m
+[38;5;159m[Genesis] [20:55:41] [INFO] IPC world initialized successfully[0m
+[38;5;159m[Genesis] [20:55:41] [INFO] Compiling simulation kernels...[0m
+/home/hasinon/ShirtDemo/envs/genesis-ipc/lib/python3.12/site-packages/quadrants/_test_tools/warnings_helper.py:11: UserWarning: cannot create weak reference to 'tuple' object. Template mapper caching disabled.
+  warnings.warn(message)
+[38;5;159m[Genesis] [20:55:42] [INFO] Building visualizer...[0m
+ipc_actual_visual_sync initialized vgeoms=8 links=['left_link15', 'left_link16', 'left_link17', 'left_link18', 'right_link25', 'right_link26', 'right_link27', 'right_link28']
+[38;5;226m[Genesis] [20:55:43] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=1/396 source_frame=740
+[38;5;226m[Genesis] [20:55:44] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:45] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:46] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=60/396 source_frame=799
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:47] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:48] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:49] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=120/396 source_frame=859
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:50] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:51] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:52] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=180/396 source_frame=919
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:53] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:54] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=240/396 source_frame=979
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:55] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:56] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:57] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=300/396 source_frame=1039
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:58] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:55:59] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:00] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+replay_render=360/396 source_frame=1099
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:01] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;226m[Genesis] [20:56:02] [WARNING] Manually setting element positions. This is not recommended and could break gradient flow.[0m
+[38;5;159m[Genesis] [20:56:02] [INFO] Video saved to "[38;5;121m/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage.mp4[0m[38;5;159m".[0m
+[38;5;159m[Genesis] [20:56:02] [INFO] Video saved to "[38;5;121m/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_overhead.mp4[0m[38;5;159m".[0m
+[38;5;159m[Genesis] [20:56:02] [INFO] Video saved to "[38;5;121m/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_shirt_bottom.mp4[0m[38;5;159m".[0m
+[38;5;159m[Genesis] [20:56:03] [INFO] Video saved to "[38;5;121m/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_right_grasp.mp4[0m[38;5;159m".[0m
+[38;5;159m[Genesis] [20:56:03] [INFO] Video saved to "[38;5;121m/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_left_grasp.mp4[0m[38;5;159m".[0m
+[38;5;159m[Genesis] [20:56:03] [INFO] Video saved to "[38;5;121m/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_base_side.mp4[0m[38;5;159m".[0m
+ffmpeg version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2000-2024 the FFmpeg developers
+  built with gcc 8 (Debian 8.3.0-6)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-debug --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --cc=gcc --enable-fontconfig --enable-frei0r --enable-gnutls --enable-gmp --enable-libgme --enable-gray --enable-libaom --enable-libfribidi --enable-libass --enable-libvmaf --enable-libfreetype --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-librubberband --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libvorbis --enable-libopus --enable-libtheora --enable-libvidstab --enable-libvo-amrwbenc --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libdav1d --enable-libxvid --enable-libzvbi --enable-libzimg
+  libavutil      59.  8.100 / 59.  8.100
+  libavcodec     61.  3.100 / 61.  3.100
+  libavformat    61.  1.100 / 61.  1.100
+  libavdevice    61.  1.100 / 61.  1.100
+  libavfilter    10.  1.100 / 10.  1.100
+  libswscale      8.  1.100 /  8.  1.100
+  libswresample   5.  1.100 /  5.  1.100
+  libpostproc    58.  1.100 / 58.  1.100
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage
+    encoder         : Lavf62.12.102
+  Duration: 00:00:06.60, start: 0.000000, bitrate: 6962 kb/s
+  Stream #0:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(progressive), 800x600 [SAR 1:1 DAR 4:3], 6959 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+Input #1, mov,mp4,m4a,3gp,3g2,mj2, from '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_overhead.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage_overhead
+    encoder         : Lavf62.12.102
+  Duration: 00:00:06.60, start: 0.000000, bitrate: 6970 kb/s
+  Stream #1:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(progressive), 800x600 [SAR 1:1 DAR 4:3], 6967 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+Input #2, mov,mp4,m4a,3gp,3g2,mj2, from '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_shirt_bottom.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage_shirt_bottom
+    encoder         : Lavf62.12.102
+  Duration: 00:00:06.60, start: 0.000000, bitrate: 6977 kb/s
+  Stream #2:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(progressive), 800x600 [SAR 1:1 DAR 4:3], 6974 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+Input #3, mov,mp4,m4a,3gp,3g2,mj2, from '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_left_grasp.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage_left_grasp
+    encoder         : Lavf62.12.102
+  Duration: 00:00:06.60, start: 0.000000, bitrate: 7036 kb/s
+  Stream #3:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(progressive), 800x600 [SAR 1:1 DAR 4:3], 7033 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+Input #4, mov,mp4,m4a,3gp,3g2,mj2, from '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_right_grasp.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage_right_grasp
+    encoder         : Lavf62.12.102
+  Duration: 00:00:06.60, start: 0.000000, bitrate: 7035 kb/s
+  Stream #4:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(progressive), 800x600 [SAR 1:1 DAR 4:3], 7032 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+Input #5, mov,mp4,m4a,3gp,3g2,mj2, from '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_base_side.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage_base_side
+    encoder         : Lavf62.12.102
+  Duration: 00:00:06.60, start: 0.000000, bitrate: 7154 kb/s
+  Stream #5:0[0x1](und): Video: h264 (Main) (avc1 / 0x31637661), yuv420p(progressive), 800x600 [SAR 1:1 DAR 4:3], 7150 kb/s, 60 fps, 60 tbr, 15360 tbn (default)
+      Metadata:
+        handler_name    : VideoHandler
+        vendor_id       : [0][0][0][0]
+Stream mapping:
+  Stream #0:0 (h264) -> xstack
+  Stream #1:0 (h264) -> xstack
+  Stream #2:0 (h264) -> xstack
+  Stream #3:0 (h264) -> xstack
+  Stream #4:0 (h264) -> xstack
+  Stream #5:0 (h264) -> xstack
+  xstack:default -> Stream #0:0 (libx264)
+Press [q] to stop, [?] for help
+[libx264 @ 0x13d51980] using SAR=1/1
+[libx264 @ 0x13d51980] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2 AVX512
+[libx264 @ 0x13d51980] profile High, level 5.1, 4:2:0, 8-bit
+[libx264 @ 0x13d51980] 264 - core 164 r3191 4613ac3 - H.264/MPEG-4 AVC codec - Copyleft 2003-2024 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=37 lookahead_threads=6 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=20.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, mp4, to '/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_multiview.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    title           : stage
+    encoder         : Lavf61.1.100
+  Stream #0:0: Video: h264 (avc1 / 0x31637661), yuv420p(progressive), 2400x1200 [SAR 1:1 DAR 2:1], q=2-31, 60 fps, 15360 tbn
+      Metadata:
+        encoder         : Lavc61.3.100 libx264
+      Side data:
+        cpb: bitrate max/min/avg: 0/0/0 buffer size: 0 vbv_delay: N/A
+frame=   54 fps=0.0 q=28.0 size=     512KiB time=00:00:00.86 bitrate=4840.0kbits/s speed=1.73x    frame=  214 fps=214 q=28.0 size=    1536KiB time=00:00:03.53 bitrate=3561.3kbits/s speed=3.53x    [out#0/mp4 @ 0x13c441c0] video:3048KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.182164%
+frame=  396 fps=283 q=-1.0 Lsize=    3053KiB time=00:00:06.56 bitrate=3808.9kbits/s speed=4.69x    
+[libx264 @ 0x13d51980] frame I:2     Avg QP:16.01  size:109501
+[libx264 @ 0x13d51980] frame P:100   Avg QP:21.09  size: 19871
+[libx264 @ 0x13d51980] frame B:294   Avg QP:25.50  size:  3109
+[libx264 @ 0x13d51980] consecutive B-frames:  1.0%  0.0%  0.0% 99.0%
+[libx264 @ 0x13d51980] mb I  I16..4: 27.4% 47.6% 25.0%
+[libx264 @ 0x13d51980] mb P  I16..4:  0.7%  1.1%  0.2%  P16..4: 13.3%  6.6%  4.0%  0.0%  0.0%    skip:74.2%
+[libx264 @ 0x13d51980] mb B  I16..4:  0.1%  0.2%  0.0%  B16..8: 12.4%  1.6%  0.2%  direct: 0.3%  skip:85.2%  L0:45.9% L1:49.7% BI: 4.4%
+[libx264 @ 0x13d51980] 8x8 transform intra:56.7% inter:38.4%
+[libx264 @ 0x13d51980] coded y,uvDC,uvAC intra: 14.9% 21.9% 12.6% inter: 1.9% 1.3% 0.2%
+[libx264 @ 0x13d51980] i16 v,h,dc,p: 64% 24%  8%  4%
+[libx264 @ 0x13d51980] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 25%  9% 61%  1%  0%  0%  1%  1%  1%
+[libx264 @ 0x13d51980] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 34% 27% 17%  4%  3%  3%  4%  3%  4%
+[libx264 @ 0x13d51980] i8c dc,h,v,p: 67% 18% 13%  1%
+[libx264 @ 0x13d51980] Weighted P-Frames: Y:0.0% UV:0.0%
+[libx264 @ 0x13d51980] ref P L0: 65.8%  6.0% 19.0%  9.2%
+[libx264 @ 0x13d51980] ref B L0: 74.2% 20.5%  5.3%
+[libx264 @ 0x13d51980] ref B L1: 90.6%  9.4%
+[libx264 @ 0x13d51980] kb/s:3781.97
+Replay multi-view video: /home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_multiview.mp4
+Replay manifest: /home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage.replay.json
+[38;5;159m[Genesis] [20:56:04] [INFO] 💤 Exiting Genesis and caching compiled kernels...[0m
+video=/home/hasinon/ShirtDemo/outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/stage_multiview.mp4

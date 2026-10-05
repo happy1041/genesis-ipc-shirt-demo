@@ -1526,6 +1526,90 @@
       "sha256": "8d2ba7904881c1d7915e151ffcf490ebb85bdd9f7cd9b56fb2d27c6e69faf73a",
       "role": "isaac_settings",
       "source": null
+    },
+    "source_records/01_first_fold/physics_log.txt": {
+      "bytes": 163257,
+      "sha256": "0a9fcb472451139f2611462412cc5c3f07d3f763ed5f543da70a0e2d684631b2",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/run_bundle/physics.log"
+    },
+    "source_records/01_first_fold/render_log.txt": {
+      "bytes": 118989,
+      "sha256": "676690509223298dad1a241ce9d4e7585159c7d3d53720e7bce34462a09d2526",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/first_fold/20260928_tidy_plus10_run_v2/action_plans/20260928T105938120409Z/run_bundle/render.log"
+    },
+    "source_records/02_first_pull/physics_log.txt": {
+      "bytes": 87627,
+      "sha256": "392b13390c2d3434b7ed13a335e5cd00d63d68ee8401e764ffa3143e2296ab0a",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/physics.log"
+    },
+    "source_records/02_first_pull/render_log.txt": {
+      "bytes": 71292,
+      "sha256": "e5ecfd3551ff04f3a47361ab586b82c9861ac63f1bf40616fada48e9eb503a0d",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/first_pull/20260928_tidy_auto_x400/action_plans/20260928T123551763097Z/run_bundle/render.log"
+    },
+    "source_records/03_second_fold/physics_log.txt": {
+      "bytes": 168765,
+      "sha256": "43620110b5514add5d78b76981ec2770d07c9099a39a4b2fd23da187d6c9da32",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/run_bundle/physics.log"
+    },
+    "source_records/03_second_fold/render_log.txt": {
+      "bytes": 127960,
+      "sha256": "4af2858ad0ea967bdd261522cd8a0b12a4e8c610079d35ce24a1a95e49f88f3e",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/second_fold/20260929_sync955_905_spread10/action_plans/20260928T163813101914Z/run_bundle/render.log"
+    },
+    "source_records/04_third_right/physics_log.txt": {
+      "bytes": 137429,
+      "sha256": "19c7ca50db8052ad5bae9454515cd3510de55651bb8e1d6d3c8b111c3507f3ca",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/run_bundle/physics.log"
+    },
+    "source_records/04_third_right/render_log.txt": {
+      "bytes": 110087,
+      "sha256": "6d4e5fe8a065f6b2b877ba47d91f4aeccee46eb91f1f8628cafbaa68d8910fff",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/right/action_plans/20260929T011343339462Z/run_bundle/render.log"
+    },
+    "source_records/05_third_left/physics_log.txt": {
+      "bytes": 139534,
+      "sha256": "6b59e140e6e68e106d0b8c95e8fffda170f0087726f4e142dde1608c0061fe1c",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/physics.log"
+    },
+    "source_records/05_third_left/render_log.txt": {
+      "bytes": 110505,
+      "sha256": "51c7e405807cdc8d4d4e0c016ff694dccc1d8424bf95c68d11c38633509bf3cc",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/third_fold/20260929_dropX25_leftjaws5_20/left/action_plans/20260929T013355689189Z/run_bundle/render.log"
+    },
+    "source_records/06_sweep/physics_log.txt": {
+      "bytes": 65520,
+      "sha256": "592148b733d1a676ad468d25bf162689dc411c2885eee0e1ff194e9feaea9d0a",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/physics.log"
+    },
+    "source_records/06_sweep/render_log.txt": {
+      "bytes": 58185,
+      "sha256": "aee3afc4d1cd81afb79808c70e84ba1fced301249d22c3f1964a5a80583f7f2a",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_sweep_z865_extraY25/action_plans/20260929T022048456454Z/run_bundle/render.log"
+    },
+    "source_records/07_press_slide_home/physics_log.txt": {
+      "bytes": 158920,
+      "sha256": "44b67726be56987766599cbf9cd211e80814c919f3dedbfd065389a4e937d4b3",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/physics.log"
+    },
+    "source_records/07_press_slide_home/render_log.txt": {
+      "bytes": 124425,
+      "sha256": "9036bb920c53e022ba70f8dc219d9bc19349673ef30987573dca6c2008828c32",
+      "role": "source_log",
+      "source": "outputs/workbench/scene527_55068/final_push/20260929_press_at_yend_mu1_home/table_mu1/full_action/run_bundle/render.log"
     }
   },
   "checkpoint_native_cache_restored": false,

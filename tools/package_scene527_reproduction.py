@@ -53,14 +53,35 @@ def portable_args(argv):
     return result
 
 
+def append_source_logs(out, workspace):
+    profile = json.loads((out/'bundle.json').read_text())
+    for stage in profile['stages']:
+        rel = f'source_records/{stage["id"]}/manifest.json'
+        source_manifest = workspace/profile['files'][rel]['source']
+        for name in ('physics','render'):
+            source = source_manifest.parent/(name+'.log')
+            if source.is_file():
+                target = out/f'source_records/{stage["id"]}/{name}_log.txt'
+                shutil.copy2(source,target)
+                profile['files'][str(target.relative_to(out))] = dict(
+                    bytes=target.stat().st_size,sha256=sha(target),role='source_log',
+                    source=str(source.relative_to(workspace)))
+    (out/'bundle.json').write_text(json.dumps(profile,indent=2)+'\n')
+    print('SOURCE_LOGS_ADDED',flush=True)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--final-manifest', type=Path, required=True)
     p.add_argument('--workspace', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--reference-hero', type=Path)
+    p.add_argument('--append-logs', action='store_true')
     a = p.parse_args()
     workspace, out = a.workspace.resolve(), a.output.resolve()
+    if a.append_logs:
+        append_source_logs(out,workspace)
+        return
     out.mkdir(parents=True, exist_ok=False)
     records = {}
 
@@ -164,6 +185,7 @@ def main():
                    physics_continuous=False,
                    publication_scope='user-requested reproduction data on existing repository branch')
     (out/'bundle.json').write_text(json.dumps(profile, indent=2)+'\n')
+    append_source_logs(out,workspace)
     print(f'COMPLETE {out} files={len(records)} total_GiB={sum(x["bytes"] for x in records.values())/1024**3:.3f}', flush=True)
 
 
