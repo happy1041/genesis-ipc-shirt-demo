@@ -26,6 +26,7 @@ git -C /path/to/genesis-world apply \
 这是相对官方基线的累计补丁，不能叠加在已经打过旧补丁的源码上。
 已验证`git apply --check`、实际应用后的7个文件逐字节一致、反向检查和Python编译。
 证据见`patches/genesis-world-8b1dba2-current.manifest.json`。本次未执行新GPU仿真。
+各文件的作用、当前哪些功能启用以及恢复原版的比较条件见[补丁改动与仿真影响](GENESIS_PATCH_CHANGES_CN.md)。
 
 ## 依赖快照与GPU兼容
 

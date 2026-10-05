@@ -7,7 +7,7 @@
 - `src/run_genesis_ipc.py`：Genesis 场景、libuIPC 接触、机器人轨迹执行、checkpoint/replay 与诊断。
 - `tools/contact_dump.py`：可选的原始 IPC 接触记录辅助模块；主程序的该项诊断只在指定 `--contact-dump-frames` 时调用。
 - `scripts/`：运行和环境检查入口；`configs/dhat_1p5_pure_friction.args` 是历史参数基线，当前 55k 成片的参数摘要见 [`docs/CURRENT_55K_DEMO_CN.md`](docs/CURRENT_55K_DEMO_CN.md)。
-- `patches/genesis-world-8b1dba2-current.patch`：官方 `8b1dba2` 基线到当前运行源码的完整补丁，涉及 7 个文件；应用后逐文件字节匹配已验证。
+- `patches/genesis-world-8b1dba2-current.patch`：官方 `8b1dba2` 基线到当前运行源码的完整补丁，涉及 7 个文件；应用后逐文件字节匹配已验证。[逐项改动与仿真影响](docs/GENESIS_PATCH_CHANGES_CN.md)。
 - `data/scene527_55k_73s_joint_commands.npz`：当前约 1:13 分段版的累计机器人命令，见 [`data/README.md`](data/README.md)。
 
 这里的“代码”主要是 `src/` 与 `tools/assets/` 下的 Python 文件，以及 `scripts/` 下负责启动、准备资产和检查环境的 Shell 脚本。`configs/*.args` 是参数文本；`requirements/` 是依赖版本记录；`patches/*.patch` 是对外部 Genesis 源码的修改，不是独立程序。`data/*.npz` 是逐帧机器人命令数据，不是代码，也不包含衣服的运动状态。
