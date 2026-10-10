@@ -4,6 +4,8 @@
 
 另附8k、13k衣服OBJ：[面数切换指南](docs/CLOTH_MESH_SWITCH_CN.md)。七套checkpoint和参考回放仍为55k专用。
 
+[Workbench与plan→插值→IK→NPZ使用指南](docs/PLAN_TO_TRAJECTORY_CN.md)：浏览器选点、动作编辑、CPU IK和物理运行包导出，支持从随包checkpoint继续规划。
+
 ```bash
 git lfs pull
 export GENESIS_PYTHON=/path/to/patched-genesis-env/bin/python
@@ -41,4 +43,4 @@ cp .env.example .env
 
 ## 提交范围
 
-[`docs/SOURCE_FILES.txt`](docs/SOURCE_FILES.txt)记录基础代码选择；[来源记录](docs/PROVENANCE_CN.md)与复现包`bundle.json`记录哈希和源运行。包不含Workbench或整个SIM1/Genesis/虚拟环境；只收集实际需要的资产和冻结结果，大文件由Git LFS管理。原仓库`diagnostics/`与历史说明保留。研究共享声明见[`NOTICE.md`](NOTICE.md)。
+[`docs/SOURCE_FILES.txt`](docs/SOURCE_FILES.txt)记录基础代码选择；[来源记录](docs/PROVENANCE_CN.md)与复现包`bundle.json`记录哈希和源运行。包包含Workbench核心编辑工具，不包含整个SIM1/Genesis/虚拟环境；大文件由Git LFS管理。原仓库`diagnostics/`与历史说明保留。研究共享声明见[`NOTICE.md`](NOTICE.md)。
