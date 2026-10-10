@@ -1,0 +1,10 @@
+{
+  "units": "millimeter",
+  "runner_scale": 0.001,
+  "checkpoint_topology": "55068f only",
+  "variants": [
+    {"file": "short-shirt-8000f.obj", "vertices": 4090, "faces": 8000, "sha256": "78d1ec7cf751c2087b3df211a0e390a18dd93abc13f94de834cf9d65c261e441"},
+    {"file": "short-shirt-13767f.obj", "vertices": 7021, "faces": 13767, "sha256": "e4fa8f9e3aab183be3844ad9c2b4e97d07c9e788d5f59edcf7e846dffed2a731"},
+    {"file": "short-shirt-55068f.obj", "vertices": 27811, "faces": 55068, "sha256": "92ad1f68995a2d8b827d9de1c896465f436b8384c38d311abc9eadbbec9cf9cd"}
+  ]
+}

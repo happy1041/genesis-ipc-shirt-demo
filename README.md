@@ -2,6 +2,8 @@
 
 本仓库包含Scene527双臂叠衣的代码与**4373帧55k七段版复现数据**：衣服、双X5模型/碰撞网格、阶段checkpoint、原始replay、摩擦参数和运行入口。Isaac只读取保存状态做离线渲染。完整说明见[55k复现指南](docs/SCENE527_REPRODUCTION_CN.md)。
 
+另附8k、13k衣服OBJ：[面数切换指南](docs/CLOTH_MESH_SWITCH_CN.md)。七套checkpoint和参考回放仍为55k专用。
+
 ```bash
 git lfs pull
 export GENESIS_PYTHON=/path/to/patched-genesis-env/bin/python
