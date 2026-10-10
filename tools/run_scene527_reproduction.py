@@ -113,6 +113,8 @@ def main():
     p.add_argument('--physics-only', action='store_true', help='Skip Genesis offline videos after physics')
     p.add_argument('--headless', action='store_true', help='Explicitly disable the physics viewer')
     p.add_argument('--smoke-frames', type=int, help='Short single-stage/continuous diagnostic')
+    p.add_argument('--replay-override', type=Path, help='Render this saved replay for a single stage; never advances physics')
+    p.add_argument('--robot-visuals-only', action='store_true', help='Only regenerate saved-state robot visuals, no video')
     a = p.parse_args()
     bundle = a.bundle.resolve()
     profile = json.loads((bundle/'bundle.json').read_text())
@@ -125,6 +127,10 @@ def main():
     selected = stages if a.stage == 'all' else [s for s in stages if a.stage in (s['id'],s['name'])]
     if not selected:
         p.error('Unknown stage')
+    if a.replay_override and (a.mode!='replay' or len(selected)!=1):
+        p.error('--replay-override requires replay mode with one stage')
+    if a.robot_visuals_only and a.mode!='replay':
+        p.error('--robot-visuals-only requires replay mode')
     if a.mode == 'continuous' and a.stage != 'all':
         p.error('Continuous mode requires --stage all')
     if a.mode == 'chain' and a.stage != 'all' and selected[0]['previous_checkpoint']:
@@ -164,7 +170,18 @@ def main():
         if not a.dry_run:
             (out/'RUN.json').write_text(json.dumps(dict(mode=a.mode,bundle=str(bundle),commands=commands,
                 headless=a.headless,smoke_frames=a.smoke_frames),indent=2)+'\n')
-            subprocess.run(command, cwd=ROOT, env=env, check=True)
+            child = subprocess.Popen(command, cwd=ROOT, env=env)
+            commands[-1]['pid'] = child.pid
+            commands[-1]['started_utc'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            (out/'RUN.json').write_text(json.dumps(dict(mode=a.mode,bundle=str(bundle),commands=commands,
+                headless=a.headless,smoke_frames=a.smoke_frames),indent=2)+'\n')
+            code = child.wait()
+            commands[-1]['exit_code'] = code
+            commands[-1]['completed_utc'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            (out/'RUN.json').write_text(json.dumps(dict(mode=a.mode,bundle=str(bundle),commands=commands,
+                headless=a.headless,smoke_frames=a.smoke_frames),indent=2)+'\n')
+            if code:
+                raise subprocess.CalledProcessError(code,command)
 
     lock = None
     if not a.dry_run:
@@ -204,9 +221,12 @@ def main():
             execute(physics,stage['id'],'physics')
             previous_output = output_checkpoint
         if a.mode == 'replay' or (not a.physics_only and not a.smoke_frames):
-            replay = inside(bundle,stage['replay']) if a.mode=='replay' else stage_out/'stage_physics.replay_states.npz'
+            replay = (a.replay_override.resolve() if a.replay_override else inside(bundle,stage['replay'])) if a.mode=='replay' else stage_out/'stage_physics.replay_states.npz'
             render = [*base,'--replay-states',str(replay),'--record-multi-view','--replay-six-view',
-                      '--replay-closeup-hand','left','--output',str(stage_out/'stage.mp4')]
+                      '--replay-closeup-hand','left','--output',str(stage_out/'stage.mp4'),
+                      '--dump-robot-visuals',str(stage_out/'robot_visuals.npz')]
+            if a.robot_visuals_only:
+                render += ['--robot-visuals-only']
             execute(render,stage['id'],'genesis_saved_state_render')
 
 

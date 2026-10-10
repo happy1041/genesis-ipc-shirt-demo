@@ -12,6 +12,7 @@ import math
 import os
 import re
 import subprocess
+import sys
 import threading
 import webbrowser
 from collections import Counter, OrderedDict
@@ -1070,6 +1071,7 @@ class WorkbenchData:
             str(edits_path),
         ]
         environment = os.environ.copy()
+        environment.setdefault("GENESIS_PYTHON", sys.executable)
         environment["TRAJECTORY_WORKBENCH_CONFIG"] = str(self.config_path)
         environment["TRAJECTORY_IK_OUTPUT_DIR"] = str(output_dir)
         completed = subprocess.run(

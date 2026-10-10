@@ -265,6 +265,11 @@ def import_completed_stage(base_config_path, stage_manifest_path, output_path):
                    "active_segment": "action_continuation"})
     config.pop("checkpoint_catalog", None)
     config.pop("action_plan", None)
+    if config.get('regrasp_edit_binding'):
+        binding=config['regrasp_edit_binding']
+        binding['frame']=last
+        binding.pop('placement_defaults',None)
+        binding.pop('reference_markers',None)
     config["trajectory_editor"] = {
         "stage": "action_continuation", "label": "上一动作末态 → 下一动作", "default_hand": "left",
         "frame_range": [first, last], "limits": {"max_step_mm": 12.5, "max_speed_mps": .75, "max_accel_mps2": 20.},

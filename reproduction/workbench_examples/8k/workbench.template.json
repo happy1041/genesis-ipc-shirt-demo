@@ -1,0 +1,62 @@
+{
+  "name": "8k first-fold saved sample / point editing",
+  "replay": "reproduction/workbench_examples/8k/replay.npz",
+  "cloth_obj": "reproduction/scene527_55k_73s/assets/cloth/short-shirt-8000f.obj",
+  "atlas": "reproduction/workbench_examples/8k/atlas.npz",
+  "robot_urdf": "reproduction/scene527_55k_73s/assets/robots/dual_x5_2025_ipc_v1/dual_x5_2025_ipc.urdf",
+  "robot_base_pos_m": [
+    0,
+    0,
+    0.17
+  ],
+  "background_mode": "replay_cpu",
+  "replay_fps": 60,
+  "tcp_csvs": [
+    "reproduction/workbench_examples/8k/tcp.csv"
+  ],
+  "patch_output_dir": "GENERATED_BY_PREPARE",
+  "default_frame": 829,
+  "display_frame_range": [
+    770,
+    829
+  ],
+  "expected_cloth_vertices": 4090,
+  "expected_cloth_faces": 8000,
+  "camera": {
+    "view": "overhead",
+    "resolution": [
+      800,
+      600
+    ],
+    "pos_m": [
+      0.68,
+      0,
+      2.45
+    ],
+    "lookat_m": [
+      0.68,
+      0,
+      0.8
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "vertical_fov_deg": 42
+  },
+  "regrasp_edit_binding": {
+    "frame": 829,
+    "hands": [
+      "left",
+      "right"
+    ],
+    "placement_enabled": true,
+    "output_dir": "GENERATED_BY_PREPARE"
+  },
+  "sample_capabilities": {
+    "view": true,
+    "select_points": true,
+    "physical_checkpoint_resume": false
+  }
+}

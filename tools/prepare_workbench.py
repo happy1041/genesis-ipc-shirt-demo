@@ -7,9 +7,30 @@ from run_scene527_reproduction import read_checkpoint_archive
 
 ROOT=Path(__file__).resolve().parents[1]
 
+def prepare_mesh_example(mesh, out):
+    """Bind a shipped topology-matched inspection sample; no physics checkpoint."""
+    folder=ROOT/'reproduction/workbench_examples'/mesh
+    manifest=json.loads((folder/'manifest.json').read_text())
+    cfg=json.loads((folder/'workbench.template.json').read_text())
+    for key in ('replay','cloth_obj','atlas','robot_urdf'):
+        cfg[key]=str(ROOT/cfg[key])
+    cfg['tcp_csvs']=[str(ROOT/value) for value in cfg['tcp_csvs']]
+    cfg['patch_output_dir']=str(out/'patches')
+    cfg['regrasp_edit_binding']['output_dir']=str(out/'edits')
+    cfg['trajectory_editor']=dict(stage='reference',label='Saved first-fold sample / point editing',phases=[dict(range=[770,829],label='first-fold end')],frame_range=[770,829],default_hand='left',material_anchors=[],
+        hands={h:dict(label=h,color=c,nodes=[dict(frame=770,name='start',draggable=False,support_radius=2),dict(frame=829,name='end',draggable=False,support_radius=2)],semantic_path=[dict(frame=770,zero=True),dict(frame=829,zero=True)]) for h,c in [('left','#48d58a'),('right','#ff6b78')]},
+        limits=dict(max_step_mm=20,max_speed_mps=1.2,max_accel_mps2=30))
+    (out/'workbench.json').write_text(json.dumps(cfg,indent=2)+'\n')
+    (out/'sample_manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+    print(out/'workbench.json')
+
 def main():
     p=argparse.ArgumentParser();p.add_argument('--after-stage',default='03_second_fold');p.add_argument('--output',type=Path,required=True)
+    p.add_argument('--mesh-example',choices=['8k','13k'],help='Prepare a saved first-fold inspection/point-editing sample (no continuation checkpoint)')
     a=p.parse_args();out=a.output.resolve();out.mkdir(parents=True,exist_ok=False)
+    if a.mesh_example:
+        prepare_mesh_example(a.mesh_example,out)
+        return
     bundle=ROOT/'reproduction/scene527_55k_73s';profile=json.loads((bundle/'bundle.json').read_text())
     stage=next(s for s in profile['stages'] if s['id']==a.after_stage)
     cp=read_checkpoint_archive(bundle,stage,out/'checkpoint')

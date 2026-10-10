@@ -1,0 +1,15 @@
+{
+  "note": "Example for shipped04_third_right plan. Zero offsets mean selected XYZ is treated as TCP XYZ. Set offsets explicitly before using material-surface picks; zero is not calibrated grasp depth. Placement Z is intended release TCP Z.",
+  "bindings": [
+    {
+      "hand": "right", "kind": "grasp", "anchor_action": "X_grasp",
+      "tcp_offset_world_mm": [0, 0, 0],
+      "translate_actions": ["X_pregrasp", "X_grasp", "X_close", "X_slow_first5", "X_lift60"]
+    },
+    {
+      "hand": "right", "kind": "placement", "anchor_action": "X_arc_rotate_lower",
+      "tcp_offset_world_mm": [0, 0, 0],
+      "translate_actions": ["X_arc_rotate_lower", "X_release", "X_retreat", "X_settle"]
+    }
+  ]
+}

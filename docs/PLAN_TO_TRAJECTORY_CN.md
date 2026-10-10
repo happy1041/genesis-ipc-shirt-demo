@@ -30,6 +30,18 @@ python tools/prepare_workbench.py --after-stage 03_second_fold --output outputs/
 
 ## 3. plan → 插值 → IK
 
+若已在Workbench保存新点位，可先把点位写入plan。示例绑定文件明确指定哪些动作随抓点移动、哪些随落点移动，以及布面点到TCP的世界坐标偏移：
+
+```bash
+python tools/points_to_plan.py \
+  --plan reproduction/scene527_55k_73s/source_records/04_third_right/plan.json \
+  --points outputs/edit_third/edits/regrasp_points_实际时间.json \
+  --bindings configs/workbench/third_right_point_bindings.json \
+  --output outputs/edit_third/new_plan.json
+```
+
+示例绑定对应第三折右手：抓点平移接近/闭合/抬升段，落点平移放手/撤离段。`tcp_offset_world_mm` 必须按夹片几何和期望抓取深度设置；示例零偏移表示把选中XYZ直接当TCP，并非已经标定。只保存落点时抓取段保留。输出附修改量和来源哈希，不自动改变姿态、开度、时长或弧高；接着运行下面的编译/IK，把 `--plan` 换成 `outputs/edit_third/new_plan.json`。同一个材料点须保存于计划起始帧；换拓扑先重选点。
+
 ```bash
 python tools/compile_plan.py --config outputs/edit_third/workbench.json \
   --plan reproduction/scene527_55k_73s/source_records/04_third_right/plan.json --ik
@@ -58,9 +70,13 @@ python tools/trajectory_workbench/action_plan_runtime.py export \
 
 完成新阶段后，可用 `action_plan_runtime.py import --config ... --manifest ... --output ...` 导入新末态，继续下一阶段。具体产物以运行包manifest为准。
 
+新物理结果的Isaac hero生成方式见[渲染新replay](RENDER_NEW_REPLAY_CN.md)。需要把本次新保存的布料replay和同源机器人视觉状态传入，运行包的Genesis视频仍按原入口生成。
+
 ## 范围与数据约束
 
 示例使用随包55k资产、回放、atlas和checkpoint。换拓扑参考[面数切换指南](CLOTH_MESH_SWITCH_CN.md)，须生成匹配atlas/状态。Workbench为研究调试界面，人工选点和参数化动作需逐阶段验收。原七段plan是历史来源记录，不保证用新版工具重新生成后与冻结4373帧轨迹逐字节相同。
+
+8k/13k的独立选点示例与来源见[低面数Workbench示例](MESH_WORKBENCH_EXAMPLES_CN.md)。它们用于查看真实旧布态、选点和编辑参考，不使用55k checkpoint续跑。
 
 ## 附录：Workbench调试界面
 
@@ -85,7 +101,7 @@ python tools/trajectory_workbench/server.py --config outputs/edit_third/workbenc
 3. 改为 `选落点`，点击目标位置，或填写落点XYZ（界面单位mm），点击 `确认本手落点`。空白处按桌面Z=800mm投影，所需空中释放高度应显式填写。
 4. 切换另一只手重复操作，最后点击抓放点保存按钮。可以仅保存已调整的点，不必强制凑齐四点。
 
-页面状态栏显示保存的JSON路径，通常在工作目录的 `edits/` 中。抓点记录布料表面位置、材料面及选中帧；落点记录世界坐标参考。**保存点位不会自动生成新动作轨迹**：需要把点位用于修改plan的TCP目标，补上夹片偏移、抓取深度、姿态、开闭时序，再执行第3节的编译和IK。
+页面状态栏显示保存的JSON路径，通常在工作目录的 `edits/` 中。抓点记录布料表面位置、材料面及选中帧；落点记录世界坐标参考。保存后按第3节用 `points_to_plan.py` 和绑定配置更新plan，再编译、解IK。夹片偏移、抓取深度、姿态和开闭时序需要在绑定或plan中明确设置。
 
 同一个屏幕位置可能命中多层布料。候选中的 `surface_layer` 是材料标签，不应单独作为当前第几层的判断；结合候选Z与实际布态选择。表面点也不等于夹爪TCP，直接照抄其Z可能导致漏抓或碰桌。
 

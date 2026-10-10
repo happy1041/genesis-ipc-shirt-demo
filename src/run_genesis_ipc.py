@@ -1678,6 +1678,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--camera-view", choices=("overhead", "oblique"), default="overhead")
     parser.add_argument("--no-record", action="store_true")
+    parser.add_argument("--dump-robot-visuals", type=Path, default=None,
+                        help="Export actual robot visual transforms during saved-state replay only.")
+    parser.add_argument("--robot-visuals-only", action="store_true",
+                        help="Only export refreshed robot visual transforms from saved states; no video or physics.")
     parser.add_argument(
         "--dump-replay-states",
         type=Path,
@@ -2564,6 +2568,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--finger-kp", type=float, default=1000.0)
     parser.add_argument("--finger-kv", type=float, default=50.0)
     args = parser.parse_args()
+    if args.robot_visuals_only and (args.replay_states is None or args.dump_robot_visuals is None):
+        parser.error('--robot-visuals-only requires --replay-states and --dump-robot-visuals')
+    if args.dump_robot_visuals is not None and args.replay_states is None:
+        parser.error('--dump-robot-visuals requires --replay-states')
     if args.action_plan_trajectory:
         if args.trajectory_preflight_only:
             parser.error("--trajectory-preflight-only is unavailable with --action-plan-trajectory; validate joint commands separately")
@@ -6621,7 +6629,7 @@ def main() -> None:
             if primary_record_view=='overview':primary_record_view=overview_name
         replay_outputs = {}
         replay_encoders = {}
-        for view_name in replay_cameras:
+        for view_name in (() if args.robot_visuals_only else replay_cameras):
             output_path = (
                 args.output
                 if view_name == primary_record_view
@@ -6640,6 +6648,7 @@ def main() -> None:
             for name in IPC_ROBOT_LINKS
         ]
         render_started = time.perf_counter()
+        replay_visual_transforms = []
         try:
             for replay_index, source_frame in enumerate(replay_source_frames):
                 robot.set_qpos(replay_robot_q[replay_index], zero_velocity=True)
@@ -6650,6 +6659,12 @@ def main() -> None:
                         replay_ipc_transforms[replay_index, link_index]
                     )
                 scene._visualizer.update(force=True)
+                if args.dump_robot_visuals is not None:
+                    scene._visualizer.update_visual_states(force_render=True)
+                    indices = [vgeom.idx for vgeom in robot.vgeoms]
+                    replay_visual_transforms.append(
+                        as_numpy(robot._solver._vgeoms_render_T)[indices, 0].copy()
+                    )
 
                 right_link = both_debug_links['left_link16' if closeup_hand=='left' else 'right_link26']
                 right_pos = as_numpy(right_link.get_pos(relative=False)).reshape(3)
@@ -6668,7 +6683,7 @@ def main() -> None:
                     left_tcp=left_pos+quat_wxyz_to_matrix(left_quat)@TCP_LOCAL
                     replay_cameras['left_grasp'].set_pose(
                         pos=tuple(left_tcp+np.array((.20,.22,.12))),lookat=tuple(left_tcp),up=(0.,0.,1.))
-                for view_name, replay_camera in replay_cameras.items():
+                for view_name, replay_camera in (() if args.robot_visuals_only else replay_cameras.items()):
                     rgb = replay_camera.render(
                         rgb=True,
                         depth=False,
@@ -6694,6 +6709,15 @@ def main() -> None:
         finally:
             for encoder in replay_encoders.values():
                 encoder.close()
+
+        if args.dump_robot_visuals is not None:
+            args.dump_robot_visuals.parent.mkdir(parents=True, exist_ok=True)
+            np.savez_compressed(args.dump_robot_visuals,
+                                transforms=np.stack(replay_visual_transforms),
+                                source_frames=replay_source_frames)
+            print(f"Robot replay visuals: {args.dump_robot_visuals}")
+        if args.robot_visuals_only:
+            return
 
         replay_multiview = None
         if args.record_multi_view:

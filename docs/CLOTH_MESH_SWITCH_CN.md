@@ -30,6 +30,8 @@
 
 ## 3. 同步检查抓取和渲染
 
+已附[8k/13k Workbench真实布态示例](MESH_WORKBENCH_EXAMPLES_CN.md)，包含匹配replay、TCP、atlas及配置；可直接启动选点查看。它们不附物理续跑checkpoint。
+
 - 机器人轨迹可作初猜，先检查新网格的尺寸、摆放和抓取效果，再跑全程。面数变化会影响接触和褶皱，不保证旧轨迹仍夹得住。
 - 面ID、顶点ID、atlas和布料状态不能跨拓扑直接复用。Workbench须导入匹配网格与replay，重新选点或建立材料点对应。
 - Isaac/Genesis离线回放须使用同一拓扑；Isaac准备工具的 `cloth_obj` 也要对应替换。

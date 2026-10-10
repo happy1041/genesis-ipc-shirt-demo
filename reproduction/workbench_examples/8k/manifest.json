@@ -1,0 +1,24 @@
+{
+  "source_batch": "20260927_no_spread_8k_13767_source_mm",
+  "source_run": "mesh_8000",
+  "source_replay_sha256": "70bd5961d457301a24e56ae5ebf31dd1d6fe4e53992a202640b9c8bf39bd5396",
+  "source_tcp_sha256": "039af84423b663f8abe7501e58b053dddf70f2f1fba94f9daadc34a15aff3e34",
+  "source_physics_sha256": "1e0cf2211ef1a350e759fdd0d98347325b802bfc6c061224dc22a597ce9b731f",
+  "source_mesh_sha256": "78d1ec7cf751c2087b3df211a0e390a18dd93abc13f94de834cf9d65c261e441",
+  "source_frames": [
+    770,
+    829
+  ],
+  "vertices": 4090,
+  "faces": 8000,
+  "physical_checkpoint_resume": false,
+  "stage": "first_fold_end",
+  "extraction": "Exact saved world-space frames, robot q/link transforms and matching TCP. No simulation or geometry transformation.",
+  "files": {
+    "replay.npz": "918c2f9d19e8a6558a46c361929c65c762522979c7b1beea7953c6e512e292a0",
+    "tcp.csv": "a3ba05b5e0d7c7af21fbc4293f0eafc53b54a775cbfe32b5173490d574837668",
+    "atlas.npz": "945b4dbde7c7720346ede3cfecda1c760c669d96dd86bb54889e4f29b837d22a",
+    "atlas.json": "61984a40b9c51cd1c92fbca0f75ec3f3627103ea4f27789fdca5ca118a858649",
+    "workbench.template.json": "b879ec0bb44af74e128f9a705edff583595fa75fb1a0eaba8b01378975f47362"
+  }
+}

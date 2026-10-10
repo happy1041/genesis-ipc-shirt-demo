@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "mesh": "reproduction/scene527_55k_73s/assets/cloth/short-shirt-8000f.obj",
+  "mesh_sha256": "78d1ec7cf751c2087b3df211a0e390a18dd93abc13f94de834cf9d65c261e441",
+  "vertices": 4090,
+  "faces": 8000,
+  "raw_bounds_xyz": {
+    "min": [
+      -447.448669,
+      -124.10680641,
+      -313.799011
+    ],
+    "max": [
+      449.133575,
+      121.606964,
+      287.578949
+    ]
+  },
+  "genesis_transform": {
+    "euler_degrees": [
+      -90.0,
+      0.0,
+      0.0
+    ],
+    "axis_mapping": {
+      "raw_x": "world_x / shirt width",
+      "raw_z": "world_y / hem-to-collar",
+      "raw_y": "-world_z / front-back thickness"
+    }
+  },
+  "semantics": {
+    "raw_z_min": "hem/bottom",
+    "raw_z_max": "collar/top",
+    "raw_y_below_median": "table_up_surface",
+    "raw_y_above_median": "table_facing_surface",
+    "raw_x_mapping": {
+      "positive_x": "UNRESOLVED",
+      "negative_x": "UNRESOLVED"
+    },
+    "raw_x_warning": "Calibrate wearer-left/right exactly once from the asset, never from camera-left/right or robot-left/right."
+  },
+  "integer_labels": {
+    "width_band": {
+      "0": "negative_x_outer",
+      "1": "center",
+      "2": "positive_x_outer"
+    },
+    "length_zone": {
+      "0": "hem",
+      "1": "torso",
+      "2": "shoulder_collar"
+    },
+    "surface_layer": {
+      "0": "table_up",
+      "1": "table_facing"
+    }
+  },
+  "thresholds": {
+    "width_raw_x_35_65_percentile": [
+      -110.38713854950004,
+      116.70222299449999
+    ],
+    "surface_raw_y_median": 7.913267135,
+    "length_normalized_v": [
+      0.25,
+      0.72
+    ]
+  },
+  "keypoints": {
+    "hem_negative": {
+      "target_raw_xz": [
+        -196.33373338,
+        -313.799011
+      ],
+      "table_up_vertex": 1375,
+      "table_up_raw_xyz": [
+        -199.1278535,
+        -7.93565081,
+        -313.299942
+      ],
+      "table_facing_vertex": 710,
+      "table_facing_raw_xyz": [
+        -198.157104,
+        14.0920334,
+        -312.752533
+      ]
+    },
+    "hem_center": {
+      "target_raw_xz": [
+        -8.296798960000004,
+        -313.799011
+      ],
+      "table_up_vertex": 176,
+      "table_up_raw_xyz": [
+        -7.88269068,
+        -120.9066045,
+        -313.289528
+      ],
+      "table_facing_vertex": 263,
+      "table_facing_raw_xyz": [
+        -10.41257595,
+        115.4195445,
+        -313.355118
+      ]
+    },
+    "hem_positive": {
+      "target_raw_xz": [
+        179.74013546,
+        -313.799011
+      ],
+      "table_up_vertex": 740,
+      "table_up_raw_xyz": [
+        179.2342985,
+        -22.3076639,
+        -313.3638
+      ],
+      "table_facing_vertex": 305,
+      "table_facing_raw_xyz": [
+        180.557175,
+        20.4785652,
+        -313.422791
+      ]
+    },
+    "collar_center": {
+      "target_raw_xz": [
+        0.0,
+        287.578949
+      ],
+      "table_up_vertex": 1586,
+      "table_up_raw_xyz": [
+        -0.98900855,
+        -78.828186,
+        211.311813
+      ],
+      "table_facing_vertex": 489,
+      "table_facing_raw_xyz": [
+        -3.76193333,
+        56.2626915,
+        287.578949
+      ]
+    },
+    "negative_x_sleeve_tip": {
+      "target_raw_xz": [
+        -414.914978,
+        96.83265183
+      ],
+      "table_up_vertex": 2144,
+      "table_up_raw_xyz": [
+        -419.294983,
+        -19.390276,
+        96.0440521
+      ],
+      "table_facing_vertex": 4036,
+      "table_facing_raw_xyz": [
+        -411.118927,
+        48.7779655,
+        96.3766327
+      ]
+    },
+    "positive_x_sleeve_tip": {
+      "target_raw_xz": [
+        419.0785065,
+        83.0866852
+      ],
+      "table_up_vertex": 1109,
+      "table_up_raw_xyz": [
+        413.720856,
+        -50.6302986,
+        82.8514557
+      ],
+      "table_facing_vertex": 3762,
+      "table_facing_raw_xyz": [
+        415.960907,
+        37.7282219,
+        86.4443207
+      ]
+    }
+  },
+  "arrays": "reproduction/workbench_examples/8k/atlas.npz",
+  "warning": "Surface labels are topology guardrails for double-layer grasp analysis; open sleeves/seams still require visual confirmation."
+}
