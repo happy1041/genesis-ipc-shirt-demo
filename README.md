@@ -6,6 +6,8 @@
 
 [Workbench与plan→插值→IK→NPZ使用指南](docs/PLAN_TO_TRAJECTORY_CN.md)：浏览器选点、动作编辑、CPU IK和物理运行包导出，支持从随包checkpoint继续规划。
 
+[Isaac／Omniverse 渲染源码与运行入口](docs/OMNIVERSE_REPLAY_CN.md)：离线读取布料顶点和实际机器人姿态，包含渲染代码位置、启动命令及视觉穿模的对齐检查。新结果使用[新 replay 渲染指南](docs/RENDER_NEW_REPLAY_CN.md)。
+
 ```bash
 git lfs pull
 export GENESIS_PYTHON=/path/to/patched-genesis-env/bin/python

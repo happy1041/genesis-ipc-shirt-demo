@@ -1,5 +1,7 @@
 # 渲染微调后的新仿真结果
 
+核心渲染源码、参考回放的一键入口及穿模排查见[Isaac／Omniverse 回放说明](OMNIVERSE_REPLAY_CN.md)。
+
 Isaac 只离线读取已保存状态。修改 plan、生成新 NPZ 并运行物理后，应使用该次物理输出的 `stage_physics.replay_states.npz`，机器人视觉变换也必须从同一份 replay 导出。
 
 以下命令在仓库根目录执行。`$GENESIS_PYTHON` 是安装本仓库 Genesis 的 Python，`$ISAAC_PYTHON` 是安装 Isaac Sim 的 Python。输出目录必须是新的空路径。
